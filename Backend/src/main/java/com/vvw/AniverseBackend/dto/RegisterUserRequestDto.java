@@ -7,11 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class AddUserRequestDto {
+
+public class RegisterUserRequestDto {
     private String name;
     @NotBlank(message = "Eamil is Required")
     @Email
     private String email;
+    @NotBlank
+    private String password;
 }

@@ -1,5 +1,9 @@
 package com.vvw.AniverseBackend.controller;
 
+import com.vvw.AniverseBackend.dto.CreatePostDto;
+import com.vvw.AniverseBackend.dto.PostResponseDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vvw.AniverseBackend.dto.PostDto;
@@ -33,22 +37,22 @@ public class PostController {
     private final PostService postService;
     
     @GetMapping
-    public ResponseEntity<List<PostDto>> getAllPosts() {
-        return ResponseEntity.ok().body(postService.getAllPosts());
+    public ResponseEntity<Page<PostResponseDto>> getAllPosts() {
+        return ResponseEntity.ok().body(postService.getAllPosts(PageRequest.of(0, 5)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDto> getPost(@PathVariable Long id) {
+    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long id) {
         return ResponseEntity.ok().body(postService.getPostById(id));
     }
 
     @PostMapping
-    public ResponseEntity<PostDto> createNewPost (@RequestBody UpdatePostDto updatePostDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(postService.createNewPost(updatePostDto));
+    public ResponseEntity<PostResponseDto> createNewPost (@RequestBody CreatePostDto createPostDto, String username) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(postService.createNewPost(createPostDto, username));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<PostDto> updatePost(@PathVariable Long id, @RequestBody UpdatePostDto updatePostDto) {
+    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody UpdatePostDto updatePostDto) {
         return ResponseEntity.ok().body(postService.updatePost(id, updatePostDto));
     }
     
@@ -59,7 +63,7 @@ public class PostController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PostDto> updatePostPartially(@PathVariable Long id, @RequestBody Map<String, Object> updates){
+    public ResponseEntity<PostResponseDto> updatePostPartially(@PathVariable Long id, @RequestBody Map<String, Object> updates){
         return ResponseEntity.ok().body(postService.updatePostPartially(id, updates));
     }
     
