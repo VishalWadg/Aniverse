@@ -1,6 +1,8 @@
 package com.vvw.AniverseBackend.controller;
 
 import com.vvw.AniverseBackend.dto.CreateUserDto;
+import com.vvw.AniverseBackend.dto.LoginRequestDto;
+import com.vvw.AniverseBackend.dto.LoginResponseDto;
 import com.vvw.AniverseBackend.dto.UserResponseDto;
 import com.vvw.AniverseBackend.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -19,5 +21,10 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<UserResponseDto> signup(@RequestBody CreateUserDto createUserDto){
         return new ResponseEntity<>(authService.signup(createUserDto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
+        return ResponseEntity.ok(authService.login(loginRequestDto));
     }
 }

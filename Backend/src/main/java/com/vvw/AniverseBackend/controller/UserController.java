@@ -1,6 +1,7 @@
 package com.vvw.AniverseBackend.controller;
 
-import com.vvw.AniverseBackend.dto.UserDto;
+
+import com.vvw.AniverseBackend.dto.UserResponseDto;
 import com.vvw.AniverseBackend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,9 +22,9 @@ public class UserController {
      * This is public.
      */
     @GetMapping("/{username}")
-    public ResponseEntity<UserDto> getUserProfile(@PathVariable String username) {
-        UserDto userDto = userService.getUserProfile(username);
-        return ResponseEntity.ok(userDto);
+    public ResponseEntity<UserResponseDto> getUserProfile(@PathVariable String username) {
+        UserResponseDto userResponseDto = userService.getUserProfile(username);
+        return ResponseEntity.ok(userResponseDto);
     }
 
     /**
@@ -33,8 +34,8 @@ public class UserController {
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<UserDto>> getAllUsers(Pageable pageable) {
-        Page<UserDto> users = userService.getAllUsers(pageable);
+    public ResponseEntity<Page<UserResponseDto>> getAllUsers(Pageable pageable) {
+        Page<UserResponseDto> users = userService.getAllUsers(pageable);
         return ResponseEntity.ok(users);
     }
 }

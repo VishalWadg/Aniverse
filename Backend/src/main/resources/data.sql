@@ -2,7 +2,7 @@
 -- USERS
 -- ------------------------------
 
-INSERT INTO users (name, username, email, password_hash, profile_pic, bio, created_at)
+INSERT INTO users (name, username, email, password, profile_pic, bio, created_at)
 VALUES
 ('Alice Johnson', 'alice', 'alice@example.com', 'hash123', 'alice.jpg', 'Loves writing about anime and tech.', NOW()),
 ('Bob Smith', 'bob', 'bob@example.com', 'hash456', 'bob.png', 'Casual writer and commenter.', NOW()),

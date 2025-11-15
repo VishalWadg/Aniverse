@@ -29,21 +29,32 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public UserResponseDto signup(CreateUserDto createUserDto) {
+        // 1. Check if user exists (This is correct)
         if(userRepository.existsByUsername(createUserDto.getUsername())){
+            // (Pro-tip: Throw a custom exception here, like UserAlreadyExistsException)
             throw new IllegalArgumentException("The user already exists");
         }
+
         User user = modelMapper.map(createUserDto, User.class);
-        user.setPasswordHash(passwordEncoder.encode(createUserDto.getPassword()));
-        user = userRepository.save(user);
-        return modelMapper.map(user, UserResponseDto.class);
+
+        user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
+
+        User savedUser = userRepository.save(user);
+
+        return modelMapper.map(savedUser, UserResponseDto.class);
     }
 
+    @Override
     public LoginResponseDto login(LoginRequestDto loginRequestDto){
         Authentication authentication  = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword()));
         User user = (User) authentication.getPrincipal();
         String token = jwtUtil.generateAccessToken(user);
-        return new LoginResponseDto();
-
+        UserResponseDto userResponseDto = modelMapper.map(user, UserResponseDto.class);
+        return LoginResponseDto.builder()
+                .expiresIn(jwtUtil.getExpirationInSeconds())
+                .token(token)
+                .user(userResponseDto)
+                .build();
     }
 }

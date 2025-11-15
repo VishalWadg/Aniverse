@@ -1,7 +1,6 @@
 package com.vvw.AniverseBackend.service.impl;
 
 import java.util.Map;
-
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
@@ -11,13 +10,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import com.vvw.AniverseBackend.dto.PostDto;
 import com.vvw.AniverseBackend.dto.UpdatePostDto;
 import com.vvw.AniverseBackend.entity.Post;
 import com.vvw.AniverseBackend.repository.PostRepository;
 import com.vvw.AniverseBackend.service.PostService;
-
 import lombok.RequiredArgsConstructor;
 
 

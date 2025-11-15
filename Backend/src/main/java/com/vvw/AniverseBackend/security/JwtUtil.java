@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
-    private final Long EXPIREATION_TIME_MS = TimeUnit.MINUTES.toMillis(10);
+    private final Long EXPIRATION_TIME_MS = TimeUnit.MINUTES.toMillis(10);
     @Value("${jwt.secretKey}")
     private String secreteKey;
 
@@ -26,9 +26,14 @@ public class JwtUtil {
                 .subject(user.getUsername())
                 .claim("userId",user.getId().toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + EXPIREATION_TIME_MS))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_MS))
                 .signWith(getSecretKey())
                 .compact();
+    }
+
+    public long getExpirationInSeconds() {
+        return TimeUnit.MILLISECONDS.toSeconds(EXPIRATION_TIME_MS);
+        // This will return 600 (for 10 minutes)
     }
 
     public String getUsernameFromToken(String token){

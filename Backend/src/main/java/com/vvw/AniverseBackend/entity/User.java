@@ -6,9 +6,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -25,7 +28,7 @@ import java.util.List;
                 @Index(name = "idx_user_email", columnList = "email", unique = true)
         }
 )
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +52,7 @@ public class User {
 
     @NotBlank
     @Column(nullable = false, length = 255) // <-- 2. REMOVED unique=true, FIXED LENGTH
-    private String passwordHash;
+    private String password;
 
     @Column(columnDefinition = "TEXT") // <-- 2. FIXED LENGTH (use TEXT for URLs)
     private String profilePic;
@@ -78,4 +81,11 @@ public class User {
             orphanRemoval = true
     )
     private List<Comment> comments = new ArrayList<>(); // <-- 5. FIXED TYPO
+
+    //  --------------------------------------------------  Methods  --------------------------------------------------
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
 }

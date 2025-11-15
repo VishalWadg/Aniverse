@@ -1,10 +1,7 @@
 package com.vvw.AniverseBackend.service;
 
-import java.util.List;
 import java.util.Map;
-
 import com.vvw.AniverseBackend.dto.CreatePostDto;
-import com.vvw.AniverseBackend.dto.PostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.dto.UpdatePostDto;
 import org.springframework.data.domain.Page;
