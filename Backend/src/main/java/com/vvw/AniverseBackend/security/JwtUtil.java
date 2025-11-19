@@ -14,7 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
-    private final Long EXPIRATION_TIME_MS = TimeUnit.MINUTES.toMillis(10);
+    @Value("${application.security.jwt.expiration-ms}")
+    private Long EXPIRATION_TIME_MS;
     @Value("${jwt.secretKey}")
     private String secreteKey;
 

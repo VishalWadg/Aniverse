@@ -1,0 +1,111 @@
+package com.vvw.AniverseBackend.service.impl;
+
+import com.vvw.AniverseBackend.dto.internal.TokenRotationResponse;
+import com.vvw.AniverseBackend.entity.RefreshToken;
+import com.vvw.AniverseBackend.entity.User;
+import com.vvw.AniverseBackend.repository.RefreshTokenRepository;
+import com.vvw.AniverseBackend.repository.UserRepository;
+import com.vvw.AniverseBackend.service.RefreshTokenService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.apache.commons.codec.digest.DigestUtils;
+
+
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.UUID;
+
+
+@Service
+@RequiredArgsConstructor
+public class RefreshTokenServiceImpl implements RefreshTokenService {
+
+    private String hashToken(String token) {
+        return  DigestUtils.sha256Hex(token.getBytes(StandardCharsets.UTF_8)); // Use Apache Commons Codec or similar
+    }
+
+    @Value("${application.security.jwt.refresh-token.expiration-ms}")
+    private Long refreshTokenDurationMs;
+    @Value("${application.security.jwt.refresh-token.absolute-expiration-ms}")
+    private Long absoluteExpirationMs;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    public RefreshToken findByToken(String token) {
+        token = hashToken(token);
+        return refreshTokenRepository.findByToken(token)
+                .orElseThrow(() -> new EntityNotFoundException("Refresh token not found"));
+    }
+
+    @Transactional
+    @Override
+    public String createRefreshToken(Long userId){
+        Instant newAbsoluteExpiry = Instant.now().plusMillis(absoluteExpirationMs);
+        TokenRotationResponse response = createRefreshTokenInternal(userId, newAbsoluteExpiry);
+        return response.rawToken();
+    }
+
+    public TokenRotationResponse createRefreshTokenInternal(Long userId, Instant absoluteExpiry) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("user not found"));
+        refreshTokenRepository.deleteByUser(user);
+        String rawToken = UUID.randomUUID().toString();
+        RefreshToken refreshToken = RefreshToken.builder()
+                        .token(hashToken(rawToken))
+                        .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
+                        .absoluteExpiry(absoluteExpiry)
+                        .user(user)
+                        .build();
+        refreshTokenRepository.save(refreshToken);
+        return new TokenRotationResponse(rawToken, user);
+
+    }
+
+    @Override
+    public RefreshToken verifyExpiration(RefreshToken token) {
+        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+            refreshTokenRepository.delete(token);
+            throw new RuntimeException("Refresh token was expired. Please make a new login request");
+        }
+        return token;
+    }
+
+    @Transactional
+    @Override
+    public int deleteByUserId(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return refreshTokenRepository.deleteByUser(user);
+    }
+
+    @Override
+    public Long getRefreshTokenDurationSeconds() {
+        return refreshTokenDurationMs/1000;
+    }
+
+    //    @Override
+    public TokenRotationResponse rotateRefreshToken(String token){
+        RefreshToken oldToken = refreshTokenRepository.findByToken(hashToken(token)).orElseThrow();
+        verifyExpiration(oldToken);
+
+        if(oldToken.getAbsoluteExpiry().isBefore(Instant.now())){
+            refreshTokenRepository.delete(oldToken);
+            throw new RuntimeException("Session limit reached. Please login again.");
+        }
+
+        return createRefreshTokenInternal(
+                oldToken.getUser().getId(),
+                oldToken.getAbsoluteExpiry()
+        );
+    }
+
+    @Transactional
+    @Override
+    public void deleteByToken(String newRawToken) {
+        String hashedToken = hashToken(newRawToken);
+        refreshTokenRepository.findByToken(hashedToken)
+                .ifPresent(refreshTokenRepository::delete);
+    }
+}

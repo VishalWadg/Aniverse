@@ -2,12 +2,15 @@ package com.vvw.AniverseBackend.service.impl;
 
 import com.vvw.AniverseBackend.dto.CreateUserDto;
 import com.vvw.AniverseBackend.dto.LoginRequestDto;
-import com.vvw.AniverseBackend.dto.LoginResponseDto;
+import com.vvw.AniverseBackend.dto.AuthenticationResponseDto;
 import com.vvw.AniverseBackend.dto.UserResponseDto;
+import com.vvw.AniverseBackend.dto.internal.TokenRotationResponse;
+import com.vvw.AniverseBackend.entity.RefreshToken;
 import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.repository.UserRepository;
 import com.vvw.AniverseBackend.security.JwtUtil;
 import com.vvw.AniverseBackend.service.AuthService;
+import com.vvw.AniverseBackend.service.RefreshTokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final RefreshTokenService refreshTokenService;
     private final JwtUtil jwtUtil;
 
     @Override
@@ -45,16 +49,40 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginResponseDto login(LoginRequestDto loginRequestDto){
+    public AuthenticationResponseDto login(LoginRequestDto loginRequestDto){
         Authentication authentication  = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword()));
         User user = (User) authentication.getPrincipal();
         String token = jwtUtil.generateAccessToken(user);
         UserResponseDto userResponseDto = modelMapper.map(user, UserResponseDto.class);
-        return LoginResponseDto.builder()
+        String refToken = refreshTokenService.createRefreshToken(user.getId());
+
+        return AuthenticationResponseDto.builder()
                 .expiresIn(jwtUtil.getExpirationInSeconds())
                 .token(token)
+                .refToken(refToken)
                 .user(userResponseDto)
                 .build();
+    }
+
+    @Override
+    public AuthenticationResponseDto refreshToken(String oldRefToken) {
+        TokenRotationResponse response = refreshTokenService.rotateRefreshToken(oldRefToken);
+        User user = response.user();
+        String newRawToken = response.rawToken();
+        String newAccessToken = jwtUtil.generateAccessToken(user);
+        UserResponseDto userResponseDto = modelMapper.map(user, UserResponseDto.class);
+
+        return AuthenticationResponseDto.builder()
+                .token(newAccessToken)
+                .refToken(newRawToken)
+                .user(userResponseDto)
+                .expiresIn(jwtUtil.getExpirationInSeconds())
+                .build();
+    }
+
+    @Override
+    public void logout(String token) {
+        refreshTokenService.deleteByToken(token);
     }
 }
