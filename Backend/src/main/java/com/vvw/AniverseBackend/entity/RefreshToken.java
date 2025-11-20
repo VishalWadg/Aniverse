@@ -26,7 +26,7 @@ public class RefreshToken {
     @Column(nullable = false)
     private Instant absoluteExpiry;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 }

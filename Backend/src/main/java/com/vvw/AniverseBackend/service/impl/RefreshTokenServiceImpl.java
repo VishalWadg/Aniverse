@@ -49,6 +49,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return response.rawToken();
     }
 
+//    @Transactional
     public TokenRotationResponse createRefreshTokenInternal(Long userId, Instant absoluteExpiry) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("user not found"));
         refreshTokenRepository.deleteByUser(user);
@@ -85,7 +86,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return refreshTokenDurationMs/1000;
     }
 
-    //    @Override
+    @Override
+    @Transactional
     public TokenRotationResponse rotateRefreshToken(String token){
         RefreshToken oldToken = refreshTokenRepository.findByToken(hashToken(token)).orElseThrow();
         verifyExpiration(oldToken);
