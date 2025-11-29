@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private  final JwtAuthFilter jwtAuthFilter;
+    private final ApiAuthenticationEntryPoint apiAuthenticationEntryPoint;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -38,9 +39,12 @@ public class SecurityConfig {
                 .sessionManagement(sessionConfig ->
                         sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/public/**", "/auth/**").permitAll()
+                        .requestMatchers(SecurityConstants.PUBLIC_URLS).permitAll()
                         .anyRequest().authenticated()
-                ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(apiAuthenticationEntryPoint));
         return httpSecurity.build();
     }
 

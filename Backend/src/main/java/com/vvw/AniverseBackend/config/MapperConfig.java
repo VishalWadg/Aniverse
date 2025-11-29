@@ -10,6 +10,7 @@ import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.modelmapper.ModelMapper;
+import org.springframework.util.AntPathMatcher;
 
 @Configuration
 public class MapperConfig {
@@ -18,5 +19,10 @@ public class MapperConfig {
     public ModelMapper ModelMapper() {
         ModelMapper modelMapper = new ModelMapper();
         return modelMapper;
+    }
+
+    @Bean
+    public AntPathMatcher AntPathMatcher(){
+        return  new AntPathMatcher();
     }
 }

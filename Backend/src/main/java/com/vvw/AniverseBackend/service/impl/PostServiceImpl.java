@@ -4,8 +4,10 @@ import java.util.Map;
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
+import com.vvw.AniverseBackend.exceptions.EntityNotFoundException;
 import com.vvw.AniverseBackend.service.UserService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
@@ -29,6 +32,7 @@ public class PostServiceImpl implements PostService{
     public PostResponseDto createNewPost(CreatePostDto createPostDto, String username){
         Post newPost = modelMapper.map(createPostDto, Post.class);
         User author = userService.findByUsername(username);
+        newPost.setAuthor(author);
         return modelMapper.map(postRepository.save(newPost), PostResponseDto.class);
     }
 
@@ -39,9 +43,10 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public PostResponseDto getPostById(Long id){
+        log.warn("PostServiceImpl:: getPostById");
         Post post = postRepository
             .findByIdWithAuthor(id)
-            .orElseThrow(() -> new IllegalArgumentException("Post with id " + id + " not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Post with id " + id + " not found"));
         return modelMapper.map(post, PostResponseDto.class);
     }
 
@@ -56,17 +61,19 @@ public class PostServiceImpl implements PostService{
     // PUT Request (All fields are required) mostly not needed as we use PATCH instead
     @Override
     public PostResponseDto updatePost(Long id, UpdatePostDto updatePostDto){
+        log.warn("PostServiceImpl:: updatePost");
         Post post = postRepository
             .findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Error :: PostServiceImpl :: updatePost :: post with id : "+ id + " does not exist"));
+            .orElseThrow(() -> new EntityNotFoundException("Failed to Update :: post with id : "+ id + " does not exist"));
         modelMapper.map(updatePostDto, post);
         return modelMapper.map(postRepository.save(post), PostResponseDto.class);
     }
 
     @Override
     public void deletePostById(Long id){
+        log.warn("PostServiceImpl:: deletePostById");
         if(!postRepository.existsById(id)){
-            throw new IllegalArgumentException("post with id : " + id + "  not found");
+            throw new EntityNotFoundException("Failed to delete :: post with id : " + id + " does not exist");
         }
         postRepository.deleteById(id);
     }
@@ -75,9 +82,10 @@ public class PostServiceImpl implements PostService{
     // this can be done two ways using 1) Map<String, Object> and 2) using DTO with null values allowed fields 2nd approach is preferred
     @Override
     public PostResponseDto updatePostPartially(Long id, Map<String, Object> updates){
+        log.warn("PostServiceImpl:: updatePostPartially");
         Post post = postRepository
             .findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("Error :: PostServiceImpl :: updatePostPartially :: post with id : "+ id + " does not exist"));
+                .orElseThrow(() -> new EntityNotFoundException("Failed to Update :: post with id : "+ id + " does not exist"));
         
         updates.forEach((field, value)->{
             switch (field) {

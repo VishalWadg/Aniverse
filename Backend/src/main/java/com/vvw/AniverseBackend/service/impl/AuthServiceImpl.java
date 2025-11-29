@@ -5,13 +5,14 @@ import com.vvw.AniverseBackend.dto.LoginRequestDto;
 import com.vvw.AniverseBackend.dto.AuthenticationResponseDto;
 import com.vvw.AniverseBackend.dto.UserResponseDto;
 import com.vvw.AniverseBackend.dto.internal.TokenRotationResponse;
-import com.vvw.AniverseBackend.entity.RefreshToken;
 import com.vvw.AniverseBackend.entity.User;
+import com.vvw.AniverseBackend.exceptions.DuplicateResourceException;
 import com.vvw.AniverseBackend.repository.UserRepository;
 import com.vvw.AniverseBackend.security.JwtUtil;
 import com.vvw.AniverseBackend.service.AuthService;
 import com.vvw.AniverseBackend.service.RefreshTokenService;
-import jakarta.transaction.Transactional;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,8 +36,10 @@ public class AuthServiceImpl implements AuthService {
     public UserResponseDto signup(CreateUserDto createUserDto) {
         // 1. Check if user exists (This is correct)
         if(userRepository.existsByUsername(createUserDto.getUsername())){
-            // (Pro-tip: Throw a custom exception here, like UserAlreadyExistsException)
-            throw new IllegalArgumentException("The user already exists");
+            throw new DuplicateResourceException("Username is already taken");
+        }
+        if(userRepository.existsByEmail(createUserDto.getEmail())){
+            throw new DuplicateResourceException("Email is already in use");
         }
 
         User user = modelMapper.map(createUserDto, User.class);
@@ -49,6 +52,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthenticationResponseDto login(LoginRequestDto loginRequestDto){
         Authentication authentication  = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword()));
@@ -66,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthenticationResponseDto refreshToken(String oldRefToken) {
         TokenRotationResponse response = refreshTokenService.rotateRefreshToken(oldRefToken);
         User user = response.user();

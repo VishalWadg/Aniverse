@@ -17,6 +17,6 @@ public class CreatePostDto {
     @NotBlank(message = "Content cannot be empty")
     private String content;
 
-    @NotNull
-    private Long categoryId;
+//    @NotNull
+//    private Long categoryId;
 }

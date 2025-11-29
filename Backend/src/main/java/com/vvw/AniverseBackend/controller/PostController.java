@@ -2,8 +2,12 @@ package com.vvw.AniverseBackend.controller;
 
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
+import com.vvw.AniverseBackend.entity.User;
+import com.vvw.AniverseBackend.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
 import com.vvw.AniverseBackend.dto.UpdatePostDto;
 import com.vvw.AniverseBackend.service.PostService;
@@ -28,7 +32,7 @@ public class PostController {
     
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getAllPosts() {
-        return ResponseEntity.ok().body(postService.getAllPosts(PageRequest.of(0, 5)));
+        return ResponseEntity.ok().body(postService.getAllPosts(PageRequest.of(0, 10)));
     }
 
     @GetMapping("/{id}")
@@ -37,8 +41,8 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponseDto> createNewPost (@RequestBody CreatePostDto createPostDto, String username) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(postService.createNewPost(createPostDto, username));
+    public ResponseEntity<PostResponseDto> createNewPost (@RequestBody CreatePostDto createPostDto, @AuthenticationPrincipal User user) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(postService.createNewPost(createPostDto, user.getUsername()));
     }
     
     @PutMapping("/{id}")

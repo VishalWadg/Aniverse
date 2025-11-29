@@ -2,6 +2,7 @@ package com.vvw.AniverseBackend.service.impl;
 
 
 import com.vvw.AniverseBackend.dto.UserResponseDto;
+import com.vvw.AniverseBackend.exceptions.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,17 +32,22 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserResponseDto getUserProfile(String username) {
-        return null;
+        return modelMapper
+            .map(userRepository
+                    .findByUsername(username)
+                    .orElseThrow(() ->
+                        new EntityNotFoundException("User Not found with username: "+username+". Failed to get user profile.")),
+                UserResponseDto.class);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow();
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: "+username));
     }
 
     // Service to Service methods
     public User findByUsername(String username){
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("User not found in FindByUsername in UserServiceImpl"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found with username: "+username));
         return user;
     }
 

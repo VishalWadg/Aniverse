@@ -4,9 +4,9 @@ import com.vvw.AniverseBackend.dto.CreateUserDto;
 import com.vvw.AniverseBackend.dto.LoginRequestDto;
 import com.vvw.AniverseBackend.dto.AuthenticationResponseDto;
 import com.vvw.AniverseBackend.dto.UserResponseDto;
-import com.vvw.AniverseBackend.dto.internal.TokenRotationResponse;
 import com.vvw.AniverseBackend.service.AuthService;
 import com.vvw.AniverseBackend.service.RefreshTokenService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -15,15 +15,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
+    private static final String COOKIE_PATH = "/api/v1/auth";
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
     @PostMapping("/signup")
-    public ResponseEntity<UserResponseDto> signup(@RequestBody CreateUserDto createUserDto){
+    public ResponseEntity<UserResponseDto> signup(@Valid @RequestBody CreateUserDto createUserDto){
         return new ResponseEntity<>(authService.signup(createUserDto), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponseDto> login(@RequestBody LoginRequestDto loginRequestDto){
+    public ResponseEntity<AuthenticationResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto){
         Long maxAgeSeconds = refreshTokenService.getRefreshTokenDurationSeconds();
         AuthenticationResponseDto loginResponsDto = authService.login(loginRequestDto);
         String refToken= loginResponsDto.getRefToken();
@@ -31,7 +32,7 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("refresh_token",refToken)
                 .httpOnly(true)
                 .secure(false)  // TODO: MAKE IT TRUE IN PROD
-                .path("/api/v1/auth/refresh")
+                .path(COOKIE_PATH)
                 .maxAge(maxAgeSeconds)
                 .sameSite("Strict")
                 .build();
@@ -46,7 +47,7 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", newToken)
                 .httpOnly(true)
                 .secure(false) // TODO: MAKE IT TRUE IN PROD
-                .path("/api/v1/auth/refresh")
+                .path(COOKIE_PATH)
                 .maxAge(refreshTokenService.getRefreshTokenDurationSeconds())
                 .sameSite("Strict")
                 .build();
@@ -57,9 +58,10 @@ public class AuthController {
     public ResponseEntity<Void> logout(@CookieValue(name = "refresh_token") String token){
         authService.logout(token);
         ResponseCookie cleanCookie = ResponseCookie.from("refresh_token", "")
-                .path("/api/auth/refresh")
+                .path(COOKIE_PATH)
                 .maxAge(0)
                 .build();
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cleanCookie.toString())
                 .build();

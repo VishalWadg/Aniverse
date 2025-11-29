@@ -3,11 +3,12 @@ package com.vvw.AniverseBackend.service.impl;
 import com.vvw.AniverseBackend.dto.internal.TokenRotationResponse;
 import com.vvw.AniverseBackend.entity.RefreshToken;
 import com.vvw.AniverseBackend.entity.User;
+import com.vvw.AniverseBackend.exceptions.EntityNotFoundException;
+import com.vvw.AniverseBackend.exceptions.TokenException;
 import com.vvw.AniverseBackend.repository.RefreshTokenRepository;
 import com.vvw.AniverseBackend.repository.UserRepository;
 import com.vvw.AniverseBackend.service.RefreshTokenService;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,9 +37,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public RefreshToken findByToken(String token) {
-        token = hashToken(token);
-        return refreshTokenRepository.findByToken(token)
-                .orElseThrow(() -> new EntityNotFoundException("Refresh token not found"));
+        String hashedToken = hashToken(token);
+        return refreshTokenRepository.findByToken(hashedToken)
+                .orElseThrow(() -> new TokenException("Invalid refresh token."));
     }
 
     @Transactional
@@ -51,7 +52,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 //    @Transactional
     public TokenRotationResponse createRefreshTokenInternal(Long userId, Instant absoluteExpiry) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("user not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         refreshTokenRepository.deleteByUser(user);
         String rawToken = UUID.randomUUID().toString();
         RefreshToken refreshToken = RefreshToken.builder()
@@ -62,14 +63,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                         .build();
         refreshTokenRepository.save(refreshToken);
         return new TokenRotationResponse(rawToken, user);
-
     }
 
     @Override
     public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
+        if (token.getExpiryDate().isBefore(Instant.now())) {
             refreshTokenRepository.delete(token);
-            throw new RuntimeException("Refresh token was expired. Please make a new login request");
+            throw new TokenException("Session ended. Please make a new login request");
         }
         return token;
     }
@@ -77,7 +77,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Transactional
     @Override
     public int deleteByUserId(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Deletion Failed: User not found with id: "+userId));
         return refreshTokenRepository.deleteByUser(user);
     }
 
@@ -89,12 +89,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     @Transactional
     public TokenRotationResponse rotateRefreshToken(String token){
-        RefreshToken oldToken = refreshTokenRepository.findByToken(hashToken(token)).orElseThrow();
+        RefreshToken oldToken = findByToken(token);
         verifyExpiration(oldToken);
 
         if(oldToken.getAbsoluteExpiry().isBefore(Instant.now())){
             refreshTokenRepository.delete(oldToken);
-            throw new RuntimeException("Session limit reached. Please login again.");
+            throw new TokenException("Session limit reached. Please login again..");
         }
 
         return createRefreshTokenInternal(
