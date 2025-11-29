@@ -1,19 +1,17 @@
 import React from 'react'
-import appwriteService from '../Appwrite/config'
 import { Link } from 'react-router-dom'
-function PostCard({$id, Title, FeaturedImage}) {
+
+function PostCard({ id, title }) {
   return (
-    <Link to={`/post/${$id}`}>
-        <div className='w-full bg-gray-100 text-[#6E8CFB] rounded-xl p-4'>
-            <div className='w-full justify-center mb-4'>
-                <img src={appwriteService.getFilePreview(FeaturedImage)} 
-                    alt={Title}
-                    className='rounded-xl'
-                />
-            </div>
-            <h2 
-            className='text-xl font-bold'
-            >{Title}</h2>
+    <Link to={`/post/${id}`}>
+        <div className='w-full bg-gray-100 text-[#6E8CFB] rounded-xl p-4 min-h-[150px] flex flex-col justify-center'>
+            {/* Image removed for now as backend doesn't support it.
+               You can add a placeholder icon here if you want.
+            */}
+            
+            <h2 className='text-xl font-bold text-center'>
+                {title}
+            </h2>
         </div>
     </Link>
   )

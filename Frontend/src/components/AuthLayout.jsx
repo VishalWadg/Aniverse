@@ -2,22 +2,26 @@ import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
+export default function AuthLayout({ children, authentication = true }) {
 
-function Protected({children, authentication=true}) {
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(true)
     const authStatus = useSelector(state => state.auth.status)
-
+    const authLoading = useSelector(state => state.auth.loading) // Global loading state
     useEffect(() => {
-        if(authentication && authStatus !== authentication){ // if authentication is true and authStatus is false then navigate to login page
-            navigate('/login')
-        }else if(!authentication && authStatus !== authentication){ // if authentication is false and authStatus is true then navigate to home page
-            navigate('/')  // navigate to home page
+        // Case 1: Route requires Auth (true), but User is NOT logged in.
+        // Redirect to Login.
+        if (authentication && authStatus !== true) {
+            navigate("/login")
         }
-        setLoading(false) // if both conditions are false then set loading to false and show the children components which is passed as props
+        // Case 2: Route requires NO Auth (false) (like Login/Signup pages), 
+        // but User IS logged in. Redirect to Home.
+        else if (!authentication && authStatus === true) {
+            navigate("/")
+        }
+
+        // If neither case matches, allow access.
     }, [authStatus, navigate, authentication])
 
-    return loading ? <h1>Loading...</h1> : <>{children}</> // if loading is true then show loading else show children components which is passed as props
+    // While checking, show a spinner or loading text
+    return authLoading ? <h1>Loading...</h1> : <>{children}</>
 }
-
-export default Protected

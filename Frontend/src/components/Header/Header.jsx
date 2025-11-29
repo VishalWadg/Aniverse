@@ -49,12 +49,12 @@ function Header() {
             item.active ?
             (
               <li key={item.name}>
-                <button 
-                  onClick={() => navigate(item.slug)}
+                <Link 
+                  to={item.slug}
                   className='inline-block px-6 py-2 duration-200 hover:text-[#e5e6ff] hover:bg-[#6E8CFB] rounded-full'
                 >
                   {item.name}
-                </button>
+                </Link>
               </li>
             ) : null
            
