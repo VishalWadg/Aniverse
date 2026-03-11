@@ -2,13 +2,14 @@ name: Aniverse Backend CI
 
 on:
   push:
-    branches: [ "main" ]
     paths:
       - 'Backend/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'Backend/**'
+      - '.github/workflows/backend-ci.yml'
 
 jobs:
   build-and-test:
@@ -17,7 +18,7 @@ jobs:
     
     defaults:
       run:
-        working-directory: ./Backend 
+        working-directory: ./Backend
 
     steps:
     - name: Checkout repository

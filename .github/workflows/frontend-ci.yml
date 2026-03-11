@@ -2,13 +2,14 @@ name: Aniverse Frontend CI
 
 on:
   push:
-    branches: [ "main" ]
     paths:
       - 'Frontend/**'
+      - '.github/workflows/frontend-ci.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'Frontend/**'
+      - '.github/workflows/frontend-ci.yml'
 
 jobs:
   build-frontend:
