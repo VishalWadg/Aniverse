@@ -34,3 +34,8 @@ jobs:
     - name: Build and Test with Maven
       run: mvn clean package
       # Forcing GitHub to recognize the pipeline
+      
+    - name: Run Semgrep Security Scan
+      uses: semgrep/semgrep-action@v1
+      with:
+        config: "p/default"
