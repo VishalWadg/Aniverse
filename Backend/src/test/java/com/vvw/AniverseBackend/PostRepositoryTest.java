@@ -4,108 +4,128 @@ import com.vvw.AniverseBackend.entity.Post;
 import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.repository.PostRepository;
 import com.vvw.AniverseBackend.repository.UserRepository;
-import org.hibernate.Hibernate; // We need this to check for N+1
+
+import jakarta.transaction.Transactional;
+
+import org.hibernate.Hibernate;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest // This is the key annotation
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@SpringBootTest
+@Transactional 
 public class PostRepositoryTest {
 
-    public static final String POST_1 = "Post 1";
     @Autowired
     private PostRepository postRepository;
 
     @Autowired
     private UserRepository userRepository;
 
-    private User author1;
-    private User author2;
-    private Post post1;
-    private Post post2;
-    private Post post3;
+    @BeforeEach
+    void setUp() {
+        postRepository.deleteAll();
+        userRepository.deleteAll();
 
-    // This method runs before each @Test, setting up fresh data
-//    @BeforeEach
-//    void setUp() {
-//        // 1. Create and save authors
-//        author1 = User.builder().username("authorOne").email("a@a.com").passwordHash("...").name("Author One").build();
-//        author2 = User.builder().username("authorTwo").email("b@b.com").passwordHash("...").name("Author Two").build();
-//
-//        userRepository.saveAll(List.of(author1, author2));
-//
-//        // 2. Create and save posts
-//        post1 = Post.builder().title("Post 1").content("...").author(author1).build();
-//        post2 = Post.builder().title("Post 2").content("...").author(author1).build();
-//        post3 = Post.builder().title("Post 3").content("...").author(author2).build();
-//
-//        postRepository.saveAll(List.of(post1, post2, post3));
-//    }
+        // 1. Create Alice (Your tests expect her to have exactly 2 posts)
+        User alice = new User();
+        alice.setUsername("alice"); 
+        alice.setName("Alice");               
+        alice.setEmail("alice@test.com");     
+        alice.setPassword("SecurePass123!");  
+        userRepository.save(alice);
 
-    // Now, we write tests for each of your custom queries
+        // 2. Create Bob (To make the total post count = 5 for your pagination test)
+        User bob = new User();
+        bob.setUsername("bob"); 
+        bob.setName("Bob");               
+        bob.setEmail("bob@test.com");     
+        bob.setPassword("SecurePass123!");  
+        userRepository.save(bob);
+
+        // 3. Create Alice's 2 Posts (ADDING CONTENT SO THE DB DOESN'T CRASH)
+        Post post1 = new Post();
+        post1.setTitle("Exploring Ghibli Worlds"); // Test looks for this exact title!
+        post1.setContent("Totoro is the best movie ever made.");
+        post1.setAuthor(alice);
+        postRepository.save(post1);
+
+        Post post2 = new Post();
+        post2.setTitle("Naruto Theories");
+        post2.setContent("Sasuke's redemption arc.");
+        post2.setAuthor(alice);
+        postRepository.save(post2);
+
+        // 4. Create Bob's 3 Posts (To reach the expected 5 total posts)
+        for (int i = 3; i <= 5; i++) {
+            Post post = new Post();
+            post.setTitle("Z Anime Review " + i); // Starts with Z so it sorts to the end
+            post.setContent("Some review content.");
+            post.setAuthor(bob);
+            postRepository.save(post);
+        }
+    }
+
+    @AfterEach
+    void tearDown() {
+        postRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
     void whenFindByIdWithAuthor_ThenReturnsPostAndAuthor() {
-        // Act: Call the method we want to test
-        Optional<Post> foundPost = postRepository.findByIdWithAuthor(1L);
+        // Dynamically find the ID of the Ghibli post instead of hardcoding 1L
+        Long ghibliId = postRepository.findAll().stream()
+                .filter(p -> p.getTitle().equals("Exploring Ghibli Worlds"))
+                .findFirst().get().getId();
 
-        // Assert: Check that the post exists
+        Optional<Post> foundPost = postRepository.findByIdWithAuthor(ghibliId);
+
         assertThat(foundPost).isPresent();
         assertThat(foundPost.get().getTitle()).isEqualTo("Exploring Ghibli Worlds");
-
-        // Assert: Check that the author was loaded (this proves JOIN FETCH worked)
-        // We check if the 'author' field is "initialized" (i.e., not a lazy proxy)
         assertThat(Hibernate.isInitialized(foundPost.get().getAuthor())).isTrue();
         assertThat(foundPost.get().getAuthor().getUsername()).isEqualTo("alice");
     }
 
     @Test
     void whenFindAuthorUsernameByPostId_ThenReturnsOnlyUsername() {
-        // Act
-        Optional<String> username = postRepository.findAuthorUsernameByPostId(1L);
+        // Dynamically get Alice's post ID
+        Long alicePostId = postRepository.findAll().stream()
+                .filter(p -> p.getAuthor().getUsername().equals("alice"))
+                .findFirst().get().getId();
 
-        // Assert
+        Optional<String> username = postRepository.findAuthorUsernameByPostId(alicePostId);
+
         assertThat(username).isPresent();
         assertThat(username.get()).isEqualTo("alice");
     }
 
     @Test
     void whenFindAuthorUsernameByPostId_AndPostNotFound_ThenReturnsEmpty() {
-        // Act
-        Optional<String> username = postRepository.findAuthorUsernameByPostId(122L); // A non-existent ID
-
-        // Assert
+        Optional<String> username = postRepository.findAuthorUsernameByPostId(9999L); // Safely fake ID
         assertThat(username).isNotPresent();
     }
 
     @Test
     void whenFindAllWithAuthor_ThenReturnsPaginatedPostsAndAuthors() {
-        // Arrange: Ask for the first page, 2 items per page, sorted by title
         Pageable pageRequest = PageRequest.of(0, 2, Sort.by("title"));
-
-        // Act
         Page<Post> postPage = postRepository.findAllWithAuthor(pageRequest);
 
-        // Assert: Check the pagination metadata
         assertThat(postPage.getTotalElements()).isEqualTo(5);
         assertThat(postPage.getTotalPages()).isEqualTo(3);
         assertThat(postPage.getContent()).hasSize(2);
         assertThat(postPage.getContent().get(0).getTitle()).isEqualTo("Exploring Ghibli Worlds");
-
-        // Assert: Check that ALL authors on this page were loaded (proves N+1 is solved)
+        
         postPage.getContent().forEach(post -> {
             assertThat(Hibernate.isInitialized(post.getAuthor())).isTrue();
         });
@@ -113,18 +133,13 @@ public class PostRepositoryTest {
 
     @Test
     void whenFindByAuthorUsernameWithAuthor_ThenReturnsCorrectFilteredPage() {
-        // Arrange: Ask for posts from "author1"
-        Pageable pageRequest = PageRequest.of(0, 5); // Page of 5
-
-        // Act
+        Pageable pageRequest = PageRequest.of(0, 5); 
         Page<Post> postPage = postRepository.findByAuthorUsernameWithAuthor("alice", pageRequest);
 
-        // Assert: Check the pagination metadata
-        assertThat(postPage.getTotalElements()).isEqualTo(2); // Only 2 posts from author1
-        assertThat(postPage.getTotalPages()).isEqualTo(1);    // Only 1 page
+        assertThat(postPage.getTotalElements()).isEqualTo(2); 
+        assertThat(postPage.getTotalPages()).isEqualTo(1);    
         assertThat(postPage.getContent()).hasSize(2);
 
-        // Assert: Check that all returned posts are from the correct author
         postPage.getContent().forEach(post -> {
             assertThat(post.getAuthor().getUsername()).isEqualTo("alice");
         });
