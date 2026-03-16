@@ -1,0 +1,26 @@
+{
+  "name": "aniverse",
+  "version": "1.0.0",
+  "description": "anime/manga community",
+  "main": "index.js",
+  "scripts": {
+    "start:frontend": "cd Frontend && npm run dev",
+    "start:backend": "cd Backend && mvnw.cmd spring-boot:run",
+    "dev": "concurrently -c \"cyan,magenta\" -n \"REACT,SPRING\" \"npm run start:frontend\" \"npm run start:backend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VishalWadg/Aniverse.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VishalWadg/Aniverse/issues"
+  },
+  "homepage": "https://github.com/VishalWadg/Aniverse#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

@@ -19,7 +19,7 @@ export const allPostsLoader = async () => {
 
 function AllPosts() {
     // 2. Get Data
-    const data = useLoaderData();
+    const data = useLoaderData() as any;
     const posts = data?.content || [];
 
     // 3. Render Logic

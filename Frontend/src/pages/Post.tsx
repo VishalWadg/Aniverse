@@ -18,9 +18,9 @@ export const postLoader = async ({params}) => {
 } 
 
 export default function Post() {
-    const post = useLoaderData();
+    const post = useLoaderData() as any;
     const navigate = useNavigate();
-    const userData = useSelector((state) => state.auth.userData);
+    const userData = useSelector((state: any) => state.auth.userData);
 
     const isAuthor = post && userData ? post.author.username === userData.username : false;
     

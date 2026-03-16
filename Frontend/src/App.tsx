@@ -15,7 +15,7 @@ function App() {
   const dispatch = useDispatch();
   const isMounted = useRef(false);
   const revalidator = useRevalidator();
-  const authStatus = useSelector((state) => state.auth.status);
+  const authStatus = useSelector((state: any) => state.auth.status);
 
   useEffect(() => {
     // THE FIX:

@@ -8,6 +8,11 @@ import useToasts from '../hooks/useToasts'
 import { Button, Input, Logo } from './index'
 import { setMemoryTokenNExpiry } from '../api/axiosClient'
 
+type LoginFormValues = {
+    username: string;
+    password: string;
+};
+
 function Login() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -16,7 +21,7 @@ function Login() {
         register, 
         handleSubmit, 
         formState: { errors } // <--- This holds validation errors (e.g., errors.password)
-    } = useForm();
+    } = useForm<LoginFormValues>();
     const [error, setError] = useState('');
 
     const login = async (data) => {
@@ -39,7 +44,7 @@ function Login() {
                 console.log(userData);
                 setMemoryTokenNExpiry(response.token);
                 if (userData) {
-                    dispatch(authLogin(userData));
+                    dispatch(authLogin({ userData }));
                 }
                 navigate('/');
             }

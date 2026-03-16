@@ -26,11 +26,11 @@ export const homeLoader = async () => {
 
 function Home() {
     // --- 2. GET DATA ---
-    const data = useLoaderData(); 
+    const data = useLoaderData() as any; 
     const posts = data?.content || []; // specific to Spring Boot Page format
     
     // --- 3. GET AUTH STATE ---
-    const authStatus = useSelector((state) => state.auth.status);
+    const authStatus = useSelector((state: any) => state.auth.status);
 
     // --- 4. RENDER LOGIC ---
     

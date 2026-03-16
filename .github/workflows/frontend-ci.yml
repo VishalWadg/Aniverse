@@ -2,13 +2,14 @@ name: Aniverse Frontend CI
 
 on:
   push:
-    branches: [ "main" ]
     paths:
       - 'Frontend/**'
+      - '.github/workflows/frontend-ci.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'Frontend/**'
+      - '.github/workflows/frontend-ci.yml'
 
 jobs:
   build-frontend:
@@ -35,5 +36,10 @@ jobs:
 
     - name: Build the app
       run: npm run build
+
+    - name: Run Semgrep Security Scan
+      uses: semgrep/semgrep-action@v1
+      with:
+        config: "p/default"
 
       # Forcing GitHub to recognize the pipeline

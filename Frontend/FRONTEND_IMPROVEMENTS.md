@@ -2360,7 +2360,7 @@ export default defineConfig({
                 manualChunks: {
                     vendor: ['react', 'react-dom', 'react-router-dom'],
                     redux: ['@reduxjs/toolkit', 'react-redux'],
-                    editor: ['@tinymce/tinymce-react', 'tinymce']
+                    editor: ['@tiptap/react', '@tiptap/starter-kit']
                 }
             }
         },

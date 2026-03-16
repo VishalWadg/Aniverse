@@ -7,6 +7,13 @@ import authApi from '../api/authApi'
 import { Button, Input, Logo } from './index'
 import useToasts from '../hooks/useToasts'
 
+type SignupFormValues = {
+    name: string;
+    username: string;
+    email: string;
+    password: string;
+};
+
 function Signup() {
     const navigate = useNavigate()
     const [error, setError] = useState("")
@@ -16,7 +23,7 @@ function Signup() {
         register, 
         handleSubmit, 
         formState: { errors } // <--- This holds validation errors (e.g., errors.password)
-    } = useForm();
+    } = useForm<SignupFormValues>();
     const create = async (data) => {
         setError("")
         try {

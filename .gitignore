@@ -1,1 +1,15 @@
+# Ignore dependencies
+node_modules/
+
+# Ignore local environment variables
+.env
+.env.local
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
 .idea/
+*.swp

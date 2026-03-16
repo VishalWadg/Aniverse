@@ -5,13 +5,13 @@ import {
   RouterProvider, 
 } from 'react-router-dom'
 
-import store from './store/store.js'
+import store from './store/store'
 
 import './index.css'
 
-import { router } from './router.jsx'
+import { router } from './router'
 
-import ToastContainer from './components/Container/ToastContainer.jsx'
+import ToastContainer from './components/Container/ToastContainer'
 
 
 
