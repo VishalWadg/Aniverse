@@ -5,7 +5,7 @@ import Toast from '../Toast';
 
 function ToastContainer() {
 
-    const toasts = useSelector(selectToasts);
+    const toasts = useSelector((state: any) => selectToasts(state));
     const dispatch = useDispatch();
 
     const handleRemove = (id) => {

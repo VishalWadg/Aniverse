@@ -1,11 +1,12 @@
 
 import {useDispatch} from 'react-redux';
 import { addToast as addToastAction, removeToast as removeToastAction } from '../store';
+import type { ToastType } from '../store';
 
 export default function useToasts() {
     const dispatch = useDispatch();
 
-    const addToast = (message, type = 'info', duration = 4000) => {
+    const addToast = (message: string, type: ToastType = 'info', duration: number = 4000) => {
         const id = Date.now() + Math.random();
         const newToast = {id, message, type, duration};
 

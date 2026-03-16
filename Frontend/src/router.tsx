@@ -1,7 +1,7 @@
 import {createBrowserRouter, 
   createRoutesFromElements, redirect, // Preferred over createRoutesFromChildren (same thing, newer name)
   Route } from 'react-router-dom'
-import App from './App.jsx'
+import App from './App'
 
 import store from './store/store'
 import { login, logout } from './store'

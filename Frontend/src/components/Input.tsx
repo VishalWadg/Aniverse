@@ -1,7 +1,10 @@
 import React, { useId } from "react"
 
+type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+    label?: string;
+};
 
-const Input = React.forwardRef(function Input({
+const Input = React.forwardRef<HTMLInputElement, InputProps>(function Input({
     label,
     type='text',
     className='',

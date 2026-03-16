@@ -6,10 +6,10 @@ import { router } from '../router';
 const baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1';
 
 // In-memory token storage
-let memoryToken = null;
-let memoryTokenExpiry = null;
+let memoryToken: string | null = null;
+let memoryTokenExpiry: number | null = null;
 
-let refreshPromise = null;
+let refreshPromise: Promise<any> | null = null;
 
 let isAuthInitialized = false;
 
@@ -84,9 +84,9 @@ export const setMemoryTokenNExpiry = (token) => {
     memoryToken = token;
     if (token) {
         try {
-            const decoded = jwtDecode(token);
+            const decoded: any = jwtDecode(token);
             // Convert 'exp' (seconds) to milliseconds
-            memoryTokenExpiry = decoded.exp * 1000;
+            memoryTokenExpiry = typeof decoded?.exp === "number" ? decoded.exp * 1000 : null;
         } catch (e) {
             // If token is invalid/malformed, treat as expired
             memoryToken = null;
@@ -98,10 +98,11 @@ export const setMemoryTokenNExpiry = (token) => {
 };
 
 axiosClient.interceptors.request.use(
-    async (config) => {
+    async (config: any) => {
+        const url = typeof config?.url === "string" ? config.url : "";
 
         // 1. skip public paths
-        if(config.url.includes('/auth/')) return config;
+        if(url.includes('/auth/')) return config;
 
         // 2. CASE A: A refresh is already happening (Queueing)
         if(refreshPromise) {
@@ -112,12 +113,14 @@ axiosClient.interceptors.request.use(
                 // use token we just got
                 const newToken = data.token;
                 if(newToken){
-                    config.headers['Authorization'] = `Bearer ${newToken}`;
+                    config.headers = config.headers ?? {};
+                    config.headers["Authorization"] = `Bearer ${newToken}`;
                 }
                 return config;
             } catch (error) {
                 // If the shared refresh failed, this request must also fail
-                console.error("Refresh failed: ", error.response?.data?.message || error.message);
+                const err: any = error;
+                console.error("Refresh failed: ", err?.response?.data?.message || err?.message);
                 router.navigate('/login');
                 return Promise.reject(error);
             }
@@ -128,16 +131,19 @@ axiosClient.interceptors.request.use(
             try {
                 const data = await performRefresh();
                 const newToken = data.token;
-                config.headers['Authorization'] = `Bearer ${newToken}`;
+                config.headers = config.headers ?? {};
+                config.headers["Authorization"] = `Bearer ${newToken}`;
             } catch (error) {
-                console.error("Failed to refresh token:", error.response?.data?.message || error.message);
+                const err: any = error;
+                console.error("Failed to refresh token:", err?.response?.data?.message || err?.message);
                 router.navigate('/login');
                 setMemoryTokenNExpiry(null);
                 return Promise.reject(error);
             }
 
         }else if (memoryToken){
-            config.headers['Authorization'] = `Bearer ${memoryToken}`; // token is valid so attach it
+            config.headers = config.headers ?? {};
+            config.headers["Authorization"] = `Bearer ${memoryToken}`; // token is valid so attach it
         }
         return config;
     },
@@ -147,8 +153,8 @@ axiosClient.interceptors.request.use(
 // Optional: Add interceptors to handle token expiration if needed
 axiosClient.interceptors.response.use(
     (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
+    async (error: any) => {
+        const originalRequest: any = error?.config ?? {};
         // check 3 conditions:
         // 1. is error response status 401
         // 2. is it not a request to the login/refresh endpoint itself (prevents loops)
@@ -157,7 +163,7 @@ axiosClient.interceptors.response.use(
 
         if(
             error.response?.status === 401 &&
-            !originalRequest.url.includes('/auth/') &&
+            !(typeof originalRequest?.url === "string" ? originalRequest.url : "").includes('/auth/') &&
             !originalRequest._Retry
         ){
             originalRequest._Retry = true; // mark the request as retried
@@ -172,7 +178,8 @@ axiosClient.interceptors.response.use(
                 // B. get the new token
                 const token = data.token;
                 // D. Update the header of the FAILED request with the NEW token
-                originalRequest.headers['Authorization'] = `Bearer ${token}`;
+                originalRequest.headers = originalRequest.headers ?? {};
+                originalRequest.headers["Authorization"] = `Bearer ${token}`;
 
                 // E. Retry the original request
                 // We return the result of calling axiosClient again with the updated config
@@ -181,7 +188,7 @@ axiosClient.interceptors.response.use(
             } catch (refreshError) {
                 // F. Refresh failed (Cookie expired or invalid)
                 // console.error(refreshError.message );
-                console.log(refreshError?.response?.data?.message);
+                console.log((refreshError as any)?.response?.data?.message);
                 // router.navigate('/login');
                 setMemoryTokenNExpiry(null);
                 return Promise.reject(refreshError);

@@ -6,11 +6,20 @@ import { Input, Button, RTE } from '../index' // Select removed if not used
 import postApi from '../../api/postApi'
 import useToasts from '../../hooks/useToasts'
 
-function PostForm({ post }) {
+type PostFormValues = {
+    title: string;
+    content: string;
+};
+
+type PostFormProps = {
+    post?: any;
+};
+
+function PostForm({ post }: PostFormProps) {
 
     const toasts = useToasts();
 
-    const { register, handleSubmit, control, getValues } = useForm({
+    const { register, handleSubmit, control, getValues } = useForm<PostFormValues>({
         defaultValues: {
             title: post?.title || '',
             // Removed slug

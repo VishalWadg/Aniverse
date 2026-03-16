@@ -19,7 +19,7 @@ export const editPostLoader = async ({ params }) => {
 function EditPost() {
     // --- 2. GET DATA ---
     // The data is already here when the component mounts!
-    const post = useLoaderData(); 
+    const post = useLoaderData() as any; 
     const navigate = useNavigate();
 
     console.log('Post object:', post);

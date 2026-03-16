@@ -1,5 +1,10 @@
 import React from 'react'
 
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    bgColor?: string;
+    textColor?: string;
+};
+
 function Button({
     children,
     type = 'button',
@@ -7,7 +12,7 @@ function Button({
     textColor = 'text-white',
     className = '',
     ...props
-}) {
+}: ButtonProps) {
   return (
     <button
         className={`px-4 py-2 ${className} ${bgColor} ${textColor}`}
