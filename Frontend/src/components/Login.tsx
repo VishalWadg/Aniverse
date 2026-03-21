@@ -1,113 +1,110 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { login as authLogin } from '../store/index' // Ensure this path is correct
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import authApi from '../api/authApi'
-import useToasts from '../hooks/useToasts'
-import { Button, Input, Logo } from './index'
 import { setMemoryTokenNExpiry } from '../api/axiosClient'
+import useToasts from '../hooks/useToasts'
+import { login as authLogin } from '../store/index'
+import { AuthField, AuthScene } from './auth/AuthScene'
 
 type LoginFormValues = {
-    username: string;
-    password: string;
-};
+  username: string
+  password: string
+}
 
 function Login() {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const toasts = useToasts();
-    const { 
-        register, 
-        handleSubmit, 
-        formState: { errors } // <--- This holds validation errors (e.g., errors.password)
-    } = useForm<LoginFormValues>();
-    const [error, setError] = useState('');
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const toasts = useToasts()
+  const [error, setError] = useState('')
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>()
 
-    const login = async (data) => {
-        setError('');
-        try {
-            // data = { username: "...", password: "..." }
-            const response = await toasts.promise(
-                authApi.login(data),
-                {
-                    loading: "Logging in...",
-                    success: "Logged in successfully!",
-                    error: "Failed to log in"
-                }
-            );
-            
-            if (response) {
-                // The response contains { token, user, expiresIn } based on our backend DTO
-                // The interceptor handles the token, so we just need the user data for Redux
-                const userData = response.user;
-                console.log(userData);
-                setMemoryTokenNExpiry(response.token);
-                if (userData) {
-                    dispatch(authLogin({ userData }));
-                }
-                navigate('/');
-            }
-        } catch (error) {
-            // Better error message handling
-            const errorMessage = error.response?.data?.message || error.message || "Login failed";
-            setError(errorMessage);
+  const login = async (data: LoginFormValues) => {
+    setError('')
+
+    try {
+      const response = await toasts.promise(authApi.login(data), {
+        loading: 'Logging in...',
+        success: 'Logged in successfully!',
+        error: 'Failed to log in',
+      })
+
+      if (response) {
+        const userData = response.user
+        setMemoryTokenNExpiry(response.token)
+
+        if (userData) {
+          dispatch(authLogin({ userData }))
         }
-    }
 
-    return (
-        <div className='flex items-center justify-center w-full'>
-            <div className={`mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10`}>
-                <div className="mb-2 flex justify-center">
-                    <span className="inline-block w-full max-w-[100px]">
-                        <Logo width="100%" />
-                    </span>
-                </div>
-                <h2 className="text-center text-2xl font-bold leading-tight">Sign in to your account</h2>
-                <p className="mt-2 text-center text-base text-black/60">
-                    Don&apos;t have any account?&nbsp;
-                    <Link
-                        to="/signup"
-                        className="font-medium text-primary transition-all duration-200 hover:underline"
-                    >
-                        Sign Up
-                    </Link>
-                </p>
-                {error && <p className="text-red-600 mt-8 text-center">{error}</p>}
-                
-                <form onSubmit={handleSubmit(login)} className='mt-8'>
-                    <div className="space-y-5">
-                        {/* Changed from Email to Username to match backend DTO */}
-                        <Input
-                            label='Username: '
-                            placeholder="Enter your username"
-                            type='text'
-                            {...register('username', {
-                                required: true,
-                                minLength: 3
-                            })}
-                        />
-                        <Input
-                            label="Password: "
-                            type="password"
-                            placeholder="Enter your password"
-                            {...register("password", {
-                                required: "Password is required",
-                                minLength: {
-                                    value: 8,
-                                    message: "Password must be at least 8 characters long" // <-- Message added
-                                }
-                            })}
-                        />
-                        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-                        <Button type='submit' className='w-full'>
-                            Sign in
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
+        navigate('/')
+      }
+    } catch (requestError: any) {
+      const errorMessage =
+        requestError.response?.data?.message || requestError.message || 'Login failed'
+      setError(errorMessage)
+    }
+  }
+
+  return (
+    <AuthScene
+      title="Log In"
+      description="Log in to continue to Aniverse."
+      promptLabel="Don't have an account?"
+      promptActionLabel="Sign Up"
+      promptActionTo="/signup"
+      watermarkTop="INK"
+      watermarkBottom="MNG"
+      error={error}
+    >
+      <form onSubmit={handleSubmit(login)} className="space-y-6">
+        <AuthField
+          label="Username"
+          placeholder="Enter your username"
+          autoComplete="username"
+          {...register('username', {
+            required: 'Username is required',
+            minLength: {
+              value: 3,
+              message: 'Username must be at least 3 characters long',
+            },
+          })}
+          error={errors.username?.message}
+        />
+
+        <AuthField
+          label="Password"
+          type="password"
+          placeholder="Enter your password"
+          autoComplete="current-password"
+          helperLabel="Forgot Password?"
+          helperHref="mailto:support@aniverse.com?subject=Password%20Recovery"
+          {...register('password', {
+            required: 'Password is required',
+            minLength: {
+              value: 8,
+              message: 'Password must be at least 8 characters long',
+            },
+          })}
+          error={errors.password?.message}
+        />
+
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="h-14 w-full rounded-none bg-[#ff1018] text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#ff2b31]"
+        >
+          {isSubmitting ? 'Logging In...' : 'Log In'}
+        </Button>
+      </form>
+    </AuthScene>
+  )
 }
 
 export default Login

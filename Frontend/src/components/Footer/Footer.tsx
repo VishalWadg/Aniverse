@@ -1,142 +1,53 @@
 import React from 'react'
-import Logo from '../Logo';
+import { useLocation } from 'react-router-dom'
 import { Link } from 'react-router-dom'
+import Container from '../Container/Container'
+import Logo from '../Logo'
+
 function Footer() {
+  const location = useLocation()
+  const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
+
+  if (isAuthRoute) {
+    return (
+      <footer className="relative z-10 border-t border-white/8 bg-[#080808]/95">
+        <Container className="flex flex-col gap-3 py-4 text-[10px] font-medium uppercase tracking-[0.28em] text-[#666666] md:flex-row md:items-center md:justify-between">
+          <p>(c) 2026 Aniverse Manuscript. All rights reserved.</p>
+
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <span>Manuscript</span>
+            <Link className="transition-colors hover:text-white" to="/all-posts">
+              Archive
+            </Link>
+            <span>Legal</span>
+          </div>
+        </Container>
+      </footer>
+    )
+  }
+
   return (
-     <section className="relative overflow-hidden py-10 bg-[#50589C] border border-t-2 border-t-black">
-            <div className="relative z-10 mx-auto max-w-7xl px-4">
-                <div className="-m-6 flex flex-wrap">
-                    <div className="w-full p-6 md:w-1/2 lg:w-5/12">
-                        <div className="flex h-full flex-col justify-between">
-                            <div className="mb-4 inline-flex items-center">
-                                <Logo width="130px" />
-                            </div >
-                            <div className="mb-4 inline-flex items-center">
-                                <p className="text-sm text-[#e5e6ff]">
-                                    &copy; Copyright 2023. All Rights Reserved by DevUI.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="w-full p-6 md:w-1/2 lg:w-2/12">
-                        <div className="h-full">
-                            <h3 className="tracking-px mb-9  text-xs font-semibold uppercase text-[#6E8CFB]">
-                                Company
-                            </h3>
-                            <ul>
-                                <li className="mb-4">
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Features
-                                    </Link>
-                                </li>
-                                <li className="mb-4">
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Pricing  
-                                    </Link>
-                                </li>
-                                <li className="mb-4">
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Affiliate Program
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Press Kit
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="w-full p-6 md:w-1/2 lg:w-2/12">
-                        <div className="h-full">
-                            <h3 className="tracking-px mb-9  text-xs font-semibold uppercase text-[#6E8CFB]">
-                                Support
-                            </h3>
-                            <ul>
-                                <li className="mb-4">
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Account
-                                    </Link>
-                                </li>
-                                <li className="mb-4">
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Help
-                                    </Link>
-                                </li>
-                                <li className="mb-4">
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Contact Us
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        ustomer Support
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="w-full p-6 md:w-1/2 lg:w-3/12">
-                        <div className="h-full">
-                            <h3 className="tracking-px mb-9  text-xs font-semibold uppercase text-[#6E8CFB]">
-                                Legals
-                            </h3>
-                            <ul>
-                                <li className="mb-4">
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Terms &amp; Conditions
-                                    </Link>
-                                </li>
-                                <li className="mb-4">
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Privacy Policy
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link
-                                        className=" text-base font-medium text-[#e5e6ff] hover:text-[#6E8CFB]"
-                                        to="/"
-                                    >
-                                        Licensing
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <footer className="border-t border-white/8 bg-[#0a0a0a]/95">
+      <Container className="flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3">
+          <Logo width="132px" />
+          <p className="max-w-md text-sm leading-6 text-[#7f7f7f]">
+            Long-form theories, editorial takes, and archive notes built for late-night reading.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[#6f6f6f]">
+          <span>Privacy</span>
+          <Link className="transition-colors hover:text-white" to="/all-posts">
+            Archive
+          </Link>
+          <span>Rules</span>
+          <span>API</span>
+          <span className="text-[#5a5a5a]">(c) 2026 Aniverse</span>
+        </div>
+      </Container>
+    </footer>
   )
 }
 
-export default Footer;
+export default Footer
