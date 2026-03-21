@@ -1,6 +1,7 @@
 import React from 'react';
-import { useLoaderData, Link } from 'react-router-dom';
-import { Container, PostCard } from '../components';
+import { useLoaderData } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import EditorialFeed from '../components/feed/EditorialFeed';
 
 // 1. Loader Logic (Runs BEFORE render)
 // We can reuse the same loader logic as Home if needed, or customize it.
@@ -18,40 +19,11 @@ export const allPostsLoader = async () => {
 };
 
 function AllPosts() {
-    // 2. Get Data
     const data = useLoaderData() as any;
     const posts = data?.content || [];
+    const authStatus = useSelector((state: any) => state.auth.status);
 
-    // 3. Render Logic
-    if (posts.length === 0) {
-        return (
-            <div className="w-full py-8 mt-4 text-center">
-                <Container>
-                    <div className="flex flex-wrap">
-                        <div className="p-2 w-full">
-                            <h1 className="text-2xl font-bold hover:text-gray-500">
-                                No posts found.
-                            </h1>
-                        </div>
-                    </div>
-                </Container>
-            </div>
-        );
-    }
-
-    return (
-        <div className='w-full py-8'>
-            <Container>
-                <div className='flex flex-wrap'>
-                    {posts.map((post) => (
-                        <div key={post.id} className='p-2 w-1/4'>
-                            <PostCard {...post} />
-                        </div>
-                    ))}
-                </div>
-            </Container>
-        </div>
-    );
+    return <EditorialFeed posts={posts} authStatus={authStatus} mode="archive" />;
 }
 
 export default AllPosts;

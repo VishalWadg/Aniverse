@@ -1,132 +1,130 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { login as authLogin } from '../store/index'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import authApi from '../api/authApi'
-import { Button, Input, Logo } from './index'
 import useToasts from '../hooks/useToasts'
+import { AuthField, AuthScene } from './auth/AuthScene'
 
 type SignupFormValues = {
-    name: string;
-    username: string;
-    email: string;
-    password: string;
-};
+  name: string
+  username: string
+  email: string
+  password: string
+}
 
 function Signup() {
-    const navigate = useNavigate()
-    const [error, setError] = useState("")
-    const toasts = useToasts();
-    const dispatch = useDispatch()
-    const { 
-        register, 
-        handleSubmit, 
-        formState: { errors } // <--- This holds validation errors (e.g., errors.password)
-    } = useForm<SignupFormValues>();
-    const create = async (data) => {
-        setError("")
-        try {
-            // data = { name, username, email, password }
-            // Register returns UserDto (usually)
-            const newUser = await toasts.promise(
-                authApi.createAccount(data),
-                {
-                    loading: "Creating account...",
-                    success: "Account created successfully!",
-                    error: "Failed to create account"
-                }
-            );
-            
-            if (newUser) {
-                // After registration, auto-login or redirect to login page.
-                // Assuming we want to auto-login, we need the user to be authenticated.
-                // Option A: If register API returns a Token + User, dispatch login immediately.
-                // Option B: If register only returns User, redirect to login.
-                
-                // For better UX, let's assume Option B or simple redirect for now
-                navigate("/login"); 
-            }
-        } catch (error) {
-            // Better error message handling from Axios response
-            const errorMessage = error.response?.data?.message || error.message || "Signup failed";
-            setError(errorMessage);
-        }
+  const navigate = useNavigate()
+  const toasts = useToasts()
+  const [error, setError] = useState('')
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>()
+
+  const create = async (data: SignupFormValues) => {
+    setError('')
+
+    try {
+      const newUser = await toasts.promise(authApi.createAccount(data), {
+        loading: 'Creating account...',
+        success: 'Account created successfully!',
+        error: 'Failed to create account',
+      })
+
+      if (newUser) {
+        navigate('/login')
+      }
+    } catch (requestError: any) {
+      const errorMessage =
+        requestError.response?.data?.message || requestError.message || 'Signup failed'
+      setError(errorMessage)
     }
+  }
 
-    return (
-        <div className="flex items-center justify-center">
-            <div className={`mx-auto w-full max-w-lg bg-gray-100 rounded-xl p-10 border border-black/10`}>
-                <div className="mb-2 flex justify-center">
-                    <span className="inline-block w-full max-w-[100px]">
-                        <Logo width="100%" />
-                    </span>
-                </div>
-                <h2 className="text-center text-2xl font-bold leading-tight">Sign up to create account</h2>
-                <p className="mt-2 text-center text-base text-black/60">
-                    Already have an account?&nbsp;
-                    <Link
-                        to="/login"
-                        className="font-medium text-primary transition-all duration-200 hover:underline"
-                    >
-                        Sign In
-                    </Link>
-                </p>
-                {error && <p className="text-red-600 mt-8 text-center">{error}</p>}
+  return (
+    <AuthScene
+      title="Sign Up"
+      description="Create an account to continue to Aniverse."
+      promptLabel="Already have an account?"
+      promptActionLabel="Log In"
+      promptActionTo="/login"
+      watermarkTop="ARCHIVE"
+      watermarkBottom="ACCESS"
+      layout="split"
+      error={error}
+    >
+      <form onSubmit={handleSubmit(create)} className="space-y-6">
+        <AuthField
+          label="Full Name"
+          placeholder="Vishal Verma"
+          autoComplete="name"
+          {...register('name', {
+            required: 'Full name is required',
+          })}
+          error={errors.name?.message}
+        />
 
-                <form onSubmit={handleSubmit(create)}>
-                    <div className='space-y-5'>
-                        <Input
-                            label="Full Name: "
-                            placeholder="Enter your full name"
-                            {...register("name", {
-                                required: true,
-                            })}
-                        />
-                        
-                        {/* Added Username field as it is required by backend DTO */}
-                        <Input
-                            label="Username: "
-                            placeholder="Choose a unique username"
-                            {...register("username", {
-                                required: true,
-                                minLength: 3,
-                                maxLength: 50
-                            })}
-                        />
+        <AuthField
+          label="Username"
+          placeholder="Choose a username"
+          autoComplete="username"
+          {...register('username', {
+            required: 'Username is required',
+            minLength: {
+              value: 3,
+              message: 'Username must be at least 3 characters long',
+            },
+            maxLength: {
+              value: 50,
+              message: 'Username must be 50 characters or fewer',
+            },
+          })}
+          error={errors.username?.message}
+        />
 
-                        <Input
-                            label="Email: "
-                            placeholder="Enter your email"
-                            type="email"
-                            {...register("email", {
-                                required: true,
-                                validate: {
-                                    matchPatern: (value) => /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
-                                        "Email address must be a valid address",
-                                }
-                            })}
-                        />
-                        
-                        <Input
-                            label="Password: "
-                            type="password"
-                            placeholder="Enter your password"
-                            {...register("password", {
-                                required: true,
-                                minLength: 8 // Added minLength matching backend
-                            })}
-                        />
-                        {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-                        
-                        <Button type='submit' className="w-full">
-                            Create Account
-                        </Button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
+        <AuthField
+          label="Email Address"
+          type="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          {...register('email', {
+            required: 'Email is required',
+            validate: {
+              matchPattern: (value) =>
+                /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ||
+                'Email address must be valid',
+            },
+          })}
+          error={errors.email?.message}
+        />
+
+        <AuthField
+          label="Password"
+          type="password"
+          placeholder="Minimum 8 characters"
+          autoComplete="new-password"
+          {...register('password', {
+            required: 'Password is required',
+            minLength: {
+              value: 8,
+              message: 'Password must be at least 8 characters long',
+            },
+          })}
+          error={errors.password?.message}
+        />
+
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="h-14 w-full rounded-none bg-[#ff1018] text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#ff2b31]"
+        >
+          {isSubmitting ? 'Creating Account...' : 'Create Account'}
+        </Button>
+      </form>
+    </AuthScene>
+  )
 }
 
 export default Signup

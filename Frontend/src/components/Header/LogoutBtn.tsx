@@ -1,6 +1,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import authApi from '../../api/authApi'
 import useToasts from '../../hooks/useToasts'
 import { logout } from '../../store/' // Import from authSlice only
@@ -35,12 +36,14 @@ function LogoutBtn() {
   }
 
   return (
-    <button
-      className='inline-block px-6 py-2 duration-200 hover:text-[#e5e6ff] hover:bg-[#030d34] rounded-full cursor-pointer'
+    <Button
+      type="button"
+      variant="ghost"
+      className="rounded-none border border-white/10 bg-transparent px-4 text-[#d6d6d6] hover:bg-white/[0.04] hover:text-white"
       onClick={logoutHandler}
     >
       Logout
-    </button>
+    </Button>
   )
 }
 

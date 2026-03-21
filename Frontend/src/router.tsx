@@ -27,7 +27,7 @@ const rootLoader = async ({request}) => {
     const pathname = url.pathname
     // Define public routes (routes that don't need authentication)
 
-    const publicRoutes = ['/login', '/signup', '/'];
+    const publicRoutes = ['/login', '/signup', '/', '/all-posts'];
     // 1. OPTIMIZATION: Check if we already have a token
     // If we have a token, we assume the session is valid. 
     // if we have already checked auth once, no need to do it again
@@ -104,11 +104,7 @@ export const router = createBrowserRouter(createRoutesFromElements(
 
     {/* --- Protected Routes --- */}
     
-    <Route path='all-posts' element={
-      <AuthLayout authentication={true}>
-        <AllPosts />
-      </AuthLayout>
-    } 
+    <Route path='all-posts' element={<AllPosts />} 
       // Add the loader here so data fetches while navigating
       loader={allPostsLoader}
       shouldRevalidate={({currentUrl, nextUrl, defaultShouldRevalidate}) => {
