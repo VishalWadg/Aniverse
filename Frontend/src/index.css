@@ -1,2 +1,125 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+/* --- 1. CSS Variables for Light/Dark Theme --- */
+:root {
+  --editor-bg: #ffffff;
+  --editor-text: #37352f;
+  --editor-placeholder: #9ca3af;
+  --toolbar-bg: #ffffff;
+  --toolbar-border: #e5e7eb;
+  --toolbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --toolbar-icon: #37352f;
+  --toolbar-hover-bg: #f3f4f6;
+  --selection-bg: #cce2ff;
+}
+
+/* Assuming you use a class like .dark on the <html> or <body> tag for dark mode */
+.dark {
+  --editor-bg: #191919;
+  --editor-text: rgba(255, 255, 255, 0.81);
+  --editor-placeholder: #525252;
+  --toolbar-bg: #2f2f2f;
+  --toolbar-border: #404040;
+  --toolbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --toolbar-icon: rgba(255, 255, 255, 0.81);
+  --toolbar-hover-bg: #404040;
+  --selection-bg: #2b5278;
+}
+
+/* --- 2. Typography & Core Layout --- */
+#mono-editorjs {
+  /* Notion uses system fonts */
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Make the editor wider (Default is 650px) */
+.ce-block__content, 
+.ce-toolbar__content {
+  max-width: 800px !important;
+}
+
+/* Change placeholder color */
+.ce-paragraph[data-placeholder]:empty::before {
+  color: var(--editor-placeholder) !important;
+}
+
+/* Custom Text Selection Color */
+::selection {
+  background-color: var(--selection-bg);
+}
+
+/* --- 3. The Left Toolbar (Plus & Settings icon) --- */
+.ce-toolbar__plus, 
+.ce-toolbar__settings-btn {
+  color: var(--toolbar-icon) !important;
+  background-color: transparent !important;
+  transition: background-color 0.2s ease;
+  border-radius: 4px !important;
+}
+
+.ce-toolbar__plus:hover, 
+.ce-toolbar__settings-btn:hover {
+  background-color: var(--toolbar-hover-bg) !important;
+}
+
+/* --- 4. The Inline Toolbar (Bold, Italic, Link, etc.) --- */
+.ce-inline-toolbar {
+  background-color: var(--toolbar-bg) !important;
+  border: 1px solid var(--toolbar-border) !important;
+  box-shadow: var(--toolbar-shadow) !important;
+  border-radius: 6px !important;
+}
+
+.ce-inline-tool {
+  color: var(--toolbar-icon) !important;
+  transition: all 0.2s ease;
+}
+
+.ce-inline-tool:hover {
+  background-color: var(--toolbar-hover-bg) !important;
+}
+
+/* The active state (e.g., when text IS bold) */
+.ce-inline-tool--active {
+  color: #2563eb !important; /* Notion uses a subtle blue for active states */
+  background-color: rgba(37, 99, 235, 0.1) !important;
+}
+
+/* --- 5. The Block Tunes Menu (Delete, Move up/down) --- */
+.ce-settings {
+  background-color: var(--toolbar-bg) !important;
+  border: 1px solid var(--toolbar-border) !important;
+  box-shadow: var(--toolbar-shadow) !important;
+  border-radius: 6px !important;
+}
+
+.ce-settings__button {
+  color: var(--toolbar-icon) !important;
+}
+
+.ce-settings__button:hover {
+  background-color: var(--toolbar-hover-bg) !important;
+}
+
+/* --- 6. The Conversion Menu (Turn into...) --- */
+.ce-conversion-toolbar {
+  background-color: var(--toolbar-bg) !important;
+  border: 1px solid var(--toolbar-border) !important;
+  box-shadow: var(--toolbar-shadow) !important;
+  border-radius: 6px !important;
+}
+
+.ce-conversion-tool {
+  color: var(--toolbar-icon) !important;
+}
+
+.ce-conversion-tool:hover {
+  background-color: var(--toolbar-hover-bg) !important;
+}
+
+.ce-conversion-tool__icon {
+  background-color: var(--toolbar-bg) !important;
+}

@@ -4,6 +4,7 @@ import { EditorContent, useEditor, type Editor, FloatingMenu, BubbleMenu } from 
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import MonolithEditor from "./Editors/MonolithEditor";
 
 type RTEProps = {
   name: string;
@@ -142,8 +143,8 @@ function TiptapField({ value, onChange, placeholder }: { value: string; onChange
 // 3. React Hook Form Wrapper
 export default function RTE({ name, control, label, defaultValue = "", placeholder }: RTEProps) {
   return (
-    <div className="w-full text-start">
-      {label && <label className="inline-block mb-1 pl-1 font-medium text-white">{label}</label>}
+    <div className="w-full text-start ">
+      {/* {label && <label className="inline-block mb-1 pl-1 font-medium text-white">{label}</label>}
 
       <Controller
         name={name}
@@ -156,7 +157,8 @@ export default function RTE({ name, control, label, defaultValue = "", placehold
             placeholder={placeholder} 
           />
         )}
-      />
+      /> */}
+      <MonolithEditor/>
     </div>
   );
 }
