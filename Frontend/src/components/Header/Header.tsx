@@ -56,7 +56,7 @@ function Header() {
   if (isAuthRoute) {
     return (
       <header className="sticky top-0 z-40 border-b border-white/8 bg-[#0b0b0b]/90 backdrop-blur-xl">
-        <Container className="py-4 mx-[11.2px]">
+        <Container className="py-4 px-4.3">
           <div className="flex min-h-10 items-center justify-between gap-6">
             <Link to="/" className="shrink-0">
               <Logo width="168px" />

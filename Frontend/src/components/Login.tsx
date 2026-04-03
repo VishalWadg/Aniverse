@@ -53,14 +53,15 @@ function Login() {
   }
 
   return (
+    <div className='bg-black mt-0'>
     <AuthScene
       title="Log In"
       description="Log in to continue to Aniverse."
       promptLabel="Don't have an account?"
       promptActionLabel="Sign Up"
       promptActionTo="/signup"
-      watermarkTop="INK"
-      watermarkBottom="MNG"
+      watermarkTop=""
+      watermarkBottom=""
       error={error}
     >
       <form onSubmit={handleSubmit(login)} className="space-y-6">
@@ -104,6 +105,7 @@ function Login() {
         </Button>
       </form>
     </AuthScene>
+    </div>
   )
 }
 
