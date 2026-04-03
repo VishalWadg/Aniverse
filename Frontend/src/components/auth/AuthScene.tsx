@@ -32,8 +32,8 @@ function AuthScene({
   const isSplit = layout === 'split'
 
   return (
-    <section className="relative min-h-full w-full overflow-hidden border-y border-white/8 bg-black/55">
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 hidden xl:block">
+    <section className="h-75% w-full overflow-hidden bg-black/55 flex items-center justify-center">
+      <div aria-hidden="true" className="pointer-events-none  z-0 hidden xl:block">
         <p className="absolute top-20 right-[-1rem] text-[clamp(8rem,23vw,22rem)] font-black leading-none tracking-[-0.08em] text-white/[0.08]">
           {watermarkTop}
         </p>
@@ -81,18 +81,18 @@ function AuthScene({
                 </div>
               </div>
 
-              <div className="w-full border border-white/8 bg-[#141414]/96 px-5 py-4 shadow-[0_32px_80px_rgba(0,0,0,0.45)] sm:px-6 sm:py-5 lg:px-7">
+              <div className="w-full border bg-[#141414]/96 px-5 py-4 shadow-[0_32px_80px_rgba(0,0,0,0.45)] sm:px-6 sm:py-5 lg:px-7">
                 {error ? (
                   <div className="mb-3 border border-[#ff453a]/30 bg-[#ff453a]/10 px-3.5 py-2 text-sm text-[#ff9b95]">
                     {error}
                   </div>
                 ) : null}
 
-                <div className="space-y-3">{children}</div>
+                <div className="space-y-1">{children}</div>
               </div>
             </div>
           ) : (
-            <div className="w-full border border-white/8 bg-[#141414]/96 px-5 py-4 shadow-[0_32px_80px_rgba(0,0,0,0.45)] sm:px-6 sm:py-5 lg:px-7">
+            <div className="w-full  bg-[#141414]/96 px-5 py-2 shadow-[0_32px_80px_rgba(0,0,0,0.45)] sm:px-6 sm:py-5 lg:px-7">
               <h1 className="text-[2.5rem] font-black tracking-[-0.06em] text-[#f5f5f5] sm:text-[3.2rem]">
                 {title}
               </h1>
