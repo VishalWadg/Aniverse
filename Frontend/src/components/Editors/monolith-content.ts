@@ -1,4 +1,5 @@
 import type { OutputData } from '@editorjs/editorjs'
+import { sanitizeMonolithHtml } from '@/lib/monolith-html'
 
 type EditorJsBlock = OutputData['blocks'][number]
 
@@ -604,12 +605,14 @@ export function createEditorJsData(value = ''): OutputData {
   }
 
   if (/<[a-z][\s\S]*>/i.test(value)) {
-    return parseHtmlToEditorJsContent(value) ?? {
+    const sanitizedHtml = sanitizeMonolithHtml(value)
+
+    return parseHtmlToEditorJsContent(sanitizedHtml) ?? {
       blocks: [
         {
           type: 'raw',
           data: {
-            html: value,
+            html: sanitizedHtml,
           },
         },
       ],
@@ -631,8 +634,10 @@ export function createEditorJsData(value = ''): OutputData {
 }
 
 export function editorJsToHtml(data: OutputData) {
-  return (data?.blocks ?? [])
+  const html = (data?.blocks ?? [])
     .map(renderBlock)
     .filter(Boolean)
     .join('')
+
+  return sanitizeMonolithHtml(html)
 }

@@ -5,6 +5,7 @@ import parse from "html-react-parser";
 import { useSelector } from "react-redux";
 import postApi from "../api/postApi";
 import useToasts from "../hooks/useToasts";
+import { sanitizeMonolithHtml } from "../lib/monolith-html";
 
 export const postLoader = async ({params}) => {
     try {
@@ -70,7 +71,7 @@ export default function Post() {
                     </header>
 
                     <div id="mono-preview" className="monolith-rendered">
-                        {parse(post.content ?? '')}
+                        {parse(sanitizeMonolithHtml(post.content ?? ''))}
                     </div>
                 </article>
             </Container>
