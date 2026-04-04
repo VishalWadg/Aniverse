@@ -1,8 +1,7 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { Input, Button, RTE } from '../index' // Select removed if not used
+import { Button, RTE } from '../index'
 import postApi from '../../api/postApi'
 import useToasts from '../../hooks/useToasts'
 
@@ -19,27 +18,22 @@ function PostForm({ post }: PostFormProps) {
 
     const toasts = useToasts();
 
-    const { register, handleSubmit, control, getValues } = useForm<PostFormValues>({
+    const { handleSubmit, control } = useForm<PostFormValues>({
         defaultValues: {
             title: post?.title || '',
-            // Removed slug
             content: post?.content || '',
         }
     })
 
     const navigate = useNavigate()
-    // We don't need userData for creating/updating logic anymore, 
-    // backend handles author assignment via Token.
 
     const submit = async (data) => {
         try {
             if (post) {
-                // --- UPDATE ---
                 const updateData = {
                     title: data.title,
                     content: data.content
                 };
-                // Use post.id here
                 const dbPost = await toasts.promise(
                     postApi.updatePost(post.id, updateData),
                     {
@@ -51,12 +45,9 @@ function PostForm({ post }: PostFormProps) {
                 if (dbPost) navigate(`/post/${dbPost.id}`); // Navigate using ID
 
             } else {
-                // --- CREATE ---
-                // console.log(userData);
                 const createData = {
                     title: data.title,
                     content: data.content,
-                    // categoryId: 1 // Hardcoded for now until you add Category Select
                 };
                 const dbPost = await toasts.promise(
                     postApi.createPost(createData),
@@ -74,29 +65,24 @@ function PostForm({ post }: PostFormProps) {
     }
 
     return (
-        <form onSubmit={handleSubmit(submit)} className="flex flex-wrap">
-            <div className="w-2/3 px-2 text-start">
-                <Input
-                    label="Title :"
-                    placeholder="Title"
-                    className="mb-4"
-                    {...register("title", { required: true })}
-                />
-                
-                {/* SLUG INPUT REMOVED */}
-                
+        <form onSubmit={handleSubmit(submit)} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start">
+            <div className="min-w-0 text-start">
                 <RTE 
-                    label="Content :" 
+                    titleName="title"
                     name="content" 
                     control={control} 
-                    defaultValue={getValues("content")} 
+                    titleDefaultValue={post?.title || ''}
+                    defaultValue={post?.content || ''} 
                 />
             </div>
             
-            <div className="w-1/3 px-2">
-                {/* Image Input Removed */}
-
-                <Button type="submit" className={`w-full ${post ? "bg-green-500 hover:bg-green-600" : "bg-blue-500 hover:bg-blue-600"}`}>
+            <div className="lg:sticky lg:top-24">
+                <Button
+                    type="submit"
+                    bgColor="bg-white hover:bg-zinc-200 dark:bg-zinc-100 dark:hover:bg-white"
+                    textColor="text-zinc-950"
+                    className="w-full rounded-xl border border-white/10 py-3 font-medium transition-colors"
+                >
                     {post ? "Update Post" : "Submit Post"}
                 </Button>
             </div>
