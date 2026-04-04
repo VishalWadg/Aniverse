@@ -1,125 +1,844 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* --- 1. CSS Variables for Light/Dark Theme --- */
 :root {
   --editor-bg: #ffffff;
   --editor-text: #37352f;
-  --editor-placeholder: #9ca3af;
-  --toolbar-bg: #ffffff;
-  --toolbar-border: #e5e7eb;
-  --toolbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --editor-placeholder: #9b9a97;
+  --editor-border: rgba(55, 53, 47, 0.12);
+  --toolbar-bg: rgba(255, 255, 255, 0.96);
+  --toolbar-border: rgba(55, 53, 47, 0.12);
+  --toolbar-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
   --toolbar-icon: #37352f;
-  --toolbar-hover-bg: #f3f4f6;
-  --selection-bg: #cce2ff;
+  --toolbar-hover-bg: rgba(55, 53, 47, 0.08);
+  --selection-bg: rgba(35, 131, 226, 0.24);
+  --toolbar-active-bg: rgba(35, 131, 226, 0.12);
+  --toolbar-active-text: #0f6fff;
+  --popover-scrollbar: rgba(55, 53, 47, 0.18);
+  --block-hover-bg: rgba(55, 53, 47, 0.05);
+  --block-active-bg: rgba(55, 53, 47, 0.075);
+  --block-selected-bg: rgba(55, 53, 47, 0.085);
+  --block-selected-outline: rgba(55, 53, 47, 0.08);
 }
 
-/* Assuming you use a class like .dark on the <html> or <body> tag for dark mode */
 .dark {
   --editor-bg: #191919;
   --editor-text: rgba(255, 255, 255, 0.81);
-  --editor-placeholder: #525252;
-  --toolbar-bg: #2f2f2f;
-  --toolbar-border: #404040;
-  --toolbar-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --editor-placeholder: rgba(255, 255, 255, 0.22);
+  --editor-border: rgba(255, 255, 255, 0.08);
+  --toolbar-bg: rgba(39, 39, 39, 0.96);
+  --toolbar-border: rgba(255, 255, 255, 0.08);
+  --toolbar-shadow: 0 20px 50px rgba(0, 0, 0, 0.38);
   --toolbar-icon: rgba(255, 255, 255, 0.81);
-  --toolbar-hover-bg: #404040;
-  --selection-bg: #2b5278;
+  --toolbar-hover-bg: rgba(255, 255, 255, 0.08);
+  --selection-bg: rgba(88, 157, 246, 0.3);
+  --toolbar-active-bg: rgba(88, 157, 246, 0.18);
+  --toolbar-active-text: #7cb7ff;
+  --popover-scrollbar: rgba(255, 255, 255, 0.12);
+  --block-hover-bg: rgba(255, 255, 255, 0.06);
+  --block-active-bg: rgba(255, 255, 255, 0.082);
+  --block-selected-bg: rgba(255, 255, 255, 0.095);
+  --block-selected-outline: rgba(255, 255, 255, 0.06);
 }
 
-/* --- 2. Typography & Core Layout --- */
-#mono-editorjs {
-  /* Notion uses system fonts */
+.monolith-editor__title {
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--editor-text);
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-  font-size: 16px;
+  font-size: clamp(2.85rem, 5vw, 4.45rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.055em;
+  padding: 0 0 0.75rem;
+  margin: 0;
+}
+
+.monolith-editor__title::placeholder {
+  color: var(--editor-placeholder);
+}
+
+.dark .monolith-editor__title::placeholder {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.monolith-editor__title::-webkit-scrollbar {
+  display: none;
+}
+
+.monolith-preview__title {
+  margin: 0;
+  color: var(--editor-text);
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: clamp(2.85rem, 5vw, 4.45rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.monolith-preview__meta {
+  margin: 0.85rem 0 0;
+  color: var(--editor-placeholder);
+  font-size: 0.96rem;
   line-height: 1.6;
 }
 
-/* Make the editor wider (Default is 650px) */
-.ce-block__content, 
-.ce-toolbar__content {
+#mono-preview {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  color: var(--editor-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#mono-preview > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+#mono-preview > * + * {
+  margin-top: 1.2rem;
+}
+
+#mono-preview p,
+#mono-preview li,
+#mono-preview figcaption,
+#mono-preview cite {
+  font-size: 16px;
+  line-height: 1.75;
+  letter-spacing: -0.011em;
+}
+
+#mono-preview h1,
+#mono-preview h2,
+#mono-preview h3,
+#mono-preview h4,
+#mono-preview h5,
+#mono-preview h6 {
+  margin: 0;
+  color: var(--editor-text);
+  line-height: 1.22;
+  letter-spacing: -0.03em;
+  font-weight: 650;
+}
+
+#mono-preview h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+#mono-preview h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+#mono-preview h3 {
+  font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+}
+
+#mono-preview a:not(.monolith-bookmark) {
+  color: var(--editor-text);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--toolbar-active-text) 45%, transparent);
+  text-underline-offset: 0.18em;
+}
+
+#mono-preview ul,
+#mono-preview ol {
+  margin: 0;
+  padding-left: 1.55rem;
+}
+
+#mono-preview li + li {
+  margin-top: 0.4rem;
+}
+
+#mono-preview .monolith-checklist {
+  list-style: none;
+  padding-left: 0;
+}
+
+#mono-preview .monolith-checklist li {
+  margin-top: 0;
+}
+
+#mono-preview .monolith-checklist li + li {
+  margin-top: 0.7rem;
+}
+
+#mono-preview .monolith-checklist label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+#mono-preview .monolith-checklist input {
+  margin-top: 0.35rem;
+  accent-color: var(--toolbar-active-text);
+}
+
+#mono-preview blockquote {
+  margin: 1.35rem 0 0;
+  padding: 0.15rem 0 0.15rem 1.25rem;
+  color: var(--editor-text);
+  font-size: clamp(1.35rem, 2vw, 1.95rem);
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  border-left: 4px solid var(--toolbar-active-text);
+}
+
+#mono-preview blockquote p {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+}
+
+#mono-preview blockquote cite {
+  display: block;
+  margin-top: 0.55rem;
+  color: var(--editor-placeholder);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+#mono-preview hr {
+  margin: 1.8rem 0;
+  border: 0;
+  border-top: 1px solid var(--toolbar-border);
+}
+
+#mono-preview figure {
+  margin: 1.5rem 0 0;
+}
+
+#mono-preview .monolith-image img {
+  display: block;
+  width: 100%;
+  border-radius: 18px;
+}
+
+#mono-preview .monolith-image figcaption,
+#mono-preview .monolith-embed figcaption {
+  margin-top: 0.85rem;
+  color: var(--editor-placeholder);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+#mono-preview .monolith-embed__frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--toolbar-border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--toolbar-bg) 92%, transparent);
+  padding-top: 56.25%;
+}
+
+#mono-preview .monolith-embed__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+#mono-preview .monolith-bookmark {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(148px, 190px);
+  gap: 1rem;
+  align-items: stretch;
+  padding: 1rem 1.05rem;
+  color: var(--editor-text);
+  text-decoration: none;
+  background: color-mix(in srgb, var(--toolbar-bg) 92%, transparent);
+  border: 1px solid var(--toolbar-border);
+  border-radius: 18px;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+#mono-preview .monolith-bookmark:hover {
+  background: color-mix(in srgb, var(--toolbar-bg) 96%, transparent);
+}
+
+#mono-preview .monolith-bookmark__content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+#mono-preview .monolith-bookmark__title {
+  color: var(--editor-text);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+#mono-preview .monolith-bookmark__description {
+  margin-top: 0.45rem;
+  color: var(--editor-placeholder);
+  font-size: 0.93rem;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+#mono-preview .monolith-bookmark__anchor {
+  margin-top: 0.85rem;
+  color: var(--editor-placeholder);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+#mono-preview .monolith-bookmark__image {
+  min-height: 112px;
+  border-radius: 12px;
+  background-color: color-mix(in srgb, var(--toolbar-bg) 70%, transparent);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+#mono-editorjs {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  color: var(--editor-text);
+  caret-color: var(--editor-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#mono-editorjs .codex-editor,
+#mono-editorjs .codex-editor__redactor,
+#mono-editorjs .ce-block__content,
+#mono-editorjs .ce-toolbar__content,
+#mono-editorjs .cdx-block,
+#mono-editorjs .ce-paragraph,
+#mono-editorjs .ce-header,
+#mono-editorjs .cdx-input,
+#mono-editorjs .cdx-search-field__input,
+#mono-editorjs .ce-inline-tool-input {
+  font-family: inherit;
+  color: var(--editor-text) !important;
+}
+
+#mono-editorjs .ce-block__content,
+#mono-editorjs .ce-toolbar__content {
   max-width: 800px !important;
 }
 
-/* Change placeholder color */
-.ce-paragraph[data-placeholder]:empty::before {
+#mono-editorjs .ce-toolbar__content {
+  width: min(100%, 800px);
+}
+
+#mono-editorjs .codex-editor__redactor {
+  padding-bottom: 8rem;
+}
+
+#mono-editorjs .cdx-block {
+  padding: 0.3rem 0;
+}
+
+#mono-editorjs .ce-block__content {
+  min-height: 2.1rem;
+  border-radius: 10px;
+  transition: color 0.18s ease;
+}
+
+#mono-editorjs .ce-block__content::before {
+  content: "";
+  position: absolute;
+  inset: -0.08rem -0.55rem;
+  border-radius: 10px;
+  background-color: transparent;
+  box-shadow: inset 0 0 0 1px transparent;
+  pointer-events: none;
+  transition: background-color 0.16s ease, box-shadow 0.16s ease;
+  z-index: -1;
+}
+
+#mono-editorjs .ce-block:hover .ce-block__content::before {
+  background-color: var(--block-hover-bg);
+}
+
+#mono-editorjs .ce-block:focus-within .ce-block__content::before {
+  background-color: var(--block-active-bg);
+}
+
+#mono-editorjs .ce-block--selected .ce-block__content {
+  background-color: transparent !important;
+}
+
+#mono-editorjs .ce-block--selected .ce-block__content::before {
+  background-color: var(--block-selected-bg);
+  box-shadow: inset 0 0 0 1px var(--block-selected-outline);
+}
+
+#mono-editorjs .ce-paragraph {
+  font-size: 16px;
+  line-height: 1.75;
+  letter-spacing: -0.011em;
+}
+
+#mono-editorjs .ce-header {
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+
+#mono-editorjs .ce-header[data-placeholder]::before {
   color: var(--editor-placeholder) !important;
 }
 
-/* Custom Text Selection Color */
-::selection {
+#mono-editorjs .cdx-input,
+#mono-editorjs .ce-inline-tool-input,
+#mono-editorjs .cdx-search-field {
+  background: color-mix(in srgb, var(--toolbar-bg) 86%, transparent);
+  border: 1px solid var(--toolbar-border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+#mono-editorjs .cdx-button {
+  background: var(--toolbar-bg) !important;
+  color: var(--editor-text) !important;
+  border: 1px solid var(--toolbar-border) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+#mono-editorjs .cdx-search-field {
+  padding: 4px;
+}
+
+#mono-editorjs .codex-editor [data-placeholder]:empty::before,
+#mono-editorjs .codex-editor [data-placeholder][data-empty="true"]::before {
+  color: var(--editor-placeholder) !important;
+}
+
+#mono-editorjs *::selection {
   background-color: var(--selection-bg);
 }
 
-/* --- 3. The Left Toolbar (Plus & Settings icon) --- */
-.ce-toolbar__plus, 
-.ce-toolbar__settings-btn {
+#mono-editorjs .ce-toolbar__plus,
+#mono-editorjs .ce-toolbar__settings-btn {
   color: var(--toolbar-icon) !important;
   background-color: transparent !important;
   transition: background-color 0.2s ease;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
 }
 
-.ce-toolbar__plus:hover, 
-.ce-toolbar__settings-btn:hover {
+#mono-editorjs .ce-toolbar__plus:hover,
+#mono-editorjs .ce-toolbar__settings-btn:hover {
   background-color: var(--toolbar-hover-bg) !important;
 }
 
-/* --- 4. The Inline Toolbar (Bold, Italic, Link, etc.) --- */
-.ce-inline-toolbar {
+@media (min-width: 651px) {
+  #mono-editorjs .ce-toolbar__content,
+  #mono-editorjs .ce-block__content {
+    padding-left: 0.15rem;
+  }
+
+  #mono-editorjs .ce-toolbar__actions {
+    right: calc(100% + 0.15rem);
+    padding-right: 0;
+    gap: 0.2rem;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(6px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+
+  #mono-editorjs .ce-toolbar__actions--opened {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+}
+
+#mono-editorjs .ce-inline-toolbar {
+  --color-background-icon-active: var(--toolbar-active-bg);
+  --color-text-icon-active: var(--toolbar-active-text);
+  --color-text-primary: var(--editor-text);
   background-color: var(--toolbar-bg) !important;
   border: 1px solid var(--toolbar-border) !important;
   box-shadow: var(--toolbar-shadow) !important;
-  border-radius: 6px !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(16px);
 }
 
-.ce-inline-tool {
+#mono-editorjs .ce-inline-toolbar__dropdown {
+  border-right-color: var(--toolbar-border) !important;
+}
+
+#mono-editorjs .ce-inline-tool {
   color: var(--toolbar-icon) !important;
   transition: all 0.2s ease;
+  border-radius: 8px !important;
 }
 
-.ce-inline-tool:hover {
+#mono-editorjs .ce-inline-tool:hover {
   background-color: var(--toolbar-hover-bg) !important;
 }
 
-/* The active state (e.g., when text IS bold) */
-.ce-inline-tool--active {
-  color: #2563eb !important; /* Notion uses a subtle blue for active states */
-  background-color: rgba(37, 99, 235, 0.1) !important;
+#mono-editorjs .ce-inline-tool--active {
+  color: var(--toolbar-active-text) !important;
+  background-color: var(--toolbar-active-bg) !important;
 }
 
-/* --- 5. The Block Tunes Menu (Delete, Move up/down) --- */
-.ce-settings {
+#mono-editorjs .ce-popover {
+  --color-border: var(--toolbar-border);
+  --color-shadow: rgba(15, 23, 42, 0.16);
+  --color-background: var(--toolbar-bg);
+  --color-text-primary: var(--editor-text);
+  --color-text-secondary: var(--editor-placeholder);
+  --color-border-icon: var(--toolbar-border);
+  --color-border-icon-disabled: var(--toolbar-border);
+  --color-text-icon-active: var(--toolbar-active-text);
+  --color-background-icon-active: var(--toolbar-active-bg);
+  --color-background-item-focus: var(--toolbar-active-bg);
+  --color-shadow-item-focus: transparent;
+  --color-background-item-hover: var(--toolbar-hover-bg);
+  --width: 248px;
+  --max-height: 320px;
+  --border-radius: 14px;
+}
+
+#mono-editorjs .ce-popover__container,
+#mono-editorjs .ce-settings,
+#mono-editorjs .ce-conversion-toolbar {
   background-color: var(--toolbar-bg) !important;
   border: 1px solid var(--toolbar-border) !important;
   box-shadow: var(--toolbar-shadow) !important;
-  border-radius: 6px !important;
+  border-radius: 14px !important;
+  backdrop-filter: blur(16px);
 }
 
-.ce-settings__button {
+#mono-editorjs .ce-popover-item,
+#mono-editorjs .ce-settings__button,
+#mono-editorjs .ce-conversion-tool {
   color: var(--toolbar-icon) !important;
+  border-radius: 10px !important;
 }
 
-.ce-settings__button:hover {
+#mono-editorjs .ce-popover-item:hover,
+#mono-editorjs .ce-settings__button:hover,
+#mono-editorjs .ce-conversion-tool:hover {
   background-color: var(--toolbar-hover-bg) !important;
 }
 
-/* --- 6. The Conversion Menu (Turn into...) --- */
-.ce-conversion-toolbar {
-  background-color: var(--toolbar-bg) !important;
+#mono-editorjs .ce-popover-item--active,
+#mono-editorjs .ce-popover-item--focused:not(.ce-popover-item--no-focus) {
+  color: var(--toolbar-active-text) !important;
+  background-color: var(--toolbar-active-bg) !important;
+}
+
+#mono-editorjs .link-tool__input {
+  color: var(--editor-text) !important;
+  background-color: color-mix(in srgb, var(--toolbar-bg) 84%, transparent) !important;
   border: 1px solid var(--toolbar-border) !important;
-  box-shadow: var(--toolbar-shadow) !important;
-  border-radius: 6px !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
 }
 
-.ce-conversion-tool {
-  color: var(--toolbar-icon) !important;
+#mono-editorjs .link-tool__input[contentEditable="true"][data-placeholder]:before {
+  color: var(--editor-placeholder) !important;
 }
 
-.ce-conversion-tool:hover {
-  background-color: var(--toolbar-hover-bg) !important;
+#mono-editorjs .link-tool__content {
+  color: var(--editor-text) !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
 }
 
-.ce-conversion-tool__icon {
-  background-color: var(--toolbar-bg) !important;
+#mono-editorjs .link-tool__content:after {
+  display: none;
+}
+
+#mono-editorjs .link-tool__content--rendered {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(148px, 190px);
+  gap: 1rem;
+  align-items: stretch;
+  padding: 1rem 1.05rem !important;
+  background: color-mix(in srgb, var(--toolbar-bg) 92%, transparent) !important;
+  border: 1px solid var(--toolbar-border) !important;
+  border-radius: 18px !important;
+  box-shadow: none !important;
+  transition: background-color 0.16s ease, border-color 0.16s ease;
+}
+
+#mono-editorjs .link-tool__content--rendered:hover {
+  background: color-mix(in srgb, var(--toolbar-bg) 96%, transparent) !important;
+  box-shadow: none !important;
+}
+
+#mono-editorjs .link-tool__image {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  width: 100%;
+  min-height: 112px;
+  height: 100%;
+  margin: 0;
+  float: none;
+  border-radius: 12px;
+  background-color: color-mix(in srgb, var(--toolbar-bg) 70%, transparent);
+}
+
+#mono-editorjs .link-tool__title,
+#mono-editorjs .link-tool__description,
+#mono-editorjs .link-tool__anchor {
+  grid-column: 1;
+}
+
+#mono-editorjs .link-tool__title {
+  margin: 0;
+  color: var(--editor-text) !important;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+#mono-editorjs .link-tool__description {
+  margin: 0.45rem 0 0;
+  color: var(--editor-placeholder) !important;
+  font-size: 0.93rem;
+  line-height: 1.55;
+  -webkit-line-clamp: 2;
+}
+
+#mono-editorjs .link-tool__anchor {
+  margin-top: 0.85rem !important;
+  color: var(--editor-placeholder) !important;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+#mono-editorjs .cdx-quote {
+  position: relative;
+  margin: 1.35rem 0 !important;
+}
+
+#mono-editorjs .cdx-quote__text,
+#mono-editorjs .blockquote_type1,
+#mono-editorjs .blockquote_type2,
+#mono-editorjs .blockquote_type3 {
+  position: relative;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0.15rem 0 0.15rem 1.25rem !important;
+  color: var(--editor-text) !important;
+  font-size: clamp(1.35rem, 2vw, 1.95rem) !important;
+  font-style: italic !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.04em;
+  text-align: left !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-left: 4px solid var(--toolbar-active-text) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+#mono-editorjs .blockquote_type1 {
+  background-image: none !important;
+}
+
+#mono-editorjs .cdx-quote__text::before,
+#mono-editorjs .blockquote_type1::before,
+#mono-editorjs .blockquote_type2::before,
+#mono-editorjs .blockquote_type3::before {
+  content: none !important;
+}
+
+#mono-editorjs .cdx-quote__caption {
+  margin-top: 0.55rem !important;
+  padding-left: 1.25rem !important;
+  color: var(--editor-placeholder) !important;
+  font-size: 0.85rem !important;
+  line-height: 1.45 !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#mono-editorjs .cdx-quote [contentEditable="true"][data-placeholder]::before {
+  color: var(--editor-placeholder) !important;
+}
+
+#mono-editorjs .cdx-quote__text[data-placeholder]:empty::before,
+#mono-editorjs .cdx-quote__text[data-placeholder][data-empty="true"]::before {
+  content: attr(data-placeholder) !important;
+  position: absolute;
+  inset: 0 auto auto 1.25rem;
+  font-size: clamp(1.35rem, 2vw, 1.95rem);
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  color: var(--editor-placeholder) !important;
+}
+
+#mono-editorjs .cdx-quote__caption[data-placeholder]:empty::before,
+#mono-editorjs .cdx-quote__caption[data-placeholder][data-empty="true"]::before {
+  content: attr(data-placeholder) !important;
+  position: static !important;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--editor-placeholder) !important;
+}
+
+#mono-editorjs .ce-popover__items,
+#mono-editorjs .ce-popover--inline .ce-popover__items,
+#mono-editorjs .ce-conversion-toolbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--popover-scrollbar) transparent;
+}
+
+#mono-editorjs .ce-popover__items::-webkit-scrollbar,
+#mono-editorjs .ce-popover--inline .ce-popover__items::-webkit-scrollbar,
+#mono-editorjs .ce-conversion-toolbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+#mono-editorjs .ce-popover__items::-webkit-scrollbar-track,
+#mono-editorjs .ce-popover--inline .ce-popover__items::-webkit-scrollbar-track,
+#mono-editorjs .ce-conversion-toolbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#mono-editorjs .ce-popover__items::-webkit-scrollbar-thumb,
+#mono-editorjs .ce-popover--inline .ce-popover__items::-webkit-scrollbar-thumb,
+#mono-editorjs .ce-conversion-toolbar::-webkit-scrollbar-thumb {
+  background: var(--popover-scrollbar);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+#mono-editorjs .ce-toolbar__plus svg,
+#mono-editorjs .ce-toolbar__settings-btn svg,
+#mono-editorjs .ce-inline-tool svg,
+#mono-editorjs .ce-popover-item__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 768px) {
+  .monolith-editor__title {
+    font-size: clamp(2.1rem, 10vw, 3rem);
+    line-height: 1;
+    padding: 0 0 0.6rem;
+  }
+
+  .monolith-preview__title {
+    font-size: clamp(2.1rem, 10vw, 3rem);
+    line-height: 1;
+  }
+
+  #mono-preview > * + * {
+    margin-top: 1rem;
+  }
+
+  #mono-editorjs .ce-block__content,
+  #mono-editorjs .ce-toolbar__content {
+    max-width: 100% !important;
+  }
+
+  #mono-editorjs .codex-editor__redactor {
+    padding-bottom: 4rem;
+  }
+
+  #mono-editorjs .ce-block__content::before {
+    inset: -0.06rem -0.3rem;
+  }
+
+  #mono-editorjs .link-tool__content--rendered {
+    grid-template-columns: 1fr;
+  }
+
+  #mono-editorjs .link-tool__image {
+    grid-column: 1;
+    grid-row: auto;
+    min-height: 168px;
+  }
+
+  #mono-preview .monolith-bookmark {
+    grid-template-columns: 1fr;
+  }
+
+  #mono-preview .monolith-bookmark__image {
+    min-height: 168px;
+  }
+}
+
+@media (max-width: 650px) {
+  #mono-editorjs .codex-editor__redactor {
+    padding-bottom: 3.5rem;
+  }
+
+  #mono-editorjs .cdx-block {
+    padding: 0.24rem 0;
+  }
+
+  #mono-editorjs .ce-toolbar__content,
+  #mono-editorjs .ce-block__content {
+    width: 100%;
+    max-width: 100% !important;
+  }
+
+  #mono-editorjs .ce-toolbar__content {
+    padding-inline: 0.2rem;
+  }
+
+  #mono-editorjs .ce-toolbar__actions {
+    left: 0.1rem;
+    right: auto;
+    top: 0;
+    padding-right: 0;
+    gap: 0.18rem;
+    align-items: center;
+  }
+
+  #mono-editorjs .ce-toolbar__plus,
+  #mono-editorjs .ce-toolbar__settings-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 9px !important;
+  }
+
+  #mono-editorjs .ce-toolbar__plus svg,
+  #mono-editorjs .ce-toolbar__settings-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  #mono-editorjs .ce-block__content::before {
+    inset: -0.05rem -0.14rem;
+    border-radius: 9px;
+  }
+
+  #mono-editorjs .ce-paragraph {
+    font-size: 15px;
+    line-height: 1.7;
+  }
 }

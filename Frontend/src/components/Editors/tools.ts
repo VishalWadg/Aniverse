@@ -1,4 +1,3 @@
-import EditorJs from '@editorjs/editorjs'
 import Header from '@editorjs/header'
 import Paragraph from '@editorjs/paragraph'
 import List from '@editorjs/list'
@@ -6,7 +5,6 @@ import Checklist from '@editorjs/checklist'
 import Quote from '@editorjs/quote'
 import CyQuote from '@cychann/editorjs-quote'
 import Embed from '@editorjs/embed'
-import ImageTool from '@editorjs/image'
 import SimpleImage from '@editorjs/simple-image'
 import LinkTool from '@editorjs/link'
 import Marker from '@editorjs/marker'
@@ -16,7 +14,11 @@ import CoolDelimiter from '@coolbytes/editorjs-delimiter'
 import TextStyle from '@skchawala/editorjs-text-style'
 import ColorPicker from 'editorjs-color-picker'
 import ParagraphWithAlignment from 'editorjs-paragraph-with-alignment'
-import TitleTool from 'title-editorjs'
+
+const editorBackendBaseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '')
+const linkToolEndpoint = editorBackendBaseUrl
+  ? `${editorBackendBaseUrl}/url-meta`
+  : '/api/v1/url-meta'
 
 export const tools = {
   header: {
@@ -43,10 +45,17 @@ export const tools = {
   quote: {
     class: Quote,
     inlineToolbar: true,
+    config: {
+      quotePlaceholder: 'Pull quote',
+      captionPlaceholder: 'Source or note',
+    },
   },
   cyQuote: {
     class: CyQuote,
     inlineToolbar: true,
+    config: {
+      defaultType: 'verticalLine',
+    },
   },
   embed: {
     class: Embed,
@@ -91,7 +100,7 @@ export const tools = {
   },
   linkTool: {
     class: LinkTool,
-    config: { endpoint: '/api/v1/url-meta' },
+    config: { endpoint: linkToolEndpoint },
   },
   marker: {
     class: Marker,
@@ -113,9 +122,5 @@ export const tools = {
   color: {
     class: ColorPicker,
     config: { defaultColor: '#ff4500' },
-  },
-  title: {
-    class: TitleTool,
-    config: { placeholder: 'Add title...' },
   },
 }

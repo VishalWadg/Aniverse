@@ -17,8 +17,8 @@ function App() {
   }, [authStatus, revalidator]);
 
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
-      <div className="flex min-h-screen flex-col bg-[radial-gradient(circle_at_top,_rgba(255,69,58,0.1),_transparent_30%),linear-gradient(180deg,_rgba(18,18,18,1)_0%,_rgba(10,10,10,1)_55%,_rgba(8,8,8,1)_100%)]">
+    <div className="dark min-h-screen bg-[#191919] text-foreground">
+      <div className="flex min-h-screen flex-col bg-[#191919]">
         <Header />
         <main className={isAuthRoute ? 'flex-1' : 'min-h-[calc(100vh-9rem)]'}>
           <Outlet />

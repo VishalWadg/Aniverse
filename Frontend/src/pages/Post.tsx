@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
-import appwriteService from "../Appwrite/config";
+import React from "react";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { Button, Container } from "../components";
 import parse from "html-react-parser";
 import { useSelector } from "react-redux";
 import postApi from "../api/postApi";
-import { selectToasts } from "../store";
 import useToasts from "../hooks/useToasts";
 
 export const postLoader = async ({params}) => {
@@ -41,37 +39,40 @@ export default function Post() {
     };
 
     return post ? (
-        <div className="py-8">
+        <div className="py-8 sm:py-12">
             <Container>
-                <div className="w-2xl flex justify-center mb-4 border rounded-xl p-2 m-auto flex-col gap-4 border-transparent">
-                    {/* <div className=" w-full flex justify-center">
-                        <img
-                            src={appwriteService.getFilePreview(post.FeaturedImage)}
-                            alt={post.title}
-                            className="object-contain rounded-xl  w-xl"
-                        />
-                    </div> */}
-
+                <article className="mx-auto w-full max-w-[880px]">
                     {isAuthor && (
-                        <div className="">
+                        <div className="mb-6 flex flex-wrap justify-end gap-3">
                             <Link to={`/edit-post/${post.id}`}>
-                                <Button bgColor="bg-green-500" className="mr-3 rounded-md">
+                                <Button
+                                    bgColor="bg-white hover:bg-zinc-200 dark:bg-zinc-100 dark:hover:bg-white"
+                                    textColor="text-zinc-950"
+                                    className="rounded-md border border-white/10"
+                                >
                                     Edit
                                 </Button>
                             </Link>
-                            <Button bgColor="bg-red-500" onClick={deletePost} className="rounded-md">
+                            <Button
+                                bgColor="bg-red-500/90 hover:bg-red-500"
+                                textColor="text-white"
+                                onClick={deletePost}
+                                className="rounded-md"
+                            >
                                 Delete
                             </Button>
                         </div>
                     )}
-                </div>
-                <div className="w-full mb-6">
-                    <h1 className="text-2xl font-bold">{post.title}</h1>
-                    <p className="text-gray-500">By {post.author.username}</p>
-                </div>
-                <div className="browser-css">
-                    {parse(post.content)}
+
+                    <header className="mb-6 sm:mb-8">
+                        <h1 className="monolith-preview__title">{post.title}</h1>
+                        <p className="monolith-preview__meta">By {post.author.username}</p>
+                    </header>
+
+                    <div id="mono-preview" className="monolith-rendered">
+                        {parse(post.content ?? '')}
                     </div>
+                </article>
             </Container>
         </div>
     ) : null;
