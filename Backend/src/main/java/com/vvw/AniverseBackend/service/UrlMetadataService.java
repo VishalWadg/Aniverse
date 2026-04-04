@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
+import javax.net.SocketFactory;
 import javax.net.ssl.SNIHostName;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocket;
@@ -153,7 +154,7 @@ public class UrlMetadataService {
     }
 
     private Socket openSocket(ResolvedTarget target) throws IOException {
-        Socket baseSocket = new Socket();
+        Socket baseSocket = SocketFactory.getDefault().createSocket();
         baseSocket.connect(new InetSocketAddress(target.address(), target.port()), (int) CONNECT_TIMEOUT.toMillis());
         baseSocket.setSoTimeout((int) READ_TIMEOUT.toMillis());
 
@@ -161,7 +162,8 @@ public class UrlMetadataService {
             return baseSocket;
         }
 
-        SSLSocket sslSocket = (SSLSocket) SSLSocketFactory.getDefault()
+        SSLSocketFactory sslSocketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+        SSLSocket sslSocket = (SSLSocket) sslSocketFactory
                 .createSocket(baseSocket, target.uri().getHost(), target.port(), true);
         SSLParameters parameters = sslSocket.getSSLParameters();
         parameters.setEndpointIdentificationAlgorithm("HTTPS");
