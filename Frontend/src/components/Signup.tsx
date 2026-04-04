@@ -44,21 +44,22 @@ function Signup() {
   }
 
   return (
+    <div className='min-h-screen bg-black flex items-center justify-center'>
     <AuthScene
       title="Sign Up"
       description="Create an account to continue to Aniverse."
       promptLabel="Already have an account?"
       promptActionLabel="Log In"
       promptActionTo="/login"
-      watermarkTop="ARCHIVE"
-      watermarkBottom="ACCESS"
+      watermarkTop=""
+      watermarkBottom=""
       layout="split"
       error={error}
     >
       <form onSubmit={handleSubmit(create)} className="space-y-6">
         <AuthField
           label="Full Name"
-          placeholder="Vishal Verma"
+          placeholder="Enter your name"
           autoComplete="name"
           {...register('name', {
             required: 'Full name is required',
@@ -124,6 +125,7 @@ function Signup() {
         </Button>
       </form>
     </AuthScene>
+    </div>
   )
 }
 
