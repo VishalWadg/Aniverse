@@ -125,6 +125,7 @@
   html {
     @apply font-sans;
     color-scheme: dark;
+    overflow-y: scroll;
   }
 
   body {
