@@ -4,10 +4,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "application.security.jwt")
 public record SecurityProperties(
-                Long expirationMs,
+                java.time.Duration expiration,
                 RefreshToken refreshToken) {
         public record RefreshToken(
-                        Long expirationMs,
-                        Long absoluteExpirationMs) {
+                        java.time.Duration expiration,
+                        java.time.Duration absoluteExpiration) {
         }
 }
