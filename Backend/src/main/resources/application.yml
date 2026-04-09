@@ -1,0 +1,27 @@
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  application:
+    name: AniverseBackend
+
+# spring.sql.init.data-locations=classpath:data.sql
+server:
+  servlet:
+    context-path: /api/v1
+
+# spring.sql.init.mode=always
+jwt:
+  secretKey: ${JWT_SECRET:adasfasd3424@#$@#wruwJj3@#djfsk#ioriw,.vxv2343#$@dfdljk#}
+
+# Access Token: 15 minutes (in ms)
+application:
+  security:
+    jwt:
+      expiration-ms: ${ACCESS_TOKEN_EXPIRATION_MS:900000}
+# Refresh Token: 7 days (in ms)
+      refresh-token:
+        expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS:604800000}
+        absolute-expiration-ms: ${REFRESH_TOKEN_ABSOLUTE_EXPIRATION_MS:2592000000}
+
+
+

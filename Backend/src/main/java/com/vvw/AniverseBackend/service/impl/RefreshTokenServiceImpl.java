@@ -10,7 +10,7 @@ import com.vvw.AniverseBackend.repository.UserRepository;
 import com.vvw.AniverseBackend.service.RefreshTokenService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import com.vvw.AniverseBackend.config.properties.SecurityProperties;
 import org.springframework.stereotype.Service;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -28,10 +28,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return  DigestUtils.sha256Hex(token.getBytes(StandardCharsets.UTF_8)); // Use Apache Commons Codec or similar
     }
 
-    @Value("${application.security.jwt.refresh-token.expiration-ms}")
-    private Long refreshTokenDurationMs;
-    @Value("${application.security.jwt.refresh-token.absolute-expiration-ms}")
-    private Long absoluteExpirationMs;
+    private final SecurityProperties securityProperties;
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
 
@@ -45,7 +42,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Transactional
     @Override
     public String createRefreshToken(Long userId){
-        Instant newAbsoluteExpiry = Instant.now().plusMillis(absoluteExpirationMs);
+        Instant newAbsoluteExpiry = Instant.now().plusMillis(securityProperties.refreshToken().absoluteExpirationMs());
         TokenRotationResponse response = createRefreshTokenInternal(userId, newAbsoluteExpiry);
         return response.rawToken();
     }
@@ -57,7 +54,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         String rawToken = UUID.randomUUID().toString();
         RefreshToken refreshToken = RefreshToken.builder()
                         .token(hashToken(rawToken))
-                        .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
+                        .expiryDate(Instant.now().plusMillis(securityProperties.refreshToken().expirationMs()))
                         .absoluteExpiry(absoluteExpiry)
                         .user(user)
                         .build();
@@ -83,7 +80,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public Long getRefreshTokenDurationSeconds() {
-        return refreshTokenDurationMs/1000;
+        return securityProperties.refreshToken().expirationMs()/1000;
     }
 
     @Override
