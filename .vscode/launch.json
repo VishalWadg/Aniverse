@@ -8,7 +8,7 @@
             "mainClass": "com.vvw.AniverseBackend.AniverseBackendApplication",
             "projectName": "AniverseBackend",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/Backend/.env"
         }
     ]
 }
