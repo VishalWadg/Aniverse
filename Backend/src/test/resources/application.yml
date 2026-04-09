@@ -11,15 +11,15 @@ spring:
     password: 
 
 # 2. Tell Hibernate to use H2 SQL dialect
-jpa:
-  database-platform: org.hibernate.dialect.H2Dialect
-  hibernate:
-    ddl-auto: create-drop
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
 
 # 3. Disable your data.sql file for tests (prevents MySQL syntax errors in H2)
-sql:
-  init:
-    mode: never
+  sql:
+    init:
+      mode: never
 
 # 4. Dummy JWT Secret just so the context loads without crashing
 jwt:
@@ -29,10 +29,10 @@ jwt:
 application:
   security:
     jwt:
-      expiration-ms: ${ACCESS_TOKEN_EXPIRATION_MS}
+      expiration-ms: ${ACCESS_TOKEN_EXPIRATION_MS:900000}
       refresh-token:
-        expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS}
-        absolute-expiration-ms: ${REFRESH_TOKEN_ABSOLUTE_EXPIRATION_MS}
+        expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS:604800000}
+        absolute-expiration-ms: ${REFRESH_TOKEN_ABSOLUTE_EXPIRATION_MS:2592000000}
 
 app:
   cors:
