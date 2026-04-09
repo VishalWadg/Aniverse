@@ -1,0 +1,39 @@
+# ===================================================================
+# TEST CONFIGURATION (Used only during CI/CD and 'mvn test')
+# ===================================================================
+
+# 1. Use H2 In-Memory Database instead of MySQL
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+
+# 2. Tell Hibernate to use H2 SQL dialect
+jpa:
+  database-platform: org.hibernate.dialect.H2Dialect
+  hibernate:
+    ddl-auto: create-drop
+
+# 3. Disable your data.sql file for tests (prevents MySQL syntax errors in H2)
+sql:
+  init:
+    mode: never
+
+# 4. Dummy JWT Secret just so the context loads without crashing
+jwt:
+  secretKey: ${JWT_SECRET:adasfasd3424@#$@#wruwJj3@#djfsk#ioriw,.vxv2343#$@dfdljk#}
+
+# Access Token: 15 minutes (in ms)
+application:
+  security:
+    jwt:
+      expiration-ms: ${ACCESS_TOKEN_EXPIRATION_MS}
+      refresh-token:
+        expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS}
+        absolute-expiration-ms: ${REFRESH_TOKEN_ABSOLUTE_EXPIRATION_MS}
+
+app:
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174}
