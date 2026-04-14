@@ -11,7 +11,7 @@ server:
 
 # spring.sql.init.mode=always
 jwt:
-  secretKey: ${JWT_SECRET:adasfasd3424@#$@#wruwJj3@#djfsk#ioriw,.vxv2343#$@dfdljk#}
+  secretKey: ${JWT_SECRET}
 
 # Access Token: 15 minutes (in ms)
 application:
@@ -23,5 +23,9 @@ application:
         expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS:604800000}
         absolute-expiration-ms: ${REFRESH_TOKEN_ABSOLUTE_EXPIRATION_MS:2592000000}
 
-
+# cloudinary
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_KEY}
+  api-secret: ${CLOUDINARY_SECRET}
 

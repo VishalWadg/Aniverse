@@ -6,6 +6,7 @@ import Quote from '@editorjs/quote'
 import CyQuote from '@cychann/editorjs-quote'
 import Embed from '@editorjs/embed'
 import SimpleImage from '@editorjs/simple-image'
+import ImageTool from '@editorjs/image'
 import LinkTool from '@editorjs/link'
 import Marker from '@editorjs/marker'
 import RawTool from '@editorjs/raw'
@@ -14,6 +15,7 @@ import CoolDelimiter from '@coolbytes/editorjs-delimiter'
 import TextStyle from '@skchawala/editorjs-text-style'
 import ColorPicker from 'editorjs-color-picker'
 import ParagraphWithAlignment from 'editorjs-paragraph-with-alignment'
+import { uploadImageToCloudinary, uploadImageUrlToCloudinary } from '@/api/uploadApi'
 
 const editorBackendBaseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '')
 const linkToolEndpoint = editorBackendBaseUrl
@@ -67,33 +69,57 @@ export const tools = {
       },
     },
   },
-//   image: {
-//     class: ImageTool,
-//     config: {
-//       uploader: {
-//         async uploadByFile(file: File) {
-//           const form = new FormData()
-//           form.append('file', file)
-//           const response = await fetch('/api/v1/uploads/editor-image', {
-//             method: 'POST',
-//             body: form,
-//             headers: { Authorization: `Bearer ${yourAuthToken}` }, // add if needed
-//           })
-//           const json = await response.json()
-//           return { success: 1, file: { url: json.url } }
-//         },
-//         async uploadByUrl(url: string) {
-//           const response = await fetch('/api/v1/uploads/editor-image', {
-//             method: 'POST',
-//             body: JSON.stringify({ url }),
-//             headers: { 'Content-Type': 'application/json' },
-//           })
-//           const json = await response.json()
-//           return { success: 1, file: { url: json.url } }
-//         },
-//       },
-//     },
-//   },
+  image: {
+    class: ImageTool,
+    config: {
+
+      uploader: {
+        /**
+                 * This function triggers when a user drops a file into Editor.js
+                 */
+        async uploadByFile(file: File) {
+          try {
+            const uploadData = await uploadImageToCloudinary(file);
+            if (uploadData.secure_url) {
+              return {
+                success: 1,
+                file: {
+                  url: uploadData.secure_url,
+                }
+              }
+            } else {
+              return {
+                success: 0,
+                message: "Upload failed",
+              }
+            }
+          } catch (error: any) {
+            return { success: 0, message: error.message || "An error occured" };
+          }
+        },
+        async uploadByUrl(url: string) {
+          try {
+            const uploadData = await uploadImageUrlToCloudinary(url);
+            if (uploadData.secure_url) {
+              return {
+                success: 1,
+                file: {
+                  url: uploadData.secure_url,
+                }
+              }
+            } else {
+              return {
+                success: 0,
+                message: "URL Upload failed",
+              }
+            }
+          } catch (error: any) {
+            return { success: 0, message: error.message || "An error occured" };
+          }
+        },
+      },
+    },
+  },
   'simple-image': {
     class: SimpleImage,
     inlineToolbar: true,

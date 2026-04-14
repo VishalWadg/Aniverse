@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start:frontend": "cd Frontend && npm run dev",
-    "start:backend": "cd Backend && mvnw.cmd spring-boot:run",
+    "start:backend": "cd Backend && dotenv -e .env -- mvnw.cmd spring-boot:run",
     "dev": "concurrently -c \"cyan,magenta\" -n \"REACT,SPRING\" \"npm run start:frontend\" \"npm run start:backend\""
   },
   "repository": {
@@ -22,5 +22,8 @@
   "homepage": "https://github.com/VishalWadg/Aniverse#readme",
   "devDependencies": {
     "concurrently": "^9.2.1"
+  },
+  "dependencies": {
+    "dotenv-cli": "^11.0.0"
   }
 }
