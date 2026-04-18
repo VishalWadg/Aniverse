@@ -99,6 +99,7 @@ function EditorialFeed({ posts = [], authStatus = true, mode = 'home' }) {
 
   const clearSearchHref = location.pathname
   const hasSearchMiss = Boolean(searchQuery) && visiblePosts.length === 0
+  const canInteract = Boolean(authStatus)
 
   return (
     <section className="pb-14 pt-8 sm:pt-10">
@@ -193,7 +194,7 @@ function EditorialFeed({ posts = [], authStatus = true, mode = 'home' }) {
                     key={post.id}
                     className={index === 0 ? '' : 'border-t border-white/8'}
                   >
-                    <PostCard {...post} canInteract={authStatus} />
+                    <PostCard {...post} canInteract={canInteract} />
                   </div>
                 ))}
               </div>
@@ -216,7 +217,7 @@ function EditorialFeed({ posts = [], authStatus = true, mode = 'home' }) {
                   {trendingPosts.map((post, index) => (
                     <Link
                       key={post.id}
-                      to={`/post/${post.id}`}
+                      to={canInteract ? `/post/${post.id}` : '/login'}
                       className="group block"
                     >
                       <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#ff6c62]">

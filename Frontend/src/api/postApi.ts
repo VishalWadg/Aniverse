@@ -1,14 +1,18 @@
 import axiosClient from "./axiosClient";
 
+type RequestOptions = {
+    signal?: AbortSignal;
+};
+
 const postApi = {
     // Fetch all posts
-    getPosts: async () => {
-        const response = await axiosClient.get('/posts');
+    getPosts: async (options: RequestOptions = {}) => {
+        const response = await axiosClient.get('/posts', options);
         return response.data; // Returns an array of post objects
     },
 
-    getPost: async (postId) => {
-        const response = await axiosClient.get(`/posts/${postId}`)
+    getPost: async (postId, options: RequestOptions = {}) => {
+        const response = await axiosClient.get(`/posts/${postId}`, options)
         return response.data; // Returns a single post object
     },
 

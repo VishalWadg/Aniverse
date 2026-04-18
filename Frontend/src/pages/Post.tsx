@@ -7,9 +7,9 @@ import postApi from "../api/postApi";
 import useToasts from "../hooks/useToasts";
 import { sanitizeMonolithHtml } from "../lib/monolith-html";
 
-export const postLoader = async ({params}) => {
+export const postLoader = async ({ params, request }) => {
     try {
-        const data = await postApi.getPost(params.id);
+        const data = await postApi.getPost(params.id, { signal: request.signal });
         return data;
     } catch (error) {
         return null;

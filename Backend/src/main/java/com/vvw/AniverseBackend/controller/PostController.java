@@ -6,6 +6,7 @@ import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +30,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/posts")
 public class PostController {
     private final PostService postService;
-    
+
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getAllPosts() {
         return ResponseEntity.ok().body(postService.getAllPosts(PageRequest.of(0, 10)));
@@ -41,24 +42,29 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponseDto> createNewPost (@RequestBody CreatePostDto createPostDto, @AuthenticationPrincipal User user) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(postService.createNewPost(createPostDto, user.getUsername()));
+    public ResponseEntity<PostResponseDto> createNewPost(@RequestBody CreatePostDto createPostDto,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(postService.createNewPost(createPostDto, user.getUsername()));
     }
-    
+
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody UpdatePostDto updatePostDto) {
-        return ResponseEntity.ok().body(postService.updatePost(id, updatePostDto));
+    // @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody UpdatePostDto updatePostDto, @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok().body(postService.updatePost(id, updatePostDto, currentUser));
     }
-    
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id){
-        postService.deletePostById(id);
+    // @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deletePost(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
+        postService.deletePostById(id, currentUser);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PostResponseDto> updatePostPartially(@PathVariable Long id, @RequestBody Map<String, Object> updates){
-        return ResponseEntity.ok().body(postService.updatePostPartially(id, updates));
+    public ResponseEntity<PostResponseDto> updatePostPartially(@PathVariable Long id,
+            @RequestBody Map<String, Object> updates, @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok().body(postService.updatePostPartially(id, updates, currentUser));
     }
-    
+
 }

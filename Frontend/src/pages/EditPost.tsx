@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate, useLoaderData, useLocation } from 'react-router-dom';
 import { Container, PostForm } from '../components';
 import postApi from '../api/postApi';
+import { useSelector } from 'react-redux';
 
 // --- 1. THE LOADER (Runs before render) ---
-export const editPostLoader = async ({ params }) => {
+export const editPostLoader = async ({ params, request }) => {
     // The route is "/edit-post/:id", so we access params.id
     try {
-        const post = await postApi.getPost(params.id);
+        const post = await postApi.getPost(params.id, { signal: request.signal });
         return post;
     } catch (error) {
         // If post not found or error, return null so we can handle it in component
@@ -19,20 +20,35 @@ export const editPostLoader = async ({ params }) => {
 function EditPost() {
     // --- 2. GET DATA ---
     // The data is already here when the component mounts!
-    const post = useLoaderData() as any; 
-    const navigate = useNavigate();
+    const post = useLoaderData() as any;
+    const location = useLocation();
+    const userData = useSelector((state: any) => state.auth.userData);
+    const isAuthor = Boolean(post && userData && post.author.username === userData.username);
 
-    console.log('Post object:', post);
+    if (!post) {
+        return <Navigate to="/" replace />;
+    }
 
-    useEffect(() => {
-        // If the ID was wrong or post doesn't exist, redirect home
-        // (You could also show an error message instead)
-        if (!post) {
-            navigate('/');
-            return null;
-        }
-    }, [post, navigate])
+    if (!userData) {
+        return <Navigate to="/login" replace />;
+    }
 
+    if (!isAuthor) {
+        return (
+            <Navigate
+                to={`/post/${post.id}`}
+                replace
+                state={{
+                    toast: {
+                        id: `edit-post-access:${location.key}`,
+                        type: 'error',
+                        message: "You can't edit this post",
+                        duration: 4000,
+                    },
+                }}
+            />
+        );
+    }
 
     return (
         <div className='py-8'>

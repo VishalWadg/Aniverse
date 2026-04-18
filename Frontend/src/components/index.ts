@@ -12,6 +12,7 @@ import RTE from "./RTE";
 import Signup from "./Signup";
 import PostForm from "./post-form/PostForm";
 import AuthLayout from "./AuthLayout";
+import RouteToast from "./RouteToast";
 
 export {
     Header,
@@ -28,4 +29,5 @@ export {
     Signup,
     PostForm,
     AuthLayout,
+    RouteToast,
 };

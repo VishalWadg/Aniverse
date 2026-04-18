@@ -4,6 +4,8 @@ import java.util.Map;
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.dto.UpdatePostDto;
+import com.vvw.AniverseBackend.entity.User;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,9 +13,9 @@ public interface PostService {
     Page<PostResponseDto> getAllPosts(Pageable pageable);
     PostResponseDto createNewPost(CreatePostDto createPostDto, String username);
     PostResponseDto getPostById(Long id);
-    void deletePostById(Long id);
-    PostResponseDto updatePost(Long id, UpdatePostDto updatePostDto);
-    PostResponseDto updatePostPartially(Long id, Map<String, Object> updates);
+    void deletePostById(Long id, User currentUser);
+    PostResponseDto updatePost(Long id, UpdatePostDto updatePostDto, User currentUser);
+    PostResponseDto updatePostPartially(Long id, Map<String, Object> updates, User currentUser);
     Page<PostResponseDto> getPostsByUsername(String username, Pageable pageable);
     Boolean isUserTheAuthor(String username, Long post_id);
 }
