@@ -75,7 +75,7 @@ public class PostServiceImpl implements PostService{
             .findByIdWithAuthor(id)
             .orElseThrow(() -> new EntityNotFoundException("Failed to Update :: post with id : "+ id + " does not exist"));
         assertCanModifyPost(post, currentUser);
-        
+        modelMapper.map(updatePostDto, post);
         return modelMapper.map(postRepository.save(post), PostResponseDto.class);
     }
 
