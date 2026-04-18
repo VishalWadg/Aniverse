@@ -5,6 +5,7 @@ import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.exceptions.EntityNotFoundException;
+import com.vvw.AniverseBackend.exceptions.ResourceAccessDeniedException;
 import com.vvw.AniverseBackend.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,14 @@ public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
     private final UserService userService;
+
+    private void assertCanModifyPost(Post post, User currentUser){
+        boolean isAuthor = post.getAuthor() != null
+                && post.getAuthor().getUsername().equals(currentUser.getUsername());
+        if(!isAuthor){
+            throw new ResourceAccessDeniedException("You can only modify your own posts.");
+        }
+    }
 
     @Override
     @Transactional
@@ -60,33 +69,35 @@ public class PostServiceImpl implements PostService{
 
     // PUT Request (All fields are required) mostly not needed as we use PATCH instead
     @Override
-    public PostResponseDto updatePost(Long id, UpdatePostDto updatePostDto){
+    public PostResponseDto updatePost(Long id, UpdatePostDto updatePostDto, User currentUser){
         log.warn("PostServiceImpl:: updatePost");
         Post post = postRepository
-            .findById(id)
+            .findByIdWithAuthor(id)
             .orElseThrow(() -> new EntityNotFoundException("Failed to Update :: post with id : "+ id + " does not exist"));
+        assertCanModifyPost(post, currentUser);
         modelMapper.map(updatePostDto, post);
         return modelMapper.map(postRepository.save(post), PostResponseDto.class);
     }
 
     @Override
-    public void deletePostById(Long id){
+    public void deletePostById(Long id, User currentUser){
         log.warn("PostServiceImpl:: deletePostById");
-        if(!postRepository.existsById(id)){
-            throw new EntityNotFoundException("Failed to delete :: post with id : " + id + " does not exist");
-        }
+        Post post = postRepository
+            .findByIdWithAuthor(id)
+            .orElseThrow(() -> new EntityNotFoundException("Failed to Update :: post with id : "+ id + " does not exist"));
+        assertCanModifyPost(post, currentUser);
         postRepository.deleteById(id);
     }
 
     // PATCH Request all fields are not required(not notnull) and only fields with notnull value are updated others are kept as is
     // this can be done two ways using 1) Map<String, Object> and 2) using DTO with null values allowed fields 2nd approach is preferred
     @Override
-    public PostResponseDto updatePostPartially(Long id, Map<String, Object> updates){
+    public PostResponseDto updatePostPartially(Long id, Map<String, Object> updates, User currentUser){
         log.warn("PostServiceImpl:: updatePostPartially");
         Post post = postRepository
-            .findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Failed to Update :: post with id : "+ id + " does not exist"));
-        
+            .findByIdWithAuthor(id)
+            .orElseThrow(() -> new EntityNotFoundException("Failed to Update :: post with id : "+ id + " does not exist"));
+        assertCanModifyPost(post, currentUser);
         updates.forEach((field, value)->{
             switch (field) {
                 case "title":

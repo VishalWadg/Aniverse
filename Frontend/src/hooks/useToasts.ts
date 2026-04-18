@@ -1,47 +1,94 @@
+import { useCallback, useMemo } from 'react';
+import axios from 'axios';
+import { toast as sonnerToast } from 'sonner';
 
-import {useDispatch} from 'react-redux';
-import { addToast as addToastAction, removeToast as removeToastAction } from '../store';
-import type { ToastType } from '../store';
+type ToastDuration = number | undefined;
 
-export default function useToasts() {
-    const dispatch = useDispatch();
+type ToastId = number | string;
 
-    const addToast = (message: string, type: ToastType = 'info', duration: number = 4000) => {
-        const id = Date.now() + Math.random();
-        const newToast = {id, message, type, duration};
+type ToastPromiseMessages = {
+    loading?: string;
+    success?: string;
+    error?: string;
+};
 
-        dispatch(addToastAction(newToast));
+const getToastOptions = (duration?: ToastDuration) => {
+    if (duration === undefined) {
+        return undefined;
+    }
 
-        if(duration > 0){
-            setTimeout(() => {
-                dispatch(removeToastAction(id));
-            }, duration);
+    return { duration };
+};
+
+const getErrorMessage = (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+        const responseData = error.response?.data;
+
+        if (typeof responseData === 'string' && responseData.trim()) {
+            return responseData;
         }
 
-        return id;
-    }
+        if (responseData && typeof responseData === 'object') {
+            const message = 'message' in responseData ? responseData.message : null;
+            if (typeof message === 'string' && message.trim()) {
+                return message;
+            }
 
-    const removeToast = (id) => {
-        dispatch(removeToastAction(id));
-    }
-
-    return {
-        success: (message, duration) => addToast(message, 'success', duration),
-        error: (message, duration) => addToast(message, 'error', duration),
-        info: (message, duration) => addToast(message, 'info', duration),
-        removeToast,
-        promise: async (promise, messages) => {
-            const loadingId = addToast(messages.loading || 'Loading...', 'info', 0);
-            try {
-                const result = await promise;
-                removeToast(loadingId);
-                addToast(messages.success || 'Success!', 'success', 4000);
-                return result;
-            }catch (error) {
-                removeToast(loadingId);
-                addToast(messages.error || 'An error occurred', 'error', 4000);
-                throw error;
+            const errorText = 'error' in responseData ? responseData.error : null;
+            if (typeof errorText === 'string' && errorText.trim()) {
+                return errorText;
             }
         }
-    };
+
+        if (typeof error.message === 'string' && error.message.trim()) {
+            return error.message;
+        }
+    }
+
+    if (error instanceof Error && error.message.trim()) {
+        return error.message;
+    }
+
+    return null;
+}
+
+export default function useToasts() {
+    const success = useCallback((message: string, duration?: ToastDuration) => {
+        return sonnerToast.success(message, getToastOptions(duration));
+    }, []);
+
+    const error = useCallback((message: string, duration?: ToastDuration) => {
+        return sonnerToast.error(message, getToastOptions(duration));
+    }, []);
+
+    const info = useCallback((message: string, duration?: ToastDuration) => {
+        return sonnerToast.info(message, getToastOptions(duration));
+    }, []);
+
+    const removeToast = useCallback((id?: ToastId) => {
+        sonnerToast.dismiss(id);
+    }, []);
+
+    const promise = useCallback(async <T,>(
+        promiseInput: Promise<T> | (() => Promise<T>),
+        messages: ToastPromiseMessages = {}
+    ) => {
+        const trackedPromise = typeof promiseInput === 'function' ? promiseInput() : promiseInput;
+
+        sonnerToast.promise(trackedPromise, {
+            loading: messages.loading || 'Loading...',
+            success: messages.success || 'Success!',
+            error: (error) => getErrorMessage(error) || messages.error || 'An error occurred',
+        });
+
+        return trackedPromise;
+    }, []);
+
+    return useMemo(() => ({
+        success,
+        error,
+        info,
+        removeToast,
+        promise,
+    }), [error, info, promise, removeToast, success]);
 }

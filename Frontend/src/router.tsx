@@ -62,8 +62,12 @@ const rootLoader = async ({request}) => {
         if (publicRoutes.includes(pathname)) {
           return null;
         }
+        return redirect('/login');
     }
-    return null;
+    if (publicRoutes.includes(pathname)) {
+      return null;
+    }
+    return redirect('/login');
 }
 
 export const router = createBrowserRouter(createRoutesFromElements(

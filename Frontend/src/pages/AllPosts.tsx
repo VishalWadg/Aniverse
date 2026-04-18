@@ -8,10 +8,10 @@ import EditorialFeed from '../components/feed/EditorialFeed';
 // For AllPosts, you might want a larger page size.
 import postApi from '../api/postApi';
 
-export const allPostsLoader = async () => {
+export const allPostsLoader = async ({ request }) => {
     try {
         // Fetch Page 0 with size 20 for the full list
-        return await postApi.getPosts();
+        return await postApi.getPosts({ signal: request.signal });
     } catch (error) {
         // Return empty content on error so UI doesn't break
         return { content: [] };

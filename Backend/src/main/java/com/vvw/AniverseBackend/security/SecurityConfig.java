@@ -1,5 +1,6 @@
 package com.vvw.AniverseBackend.security;
 
+import com.vvw.AniverseBackend.security.ApiAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,8 @@ public class SecurityConfig {
 
     private  final JwtAuthFilter jwtAuthFilter;
     private final ApiAuthenticationEntryPoint apiAuthenticationEntryPoint;
+    private final ApiAccessDeniedHandler apiAccessDeniedHandler;
+
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -46,7 +49,8 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(apiAuthenticationEntryPoint));
+                        .authenticationEntryPoint(apiAuthenticationEntryPoint)
+                        .accessDeniedHandler(apiAccessDeniedHandler));
         return httpSecurity.build();
     }
 
