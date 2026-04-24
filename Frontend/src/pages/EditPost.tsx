@@ -1,38 +1,55 @@
-import React from 'react';
-import { Navigate, useLoaderData, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { Container, PostForm } from '../components';
-import postApi from '../api/postApi';
 import { useSelector } from 'react-redux';
-
-// --- 1. THE LOADER (Runs before render) ---
-export const editPostLoader = async ({ params, request }) => {
-    // The route is "/edit-post/:id", so we access params.id
-    try {
-        const post = await postApi.getPost(params.id, { signal: request.signal });
-        return post;
-    } catch (error) {
-        // If post not found or error, return null so we can handle it in component
-        // (Or let it bubble to the ErrorElement)
-        return null;
-    }
-};
+import { useGetPostQuery } from '@/api/postsApi';
+import useToasts from '@/hooks/useToasts';
 
 function EditPost() {
-    // --- 2. GET DATA ---
-    // The data is already here when the component mounts!
-    const post = useLoaderData() as any;
+    const { id } = useParams();
+    // Destructure what you need, including isLoading
+    const { data: post, error, isLoading } = useGetPostQuery(id);
     const location = useLocation();
+    
+    // Consider replacing 'any' with your actual RootState type if using TypeScript
     const userData = useSelector((state: any) => state.auth.userData);
-    const isAuthor = Boolean(post && userData && post.author.username === userData.username);
+    const { error: errorToast } = useToasts();
 
-    if (!post) {
-        return <Navigate to="/" replace />;
+    const isAuthor = Boolean(post && userData && post?.author?.username === userData?.username);
+
+    // --- 1. HANDLE SIDE EFFECTS ---
+    // Watch for errors and trigger the toast ONLY when the error state changes
+    useEffect(() => {
+        if (error) {
+            if ('status' in error) {
+                // RTK Query FetchBaseQueryError
+                errorToast(error.data as string, 3000);
+            } else if ('message' in error) {
+                // RTK Query SerializedError
+                errorToast(error.message, 3000);
+            }
+        }
+    }, [error, errorToast]);
+
+    // --- 2. HANDLE LOADING STATE ---
+    // Prevent the component from rendering redirects while still fetching
+    if (isLoading) {
+        return <div className="py-8 text-center">Loading post...</div>; // Or use your Spinner component
     }
 
+    // --- 3. HANDLE REDIRECTS ---
+    
+    // If not logged in, send to login
     if (!userData) {
         return <Navigate to="/login" replace />;
     }
 
+    // If there is no post (and it's done loading), or an error occurred, go home
+    if (!post || error) {
+        return <Navigate to="/" replace />;
+    }
+
+    // If they are logged in but didn't write this post
     if (!isAuthor) {
         return (
             <Navigate
@@ -50,10 +67,10 @@ function EditPost() {
         );
     }
 
+    // --- 4. SUCCESSFUL RENDER ---
     return (
         <div className='py-8'>
             <Container>
-                {/* Pass the fetched post to the form */}
                 <PostForm post={post} />
             </Container>
         </div>

@@ -14,10 +14,10 @@ import { AuthLayout } from './components'
 
 // --- Pages & Loaders ---
 // We import these explicitly to get the named 'loader' exports
-import Home, { homeLoader } from './pages/Home'
+import Home from './pages/Home'
 import AllPosts, { allPostsLoader } from './pages/AllPosts' // You need to export this from AllPosts.jsx
-import Post, { postLoader } from './pages/Post'
-import EditPost, { editPostLoader } from './pages/EditPost' // You need to export this from EditPost.jsx
+import Post from './pages/Post'
+import EditPost from './pages/EditPost' // You need to export this from EditPost.jsx
 
 // These don't have loaders, so standard import is fine
 import { Login, Signup, AddPost } from './pages' 
@@ -82,15 +82,7 @@ export const router = createBrowserRouter(createRoutesFromElements(
     <Route 
       path='/' 
       element={<Home />} 
-      loader={homeLoader}
-      shouldRevalidate={({currentUrl, nextUrl, defaultShouldRevalidate}) => {
-        // 1. If we are on home and we clicked home again..
-        if(currentUrl.pathname === nextUrl.pathname && currentUrl.search === nextUrl.search) {  // pathname means the part after domain, search means query params
-          return false; // Prevent revalidation i.e dont run the loader
-        }
-        // 2. Otherwise (Form actions, Navigation from other pages), do default behavior
-        return defaultShouldRevalidate;
-      }}
+      
     />
 
     {/* --- Auth Routes --- */}
@@ -133,16 +125,13 @@ export const router = createBrowserRouter(createRoutesFromElements(
       </AuthLayout>
     }
       // Loader fetches the existing post data to fill the form
-      loader={editPostLoader} 
     />
     
     <Route path='post/:id' element={
       <AuthLayout authentication={true}>
         <Post />
       </AuthLayout>
-    }
-      // Loader fetches the specific post details
-      loader={postLoader} 
+    } 
     />
 
   </Route>

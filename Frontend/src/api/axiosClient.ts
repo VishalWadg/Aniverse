@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from "jwt-decode";
-import { router } from '../router';
+import { reportAuthFailure, resetAuthFailureState } from "../lib/authSession";
 
 
 const baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080/api/v1';
@@ -96,6 +96,7 @@ export const setMemoryTokenNExpiry = (token) => {
             const decoded: any = jwtDecode(token);
             // Convert 'exp' (seconds) to milliseconds
             memoryTokenExpiry = typeof decoded?.exp === "number" ? decoded.exp * 1000 : null;
+            resetAuthFailureState();
         } catch (e) {
             // If token is invalid/malformed, treat as expired
             memoryToken = null;
@@ -130,7 +131,8 @@ axiosClient.interceptors.request.use(
                 // If the shared refresh failed, this request must also fail
                 const err: any = error;
                 console.error("Refresh failed: ", err?.response?.data?.message || err?.message);
-                router.navigate('/login');
+                resetAuthStatus();
+                reportAuthFailure('expired');
                 return Promise.reject(error);
             }
         }
@@ -145,8 +147,8 @@ axiosClient.interceptors.request.use(
             } catch (error) {
                 const err: any = error;
                 console.error("Failed to refresh token:", err?.response?.data?.message || err?.message);
-                router.navigate('/login');
-                setMemoryTokenNExpiry(null);
+                resetAuthStatus();
+                reportAuthFailure('expired');
                 return Promise.reject(error);
             }
 
@@ -201,10 +203,9 @@ axiosClient.interceptors.response.use(
 
             } catch (refreshError) {
                 // F. Refresh failed (Cookie expired or invalid)
-                // console.error(refreshError.message );
                 console.log((refreshError as any)?.response?.data?.message);
-                // router.navigate('/login');
-                setMemoryTokenNExpiry(null);
+                resetAuthStatus();
+                reportAuthFailure('expired');
                 return Promise.reject(refreshError);
             }
 
