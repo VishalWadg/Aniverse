@@ -1,11 +1,12 @@
 import React from "react";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
 import { Button, Container } from "../components";
 import parse from "html-react-parser";
 import { useSelector } from "react-redux";
 import postApi from "../api/postApi";
 import useToasts from "../hooks/useToasts";
 import { sanitizeMonolithHtml } from "../lib/monolith-html";
+import { useGetPostQuery } from "@/api/postsApi";
 
 export const postLoader = async ({ params, request }) => {
     try {
@@ -17,11 +18,13 @@ export const postLoader = async ({ params, request }) => {
 } 
 
 export default function Post() {
-    const post = useLoaderData() as any;
+    const {id}  = useParams() ;
+    const {data, error, isLoading, isFetching} = useGetPostQuery(id);
+    const post = data;
     const navigate = useNavigate();
     const userData = useSelector((state: any) => state.auth.userData);
 
-    const isAuthor = post && userData ? post.author.username === userData.username : false;
+    const isAuthor = post && userData ? post?.author?.username === userData?.username : false;
     
     const toast = useToasts();
     
@@ -38,6 +41,20 @@ export default function Post() {
             console.error("Failed to delete Post", error)
         }
     };
+
+    if(isLoading){
+        return <p>Loading...</p>
+    }
+    if(error){
+        let errorMessage = "something went wrong";
+        if('status' in error){
+            errorMessage = `Error ${error.status} : ${error.data}`
+        }else if('message' in error){
+            errorMessage = error.message ?? errorMessage;
+        }
+
+        return <p>{errorMessage}</p>
+    }
 
     return post ? (
         <div className="py-8 sm:py-12">
