@@ -21,7 +21,7 @@ export const postLoader = async ({ params, request }) => {
 export default function Post() {
     const {id}  = useParams() ;
     const {data, error, isLoading} = useGetPostQuery(id);
-    const [deletepostMutation] = useDeletePostMutation();
+    const [deletePostMutation] = useDeletePostMutation();
     const post = data;
     const navigate = useNavigate();
     const userData = useSelector((state: any) => state.auth.userData);
@@ -33,7 +33,7 @@ export default function Post() {
 
     const deletePost = async() => {
         try {
-            await toast.promise(deletepostMutation(post.id).unwrap(), {
+            await toast.promise(deletePostMutation(post.id).unwrap(), {
                 loading: "Deleting Post...",
                 success: "Post Deleted Successfully!",
                 error: "Failed to Delete Post"
