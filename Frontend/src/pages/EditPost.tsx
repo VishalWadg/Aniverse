@@ -7,26 +7,22 @@ import useToasts from '@/hooks/useToasts';
 
 function EditPost() {
     const { id } = useParams();
-    // Destructure what you need, including isLoading
     const { data: post, error, isLoading } = useGetPostQuery(id);
     const location = useLocation();
-    
-    // Consider replacing 'any' with your actual RootState type if using TypeScript
     const userData = useSelector((state: any) => state.auth.userData);
     const { error: errorToast } = useToasts();
 
-    const isAuthor = Boolean(post && userData && post?.author?.username === userData?.username);
+    const isAuthor = Boolean(post && userData && post.author?.username === userData.username);
 
-    // --- 1. HANDLE SIDE EFFECTS ---
-    // Watch for errors and trigger the toast ONLY when the error state changes
+    
     useEffect(() => {
         if (error) {
             if ('status' in error) {
-                // RTK Query FetchBaseQueryError
-                errorToast(error.data as string, 3000);
+                
+                errorToast(error.data as string, 1000);
             } else if ('message' in error) {
-                // RTK Query SerializedError
-                errorToast(error.message, 3000);
+                
+                errorToast(error.message, 1000);
             }
         }
     }, [error, errorToast]);

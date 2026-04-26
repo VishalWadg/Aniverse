@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { useAppSelector } from '@/store/hooks'
 
 export default function AuthLayout({ children, authentication = true }) {
 
     const navigate = useNavigate()
-    const authStatus = useSelector((state: any) => state.auth.status)
-    const authLoading = useSelector((state: any) => state.auth.loading) // Global loading state
+    const authStatus = useAppSelector((state) => state.auth.status)
+    const authLoading = useAppSelector((state) => state.auth.loading) // Global loading state
     useEffect(() => {
         // Case 1: Route requires Auth (true), but User is NOT logged in.
         // Redirect to Login.

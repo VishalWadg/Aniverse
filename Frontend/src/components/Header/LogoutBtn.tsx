@@ -1,13 +1,13 @@
 import React from 'react'
-import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import authApi from '../../api/authApi'
 import useToasts from '../../hooks/useToasts'
+import { useAppDispatch } from '@/store/hooks'
 import { logout } from '../../store/' // Import from authSlice only
 
 function LogoutBtn() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const toasts = useToasts();
 

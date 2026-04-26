@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Footer, Header, RouteToast } from './components';
 import { subscribeAuthFailure } from './lib/authSession';
+import { useAppDispatch } from './store/hooks';
 import { logout } from './store';
 import './App.css';
 
 function App() {
   const location = useLocation();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup';
 
   useEffect(() => {

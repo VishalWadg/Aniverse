@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLoaderData, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button, Container } from "../components";
 import parse from "html-react-parser";
 import { useSelector } from "react-redux";
@@ -7,6 +7,7 @@ import postApi from "../api/postApi";
 import useToasts from "../hooks/useToasts";
 import { sanitizeMonolithHtml } from "../lib/monolith-html";
 import { useGetPostQuery } from "@/api/postsApi";
+import { useDeletePostMutation } from "@/api/postsApi";
 
 export const postLoader = async ({ params, request }) => {
     try {
@@ -19,19 +20,20 @@ export const postLoader = async ({ params, request }) => {
 
 export default function Post() {
     const {id}  = useParams() ;
-    const {data, error, isLoading, isFetching} = useGetPostQuery(id);
+    const {data, error, isLoading} = useGetPostQuery(id);
+    const [deletepostMutation] = useDeletePostMutation();
     const post = data;
     const navigate = useNavigate();
     const userData = useSelector((state: any) => state.auth.userData);
 
-    const isAuthor = post && userData ? post?.author?.username === userData?.username : false;
+    const isAuthor = post && userData ? post.author?.username === userData.username : false;
     
     const toast = useToasts();
     
 
     const deletePost = async() => {
         try {
-            await toast.promise(postApi.deletePost(post.id), {
+            await toast.promise(deletepostMutation(post.id).unwrap(), {
                 loading: "Deleting Post...",
                 success: "Post Deleted Successfully!",
                 error: "Failed to Delete Post"
@@ -48,7 +50,7 @@ export default function Post() {
     if(error){
         let errorMessage = "something went wrong";
         if('status' in error){
-            errorMessage = `Error ${error.status} : ${error.data}`
+            errorMessage = `Error ${error.status} : ${typeof error.data === 'object' ? JSON.stringify(error.data) : error.data}`;
         }else if('message' in error){
             errorMessage = error.message ?? errorMessage;
         }

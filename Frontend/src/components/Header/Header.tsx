@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { useAppSelector } from '@/store/hooks'
 import Container from '../Container/Container'
 import Logo from '../Logo'
 import LogoutBtn from './LogoutBtn'
@@ -14,7 +14,7 @@ const navItems = [
 ]
 
 function Header() {
-  const authStatus = useSelector((state: any) => state.auth.status)
+  const authStatus = useAppSelector((state) => state.auth.status)
   const location = useLocation()
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
