@@ -2,8 +2,8 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { Button, RTE } from '../index'
-import postApi from '../../api/postApi'
 import useToasts from '../../hooks/useToasts'
+import { useCreatePostMutation, useUpdatePostMutation } from '@/api/postsApi'
 
 type PostFormValues = {
     title: string;
@@ -17,6 +17,8 @@ type PostFormProps = {
 function PostForm({ post }: PostFormProps) {
 
     const toasts = useToasts();
+    const [createPost] = useCreatePostMutation();
+    const [updatePost] = useUpdatePostMutation();
 
     const { handleSubmit, control } = useForm<PostFormValues>({
         defaultValues: {
@@ -35,7 +37,10 @@ function PostForm({ post }: PostFormProps) {
                     content: data.content
                 };
                 const dbPost = await toasts.promise(
-                    postApi.updatePost(post.id, updateData),
+                    updatePost({
+                        id: post.id,
+                        updates: updateData,
+                    }).unwrap(),
                     {
                         loading: "Updating Post...",
                         success: "Post Updated Successfully!",
@@ -50,7 +55,7 @@ function PostForm({ post }: PostFormProps) {
                     content: data.content,
                 };
                 const dbPost = await toasts.promise(
-                    postApi.createPost(createData),
+                    createPost(createData).unwrap(),
                     {
                         loading: "Creating Post...",
                         success: "Post Created Successfully!",

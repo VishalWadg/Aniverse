@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLoaderData } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '@/store/hooks';
 import EditorialFeed from '../components/feed/EditorialFeed';
 
 // 1. Loader Logic (Runs BEFORE render)
@@ -21,7 +21,7 @@ export const allPostsLoader = async ({ request }) => {
 function AllPosts() {
     const data = useLoaderData() as any;
     const posts = data?.content || [];
-    const authStatus = useSelector((state: any) => state.auth.status);
+    const authStatus = useAppSelector((state) => state.auth.status);
 
     return <EditorialFeed posts={posts} authStatus={authStatus} mode="archive" />;
 }

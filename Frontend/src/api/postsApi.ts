@@ -13,6 +13,19 @@ type PostsResponse = {
     content: Post[]
 }
 
+type CreatePostInput = {
+    title: string
+    content: string
+}
+
+type UpdatePostInput = {
+    id: number
+    updates: {
+        title: string
+        content: string
+    }
+}
+
 const postsApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getPosts: build.query<PostsResponse, void>({
@@ -35,9 +48,47 @@ const postsApi = baseApi.injectEndpoints({
                 method: 'GET',
             }),
             providesTags: (result, error, id) => [{type: 'Post', id}]
+        }),
+
+        createPost : build.mutation<Post, CreatePostInput>({
+            query: (postData) => ({
+                url: `/posts`,
+                method: 'POST',
+                data: postData,
+            }),
+            invalidatesTags: [{type : 'Post' as const, id:'LIST'}]
+        }),
+
+        updatePost: build.mutation<Post, UpdatePostInput>({
+            query: ({id, updates}) => ({
+                url: `/posts/${id}`,
+                method:'PUT', 
+                data: updates,
+            }),
+            invalidatesTags : (result, error, {id}) => [
+                {type: 'Post' as const, id },
+                {type: 'Post' as const, id: 'LIST'}
+            ]
+        }),
+
+        deletePost: build.mutation<void, number>({
+            query: (id) => ({
+                url: `/posts/${id}`,
+                method: 'DELETE'
+            }),
+            invalidatesTags : (result, error, id) => [
+                {type:'Post' as const, id},
+                {type: 'Post' as const, id : 'LIST'},
+            ],
         })
     }),
     overrideExisting: false,
 })
 
-export const { useGetPostsQuery, useGetPostQuery } = postsApi
+export const { 
+    useGetPostsQuery, 
+    useGetPostQuery, 
+    useCreatePostMutation,
+    useUpdatePostMutation,
+    useDeletePostMutation
+} = postsApi

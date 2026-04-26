@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import authApi from '../api/authApi'
 import { setMemoryTokenNExpiry } from '../api/axiosClient'
 import useToasts from '../hooks/useToasts'
+import { useAppDispatch } from '../store/hooks'
 import { login as authLogin } from '../store/index'
 import { AuthField, AuthScene } from './auth/AuthScene'
 
@@ -16,7 +16,7 @@ type LoginFormValues = {
 
 function Login() {
   const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const toasts = useToasts()
   const [error, setError] = useState('')
   const {
