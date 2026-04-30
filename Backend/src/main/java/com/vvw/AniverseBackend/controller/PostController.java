@@ -3,12 +3,15 @@ package com.vvw.AniverseBackend.controller;
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
+import org.springframework.data.domain.Sort;
 import com.vvw.AniverseBackend.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+// import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
 import com.vvw.AniverseBackend.dto.UpdatePostDto;
 import com.vvw.AniverseBackend.service.PostService;
@@ -32,8 +35,8 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ResponseEntity<Page<PostResponseDto>> getAllPosts() {
-        return ResponseEntity.ok().body(postService.getAllPosts(PageRequest.of(0, 10)));
+    public ResponseEntity<Page<PostResponseDto>> getAllPosts(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok().body(postService.getAllPosts(pageable));
     }
 
     @GetMapping("/{id}")
