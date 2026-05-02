@@ -11,6 +11,7 @@ import LogoutBtn from './LogoutBtn'
 const navItems = [
   { name: 'Home', slug: '/' },
   { name: 'All Posts', slug: '/all-posts' },
+  { name: "Trash Bin", slug: "/admin" }
 ]
 
 function Header() {
@@ -21,6 +22,14 @@ function Header() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
   const navControlClass = 'h-10'
+  const userRole = useAppSelector((state) => state.auth.userData?.role);
+
+  const navRoutes = navItems.filter((item) => {
+    if (item.slug === "/admin") {
+      return userRole === "ADMIN"
+    }
+    return true;
+  })
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -117,7 +126,7 @@ function Header() {
 
           <div className="hidden flex-1 flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-end">
             <nav className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              {navItems.map((item) => (
+              {navRoutes.map((item) => (
                 <Link
                   key={item.name}
                   to={item.slug}
@@ -177,7 +186,7 @@ function Header() {
           {isMobileNavOpen ? (
             <div className="border-t border-white/8 pt-4 lg:hidden">
               <nav className="flex flex-col gap-3">
-                {navItems.map((item) => (
+                {navRoutes.map((item) => (
                   <Link
                     key={item.name}
                     to={item.slug}

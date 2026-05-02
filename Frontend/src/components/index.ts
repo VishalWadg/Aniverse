@@ -12,11 +12,12 @@ import RTE from "./RTE";
 import Signup from "./Signup";
 import PostForm from "./post-form/PostForm";
 import AuthLayout from "./AuthLayout";
+import AdminLayout from "./AdminLayout";
 import RouteToast from "./RouteToast";
 
 export {
     Header,
-    Footer, 
+    Footer,
     Logo,
     Container,
     LogoutBtn,
@@ -29,5 +30,6 @@ export {
     Signup,
     PostForm,
     AuthLayout,
+    AdminLayout,
     RouteToast,
 };

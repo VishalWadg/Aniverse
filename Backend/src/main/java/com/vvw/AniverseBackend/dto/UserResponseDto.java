@@ -1,5 +1,7 @@
 package com.vvw.AniverseBackend.dto;
 
+import com.vvw.AniverseBackend.entity.type.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +16,5 @@ public class UserResponseDto {
     private String username;
     private String name;
     private String email;
+    private Role role;
 }
