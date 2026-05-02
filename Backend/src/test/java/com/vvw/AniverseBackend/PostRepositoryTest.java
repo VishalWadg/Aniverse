@@ -4,9 +4,7 @@ import com.vvw.AniverseBackend.entity.Post;
 import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.repository.PostRepository;
 import com.vvw.AniverseBackend.repository.UserRepository;
-
 import jakarta.transaction.Transactional;
-
 import org.hibernate.Hibernate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,12 +31,11 @@ public class PostRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    private Long ghibliPostId;
+    private Long deletedPostId;
+
     @BeforeEach
     void setUp() {
-        postRepository.deleteAll();
-        userRepository.deleteAll();
-
-        // 1. Create Alice (Your tests expect her to have exactly 2 posts)
         User alice = new User();
         alice.setUsername("alice"); 
         alice.setName("Alice");               
@@ -45,7 +43,6 @@ public class PostRepositoryTest {
         alice.setPassword("SecurePass123!");  
         userRepository.save(alice);
 
-        // 2. Create Bob (To make the total post count = 5 for your pagination test)
         User bob = new User();
         bob.setUsername("bob"); 
         bob.setName("Bob");               
@@ -53,12 +50,11 @@ public class PostRepositoryTest {
         bob.setPassword("SecurePass123!");  
         userRepository.save(bob);
 
-        // 3. Create Alice's 2 Posts (ADDING CONTENT SO THE DB DOESN'T CRASH)
         Post post1 = new Post();
-        post1.setTitle("Exploring Ghibli Worlds"); // Test looks for this exact title!
+        post1.setTitle("Exploring Ghibli Worlds");
         post1.setContent("Totoro is the best movie ever made.");
         post1.setAuthor(alice);
-        postRepository.save(post1);
+        ghibliPostId = postRepository.save(post1).getId();
 
         Post post2 = new Post();
         post2.setTitle("Naruto Theories");
@@ -66,30 +62,31 @@ public class PostRepositoryTest {
         post2.setAuthor(alice);
         postRepository.save(post2);
 
-        // 4. Create Bob's 3 Posts (To reach the expected 5 total posts)
         for (int i = 3; i <= 5; i++) {
             Post post = new Post();
-            post.setTitle("Z Anime Review " + i); // Starts with Z so it sorts to the end
+            post.setTitle("Z Anime Review " + i);
             post.setContent("Some review content.");
             post.setAuthor(bob);
             postRepository.save(post);
         }
+
+        Post deletedPost = new Post();
+        deletedPost.setTitle("Deleted Editorial");
+        deletedPost.setContent("This post should live only in trash queries.");
+        deletedPost.setAuthor(alice);
+        deletedPost.setIsDeleted(true);
+        deletedPost.setDeletedAt(LocalDateTime.now().minusDays(45));
+        deletedPostId = postRepository.save(deletedPost).getId();
     }
 
     @AfterEach
     void tearDown() {
-        postRepository.deleteAll();
-        userRepository.deleteAll();
+        // Test data is rolled back after each transactional test.
     }
 
     @Test
-    void whenFindByIdWithAuthor_ThenReturnsPostAndAuthor() {
-        // Dynamically find the ID of the Ghibli post instead of hardcoding 1L
-        Long ghibliId = postRepository.findAll().stream()
-                .filter(p -> p.getTitle().equals("Exploring Ghibli Worlds"))
-                .findFirst().get().getId();
-
-        Optional<Post> foundPost = postRepository.findByIdWithAuthor(ghibliId);
+    void whenFindActiveByIdWithAuthor_ThenReturnsPostAndAuthor() {
+        Optional<Post> foundPost = postRepository.findActiveByIdWithAuthor(ghibliPostId);
 
         assertThat(foundPost).isPresent();
         assertThat(foundPost.get().getTitle()).isEqualTo("Exploring Ghibli Worlds");
@@ -99,27 +96,22 @@ public class PostRepositoryTest {
 
     @Test
     void whenFindAuthorUsernameByPostId_ThenReturnsOnlyUsername() {
-        // Dynamically get Alice's post ID
-        Long alicePostId = postRepository.findAll().stream()
-                .filter(p -> p.getAuthor().getUsername().equals("alice"))
-                .findFirst().get().getId();
-
-        Optional<String> username = postRepository.findAuthorUsernameByPostId(alicePostId);
+        Optional<String> username = postRepository.findAuthorUsernameByPostId(ghibliPostId);
 
         assertThat(username).isPresent();
         assertThat(username.get()).isEqualTo("alice");
     }
 
     @Test
-    void whenFindAuthorUsernameByPostId_AndPostNotFound_ThenReturnsEmpty() {
-        Optional<String> username = postRepository.findAuthorUsernameByPostId(9999L); // Safely fake ID
+    void whenFindAuthorUsernameByPostId_AndPostIsDeleted_ThenReturnsEmpty() {
+        Optional<String> username = postRepository.findAuthorUsernameByPostId(deletedPostId);
         assertThat(username).isNotPresent();
     }
 
     @Test
-    void whenFindAllWithAuthor_ThenReturnsPaginatedPostsAndAuthors() {
+    void whenFindActiveWithAuthor_ThenReturnsOnlyActivePaginatedPostsAndAuthors() {
         Pageable pageRequest = PageRequest.of(0, 2, Sort.by("title"));
-        Page<Post> postPage = postRepository.findAllWithAuthor(pageRequest);
+        Page<Post> postPage = postRepository.findActiveWithAuthor(pageRequest);
 
         assertThat(postPage.getTotalElements()).isEqualTo(5);
         assertThat(postPage.getTotalPages()).isEqualTo(3);
@@ -132,9 +124,9 @@ public class PostRepositoryTest {
     }
 
     @Test
-    void whenFindByAuthorUsernameWithAuthor_ThenReturnsCorrectFilteredPage() {
+    void whenFindActiveByAuthorUsernameWithAuthor_ThenReturnsCorrectFilteredActivePage() {
         Pageable pageRequest = PageRequest.of(0, 5); 
-        Page<Post> postPage = postRepository.findByAuthorUsernameWithAuthor("alice", pageRequest);
+        Page<Post> postPage = postRepository.findActiveByAuthorUsernameWithAuthor("alice", pageRequest);
 
         assertThat(postPage.getTotalElements()).isEqualTo(2); 
         assertThat(postPage.getTotalPages()).isEqualTo(1);    
@@ -143,5 +135,42 @@ public class PostRepositoryTest {
         postPage.getContent().forEach(post -> {
             assertThat(post.getAuthor().getUsername()).isEqualTo("alice");
         });
+    }
+
+    @Test
+    void whenFindDeletedWithAuthor_ThenReturnsOnlyDeletedPosts() {
+        Pageable pageRequest = PageRequest.of(0, 10);
+        Page<Post> postPage = postRepository.findDeletedWithAuthor(pageRequest);
+
+        assertThat(postPage.getTotalElements()).isEqualTo(1);
+        assertThat(postPage.getContent()).hasSize(1);
+        assertThat(postPage.getContent().get(0).getId()).isEqualTo(deletedPostId);
+        assertThat(postPage.getContent().get(0).getIsDeleted()).isTrue();
+        assertThat(Hibernate.isInitialized(postPage.getContent().get(0).getAuthor())).isTrue();
+    }
+
+    @Test
+    void whenFindDeletedByIdWithAuthor_ThenReturnsDeletedPostAndAuthor() {
+        Optional<Post> foundPost = postRepository.findDeletedByIdWithAuthor(deletedPostId);
+
+        assertThat(foundPost).isPresent();
+        assertThat(foundPost.get().getIsDeleted()).isTrue();
+        assertThat(foundPost.get().getDeletedAt()).isNotNull();
+        assertThat(foundPost.get().getAuthor().getUsername()).isEqualTo("alice");
+    }
+
+    @Test
+    void whenFindIdsDeletedBefore_ThenReturnsOnlyExpiredDeletedIds() {
+        LocalDateTime cutoff = LocalDateTime.now().minusDays(30);
+
+        assertThat(postRepository.findIdsDeletedBefore(cutoff)).containsExactly(deletedPostId);
+    }
+
+    @Test
+    void whenHardDeleteById_ThenPhysicallyRemovesDeletedPost() {
+        int deletedCount = postRepository.hardDeleteById(deletedPostId);
+
+        assertThat(deletedCount).isEqualTo(1);
+        assertThat(postRepository.findById(deletedPostId)).isNotPresent();
     }
 }

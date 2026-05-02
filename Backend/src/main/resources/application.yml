@@ -22,6 +22,12 @@ application:
       refresh-token:
         expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS:604800000}
         absolute-expiration-ms: ${REFRESH_TOKEN_ABSOLUTE_EXPIRATION_MS:2592000000}
+  
+  posts:
+    retention:
+      days: ${POST_RETENTION_DAYS:30}
+      purge-cron: ${POST_RETENTION_PURGE_CRON:0 0 3 * * *}
+      purge-zone: ${POST_RETENTION_PURGE_ZONE:UTC}
 
 # cloudinary
 cloudinary:

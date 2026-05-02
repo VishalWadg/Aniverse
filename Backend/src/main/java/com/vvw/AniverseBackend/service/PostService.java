@@ -18,4 +18,9 @@ public interface PostService {
     PostResponseDto updatePostPartially(Long id, Map<String, Object> updates, User currentUser);
     Page<PostResponseDto> getPostsByUsername(String username, Pageable pageable);
     Boolean isUserTheAuthor(String username, Long post_id);
+
+    Page<PostResponseDto> getDeletedPosts(Pageable pageable);
+    PostResponseDto restoreDeletedPost(Long id);
+    void purgeDeletedPost(Long id);
+    int purgeExpiredDeletedPosts();
 }
