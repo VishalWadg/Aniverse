@@ -1,15 +1,20 @@
 import { baseApi } from "./baseApi";
 
-type Post = {
+export type Post = {
     id: number
     title: string
     content: string
+    createdAt?: string
+    isDeleted?: boolean
     author: {
         username: string
+        name?: string
+        profilePic?: string | null
+        role?: string
     }
 }
 
-type PostsResponse = {
+export type PostsResponse = {
     content: Post[]
 }
 
@@ -33,41 +38,41 @@ const postsApi = baseApi.injectEndpoints({
                 url: '/posts',
                 method: 'GET',
             }),
-            providesTags:  (result) => 
+            providesTags: (result) =>
                 result
-                ?[
-                    ...result.content.map((post) => ({type: 'Post' as const, id: post.id})),
-                    {type: 'Post' as const, id: 'LIST'},
-                ]
-                : [{type : 'Post' as const, id:'LIST'}]
+                    ? [
+                        ...result.content.map((post) => ({ type: 'Post' as const, id: post.id })),
+                        { type: 'Post' as const, id: 'LIST' },
+                    ]
+                    : [{ type: 'Post' as const, id: 'LIST' }]
         }),
 
-        getPost : build.query<Post, string>({
+        getPost: build.query<Post, string>({
             query: (id) => ({
                 url: `/posts/${id}`,
                 method: 'GET',
             }),
-            providesTags: (result, error, id) => [{type: 'Post', id}]
+            providesTags: (result, error, id) => [{ type: 'Post', id }]
         }),
 
-        createPost : build.mutation<Post, CreatePostInput>({
+        createPost: build.mutation<Post, CreatePostInput>({
             query: (postData) => ({
                 url: `/posts`,
                 method: 'POST',
                 data: postData,
             }),
-            invalidatesTags: [{type : 'Post' as const, id:'LIST'}]
+            invalidatesTags: [{ type: 'Post' as const, id: 'LIST' }]
         }),
 
         updatePost: build.mutation<Post, UpdatePostInput>({
-            query: ({id, updates}) => ({
+            query: ({ id, updates }) => ({
                 url: `/posts/${id}`,
-                method:'PUT', 
+                method: 'PUT',
                 data: updates,
             }),
-            invalidatesTags : (result, error, {id}) => [
-                {type: 'Post' as const, id },
-                {type: 'Post' as const, id: 'LIST'}
+            invalidatesTags: (result, error, { id }) => [
+                { type: 'Post' as const, id },
+                { type: 'Post' as const, id: 'LIST' }
             ]
         }),
 
@@ -76,19 +81,31 @@ const postsApi = baseApi.injectEndpoints({
                 url: `/posts/${id}`,
                 method: 'DELETE'
             }),
-            invalidatesTags : (result, error, id) => [
-                {type:'Post' as const, id},
-                {type: 'Post' as const, id : 'LIST'},
+            invalidatesTags: (result, error, id) => [
+                { type: 'Post' as const, id },
+                { type: 'Post' as const, id: 'LIST' },
             ],
+        }),
+
+        getPostsByUsername: build.query<PostsResponse, string>({
+            query: (username: string) => ({
+                url: `/posts/user/${username}`,
+                method: 'GET',
+            }),
+            providesTags: (result, error, username) => [{
+                type: 'Post' as const,
+                id: `${username}-LIST`
+            }]
         })
     }),
     overrideExisting: false,
 })
 
-export const { 
-    useGetPostsQuery, 
-    useGetPostQuery, 
+export const {
+    useGetPostsQuery,
+    useGetPostQuery,
     useCreatePostMutation,
     useUpdatePostMutation,
-    useDeletePostMutation
+    useDeletePostMutation,
+    useGetPostsByUsernameQuery
 } = postsApi

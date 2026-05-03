@@ -3,11 +3,11 @@ import { createApi, BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import axiosClient from "./axiosClient";
 
 type AxiosBaseQueryArgs = {
-        url: string;
-        method?: AxiosRequestConfig['method'];
-        data?: AxiosRequestConfig['data'];
-        params?: AxiosRequestConfig['params'];
-        headers?: AxiosRequestConfig['headers'];
+    url: string;
+    method?: AxiosRequestConfig['method'];
+    data?: AxiosRequestConfig['data'];
+    params?: AxiosRequestConfig['params'];
+    headers?: AxiosRequestConfig['headers'];
 }
 
 type AxiosBaseQueryError = {
@@ -25,7 +25,7 @@ const axiosBaseQuery = (): BaseQueryFn<
             ...args,
             signal: api.signal,
         })
-        return {data: result.data}
+        return { data: result.data }
     } catch (error) {
         const axiosError = error as AxiosError
         return {
@@ -40,6 +40,6 @@ const axiosBaseQuery = (): BaseQueryFn<
 export const baseApi = createApi({
     reducerPath: 'api',
     baseQuery: axiosBaseQuery(),
-    tagTypes: ['Post'],
+    tagTypes: ['Post', 'User'],
     endpoints: () => ({}),
 })

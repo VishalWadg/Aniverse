@@ -32,6 +32,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
            countQuery = "SELECT count(p) FROM Post p WHERE p.author.username = :username AND p.isDeleted = false")
     Page<Post> findActiveByAuthorUsernameWithAuthor(@Param("username") String username, Pageable pageable);
 
+    long countByAuthorUsernameAndIsDeletedFalse(String username);
+
     @Query(value = "SELECT p FROM Post p JOIN FETCH p.author WHERE p.isDeleted = true",
            countQuery = "SELECT count(p) FROM Post p WHERE p.isDeleted = true")
     Page<Post> findDeletedWithAuthor(Pageable pageable);

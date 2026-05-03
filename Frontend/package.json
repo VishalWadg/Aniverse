@@ -13,6 +13,8 @@
   "dependencies": {
     "@coolbytes/editorjs-delimiter": "^1.0.4",
     "@cychann/editorjs-quote": "^1.0.4",
+    "@dicebear/collection": "^9.4.2",
+    "@dicebear/core": "^9.4.2",
     "@editorjs/checklist": "^1.6.0",
     "@editorjs/delimiter": "^1.4.2",
     "@editorjs/editorjs": "^2.31.5",

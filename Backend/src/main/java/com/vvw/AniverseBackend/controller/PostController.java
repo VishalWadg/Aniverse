@@ -35,8 +35,16 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ResponseEntity<Page<PostResponseDto>> getAllPosts(@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<Page<PostResponseDto>> getAllPosts(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok().body(postService.getAllPosts(pageable));
+    }
+
+    @GetMapping("/deleted")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<PostResponseDto>> getDeletedPosts(
+            @PageableDefault(size = 10, sort = "deletedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok().body(postService.getDeletedPosts(pageable));
     }
 
     @GetMapping("/{id}")
@@ -52,8 +60,8 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody UpdatePostDto updatePostDto, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody UpdatePostDto updatePostDto,
+            @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok().body(postService.updatePost(id, updatePostDto, currentUser));
     }
 
@@ -68,6 +76,32 @@ public class PostController {
     public ResponseEntity<PostResponseDto> updatePostPartially(@PathVariable Long id,
             @RequestBody Map<String, Object> updates, @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok().body(postService.updatePostPartially(id, updates, currentUser));
+    }
+
+    @DeleteMapping("/cleanup")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Integer> cleanupExpiredPosts() {
+        return ResponseEntity.ok(postService.purgeExpiredDeletedPosts());
+    }
+
+    @DeleteMapping("/cleanup/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteExpiredPost(@PathVariable Long id) {
+        postService.purgeDeletedPost(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/restore/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PostResponseDto> restoreDeletedPost(@PathVariable Long id) {
+        return ResponseEntity.ok(postService.restoreDeletedPost(id));
+    }
+
+    @GetMapping("/user/{username}")
+    public ResponseEntity<Page<PostResponseDto>> getPostsByUser(
+            @PathVariable String username,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok().body(postService.getPostsByUsername(username, pageable));
     }
 
 }

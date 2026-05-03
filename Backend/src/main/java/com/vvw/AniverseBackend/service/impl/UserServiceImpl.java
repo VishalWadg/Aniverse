@@ -1,54 +1,148 @@
 package com.vvw.AniverseBackend.service.impl;
 
 
+import com.vvw.AniverseBackend.dto.CurrentUserProfileDto;
+import com.vvw.AniverseBackend.dto.PublicUserProfileDto;
+import com.vvw.AniverseBackend.dto.UpdateUserProfileDto;
 import com.vvw.AniverseBackend.dto.UserResponseDto;
+import com.vvw.AniverseBackend.entity.User;
+import com.vvw.AniverseBackend.exceptions.DuplicateResourceException;
 import com.vvw.AniverseBackend.exceptions.EntityNotFoundException;
+import com.vvw.AniverseBackend.exceptions.InvalidOperationException;
+import com.vvw.AniverseBackend.repository.PostRepository;
+import com.vvw.AniverseBackend.repository.UserRepository;
+import com.vvw.AniverseBackend.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-
-import com.vvw.AniverseBackend.repository.UserRepository;
-import com.vvw.AniverseBackend.service.UserService;
-import com.vvw.AniverseBackend.entity.User;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final ModelMapper modelMapper;
 
+    private User findExistingUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new EntityNotFoundException("User not found with username: " + username));
+    }
+
+    private long getPostCount(String username) {
+        return postRepository.countByAuthorUsernameAndIsDeletedFalse(username);
+    }
+
+    private PublicUserProfileDto toPublicUserProfileDto(User user) {
+        return PublicUserProfileDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .name(user.getName())
+                .bio(user.getBio())
+                .profilePic(user.getProfilePic())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .postCount(getPostCount(user.getUsername()))
+                .build();
+    }
+
+    private CurrentUserProfileDto toCurrentUserProfileDto(User user) {
+        return CurrentUserProfileDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .name(user.getName())
+                .email(user.getEmail())
+                .bio(user.getBio())
+                .profilePic(user.getProfilePic())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .postCount(getPostCount(user.getUsername()))
+                .build();
+    }
+
+    private String normalizeNullableText(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmedValue = value.trim();
+        return trimmedValue.isEmpty() ? null : trimmedValue;
+    }
+
+    private String normalizeEmail(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        return value.trim().toLowerCase(Locale.ROOT);
+    }
+
     @Override
+    @Transactional(readOnly = true)
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
-        // Call the built-in .map() method directly on the Page object
         return userRepository.findAll(pageable)
                 .map(user -> modelMapper.map(user, UserResponseDto.class));
     }
 
     @Override
-    public UserResponseDto getUserProfile(String username) {
-        return modelMapper
-            .map(userRepository
-                    .findByUsername(username)
-                    .orElseThrow(() ->
-                        new EntityNotFoundException("User Not found with username: "+username+". Failed to get user profile.")),
-                UserResponseDto.class);
+    @Transactional(readOnly = true)
+    public PublicUserProfileDto getUserProfile(String username) {
+        return toPublicUserProfileDto(findExistingUserByUsername(username));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CurrentUserProfileDto getCurrentUserProfile(String username) {
+        return toCurrentUserProfileDto(findExistingUserByUsername(username));
+    }
+
+    @Override
+    @Transactional
+    public CurrentUserProfileDto updateCurrentUserProfile(String username, UpdateUserProfileDto updateUserProfileDto) {
+        User user = findExistingUserByUsername(username);
+
+        if (updateUserProfileDto.getName() != null) {
+            String normalizedName = updateUserProfileDto.getName().trim();
+            if (normalizedName.isEmpty()) {
+                throw new InvalidOperationException("Name cannot be blank");
+            }
+            user.setName(normalizedName);
+        }
+
+        if (updateUserProfileDto.getEmail() != null) {
+            String normalizedEmail = normalizeEmail(updateUserProfileDto.getEmail());
+            if (userRepository.existsByEmailAndIdNot(normalizedEmail, user.getId())) {
+                throw new DuplicateResourceException("Email is already in use");
+            }
+            user.setEmail(normalizedEmail);
+        }
+
+        if (updateUserProfileDto.getBio() != null) {
+            user.setBio(normalizeNullableText(updateUserProfileDto.getBio()));
+        }
+
+        if (updateUserProfileDto.getProfilePic() != null) {
+            user.setProfilePic(normalizeNullableText(updateUserProfileDto.getProfilePic()));
+        }
+
+        return toCurrentUserProfileDto(userRepository.save(user));
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: "+username));
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
-    // Service to Service methods
+    @Override
     public User findByUsername(String username){
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new EntityNotFoundException("User not found with username: "+username));
-        return user;
+        return findExistingUserByUsername(username);
     }
-
 }

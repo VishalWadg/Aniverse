@@ -35,10 +35,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public UserResponseDto signup(CreateUserDto createUserDto) {
         // 1. Check if user exists (This is correct)
-        if(userRepository.existsByUsername(createUserDto.getUsername())){
+        if (userRepository.existsByUsername(createUserDto.getUsername())) {
             throw new DuplicateResourceException("Username is already taken");
         }
-        if(userRepository.existsByEmail(createUserDto.getEmail())){
+        if (userRepository.existsByEmail(createUserDto.getEmail())) {
             throw new DuplicateResourceException("Email is already in use");
         }
 
@@ -53,8 +53,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthenticationResponseDto login(LoginRequestDto loginRequestDto){
-        Authentication authentication  = authenticationManager.authenticate(
+    public AuthenticationResponseDto login(LoginRequestDto loginRequestDto) {
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword()));
         User user = (User) authentication.getPrincipal();
         String token = jwtUtil.generateAccessToken(user);

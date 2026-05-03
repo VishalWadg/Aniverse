@@ -7,20 +7,31 @@ import { useAppSelector } from '@/store/hooks'
 import Container from '../Container/Container'
 import Logo from '../Logo'
 import LogoutBtn from './LogoutBtn'
+import UserAvatar from '../User/UserAvatar'
 
 const navItems = [
   { name: 'Home', slug: '/' },
   { name: 'All Posts', slug: '/all-posts' },
+  { name: "Trash Bin", slug: "/admin" }
 ]
 
 function Header() {
   const authStatus = useAppSelector((state) => state.auth.status)
+  const currentUser = useAppSelector((state) => state.auth.userData)
   const location = useLocation()
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
   const navControlClass = 'h-10'
+  const userRole = useAppSelector((state) => state.auth.userData?.role);
+
+  const navRoutes = navItems.filter((item) => {
+    if (item.slug === "/admin") {
+      return userRole === "ADMIN"
+    }
+    return true;
+  })
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -117,7 +128,7 @@ function Header() {
 
           <div className="hidden flex-1 flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-end">
             <nav className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              {navItems.map((item) => (
+              {navRoutes.map((item) => (
                 <Link
                   key={item.name}
                   to={item.slug}
@@ -169,6 +180,29 @@ function Header() {
                   </Link>
                 </Button>
 
+                {authStatus && currentUser && (
+                  <Link
+                    to={`/users/${currentUser.username}`}
+                    className="hidden items-center gap-3 border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:bg-white/[0.06] md:inline-flex"
+                  >
+                    <UserAvatar
+                      userName={currentUser.name || currentUser.username}
+                      profileUrl={currentUser.profilePic}
+                      size="sm"
+                      className="size-9 data-[size=sm]:size-9"
+                    />
+
+                    <span className="min-w-0 text-left">
+                      <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-[#727272]">
+                        Profile
+                      </span>
+                      <span className="block max-w-[9rem] truncate text-sm font-semibold text-white">
+                        {currentUser.username}
+                      </span>
+                    </span>
+                  </Link>
+                )}
+
                 {authStatus && <LogoutBtn />}
               </div>
             </div>
@@ -177,7 +211,7 @@ function Header() {
           {isMobileNavOpen ? (
             <div className="border-t border-white/8 pt-4 lg:hidden">
               <nav className="flex flex-col gap-3">
-                {navItems.map((item) => (
+                {navRoutes.map((item) => (
                   <Link
                     key={item.name}
                     to={item.slug}
@@ -224,6 +258,29 @@ function Header() {
                     Write a Theory
                   </Link>
                 </Button>
+
+                {authStatus && currentUser && (
+                  <Link
+                    to={`/users/${currentUser.username}`}
+                    className="flex items-center gap-3 border border-white/10 bg-white/[0.03] px-3 py-3 transition hover:bg-white/[0.06]"
+                  >
+                    <UserAvatar
+                      userName={currentUser.name || currentUser.username}
+                      profileUrl={currentUser.profilePic}
+                      size="sm"
+                      className="size-10 data-[size=sm]:size-10"
+                    />
+
+                    <span className="min-w-0 text-left">
+                      <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-[#727272]">
+                        Profile
+                      </span>
+                      <span className="block truncate text-sm font-semibold text-white">
+                        {currentUser.username}
+                      </span>
+                    </span>
+                  </Link>
+                )}
 
                 {authStatus && <LogoutBtn />}
               </div>

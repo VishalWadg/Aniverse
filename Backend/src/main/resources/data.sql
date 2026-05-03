@@ -2,11 +2,11 @@
 -- USERS
 -- ------------------------------
 
-INSERT INTO users (name, username, email, password, profile_pic, bio, created_at)
+INSERT INTO users (name, username, email, password, profile_pic, bio, role, created_at)
 VALUES
-('Alice Johnson', 'alice', 'alice@example.com', 'hash123', 'alice.jpg', 'Loves writing about anime and tech.', NOW()),
-('Bob Smith', 'bob', 'bob@example.com', 'hash456', 'bob.png', 'Casual writer and commenter.', NOW()),
-('Charlie Brown', 'charlie', 'charlie@example.com', 'hash789', NULL, 'Just here to read interesting posts.', NOW());
+('Alice Johnson', 'alice', 'alice@example.com', 'hash1234', 'alice.jpg', 'Loves writing about anime and tech.', 'ADMIN', NOW()),
+('Bob Smith', 'bob', 'bob@example.com', 'hash4564', 'bob.png', 'Casual writer and commenter.', 'USER', NOW()),
+('Charlie Brown', 'charlie', 'charlie@example.com', 'hash7890', NULL, 'Just here to read interesting posts.', 'USER', NOW());
 
 
 -- ------------------------------
