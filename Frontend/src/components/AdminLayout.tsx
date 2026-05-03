@@ -2,7 +2,13 @@ import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppSelector } from '@/store/hooks'
 
-export default function AdminLayout({ children, authentication = true }: { Children: React.ReactNode, authentication: boolean }) {
+export default function AdminLayout({
+    children,
+    authentication = true
+}: {
+    children: React.ReactNode
+    authentication: boolean
+}) {
 
     const navigate = useNavigate()
     const authStatus = useAppSelector((state) => state.auth.status)

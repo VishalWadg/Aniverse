@@ -1,23 +1,34 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import UserAvatar from '@/components/User/UserAvatar'
+import { cn } from '@/lib/utils'
 import {
   estimateReadTime,
   extractImageSource,
   formatRelativeTime,
   getDisplayName,
   getExcerpt,
-  getInitials,
   inferCategory,
 } from '@/lib/post-helpers'
 
-function PostCard({ id, title, content = '', author, createdAt, canInteract = true }) {
+function PostCard({
+  id,
+  title,
+  content = '',
+  author,
+  createdAt,
+  canInteract = true,
+  variant = 'default',
+}) {
   const postHref = `/post/${id}`
   const interactionHref = canInteract ? postHref : '/login'
   const displayName = getDisplayName(author)
   const category = inferCategory({ title, content })
-  const excerpt = getExcerpt(content, 240)
+  const isCompact = variant === 'compact'
+  const excerpt = getExcerpt(content, isCompact ? 140 : 240)
   const readTime = estimateReadTime(content)
   const coverImage = extractImageSource(content)
+  const authorHref = author?.username ? `/users/${author.username}` : null
   const navigate = useNavigate()
 
   const handleShare = async () => {
@@ -43,22 +54,115 @@ function PostCard({ id, title, content = '', author, createdAt, canInteract = tr
     window.open(postHref, '_blank', 'noopener,noreferrer')
   }
 
+  const authorMeta = (
+    <div className="min-w-0 flex-1">
+      <div
+        className={cn(
+          'flex flex-wrap items-center gap-2 font-medium uppercase text-[#7f7f7f]',
+          isCompact ? 'text-[10px] tracking-[0.2em]' : 'text-[11px] tracking-[0.24em]'
+        )}
+      >
+        {authorHref ? (
+          <Link
+            to={authorHref}
+            className={cn(
+              'normal-case tracking-normal text-[#ededed] transition-colors hover:text-white',
+              isCompact ? 'text-[13px]' : 'text-sm'
+            )}
+          >
+            u/{displayName}
+          </Link>
+        ) : (
+          <span className={cn('normal-case tracking-normal text-[#ededed]', isCompact ? 'text-[13px]' : 'text-sm')}>
+            u/{displayName}
+          </span>
+        )}
+        <span className="text-[#5c5c5c]">/</span>
+        <span>{formatRelativeTime(createdAt)}</span>
+      </div>
+    </div>
+  )
+
+  if (isCompact) {
+    return (
+      <article className="group flex h-full flex-col border border-white/8 bg-black/25 p-5 transition-colors hover:border-white/14 hover:bg-black/35">
+        <div className="flex items-start gap-3 text-sm text-[#9c9c9c]">
+          <UserAvatar
+            userName={displayName}
+            profileUrl={author?.profilePic}
+            size="sm"
+            className="size-10 data-[size=sm]:size-10"
+          />
+
+          {authorMeta}
+
+          <span className="inline-flex shrink-0 items-center border border-[#ff453a]/35 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-[#ff8f86]">
+            {category}
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-1 flex-col space-y-3">
+          <Link to={interactionHref} className="block">
+            <h2 className="text-xl font-black leading-tight text-[#f5f5f5] transition-colors duration-200 group-hover:text-white">
+              {title}
+            </h2>
+          </Link>
+
+          {coverImage && (
+            <Link to={interactionHref} className="block overflow-hidden border border-white/10 bg-[#121212]">
+              <img
+                src={coverImage}
+                alt={title}
+                className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+            </Link>
+          )}
+
+          <p className="text-sm leading-6 text-[#a3a3a3]">
+            {excerpt || 'Open the manuscript to read the full entry.'}
+          </p>
+        </div>
+
+        <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/8 pt-4 text-sm text-[#909090]">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-2">
+              <ClockIcon className="size-4" />
+              {readTime} min
+            </span>
+
+            <Link
+              to={interactionHref}
+              className="inline-flex items-center gap-2 text-[#b7b7b7] transition-colors hover:text-white"
+            >
+              <CommentIcon className="size-4" />
+              {canInteract ? 'Read' : 'Log in'}
+            </Link>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleShare}
+            className="inline-flex h-8 w-8 items-center justify-center border border-transparent text-[#8f8f8f] transition hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+            aria-label={`Share ${title}`}
+          >
+            <ShareIcon className="size-4" />
+          </button>
+        </div>
+      </article>
+    )
+  }
+
   return (
     <article className="group px-5 py-6 sm:px-6 sm:py-7">
       <div className="flex flex-wrap items-center gap-3 text-sm text-[#9c9c9c]">
-        <span className="flex h-11 w-11 items-center justify-center border border-white/10 bg-white/[0.03] text-xs font-black tracking-[0.2em] text-[#f5f5f5]">
-          {getInitials(displayName)}
-        </span>
+        <UserAvatar
+          userName={displayName}
+          profileUrl={author?.profilePic}
+          size="default"
+          className="size-11 data-[size=default]:size-11"
+        />
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-[11px] font-medium uppercase tracking-[0.24em] text-[#7f7f7f]">
-            <span className="normal-case text-sm tracking-normal text-[#ededed]">
-              u/{displayName}
-            </span>
-            <span className="text-[#5c5c5c]">/</span>
-            <span>{formatRelativeTime(createdAt)}</span>
-          </div>
-        </div>
+        {authorMeta}
 
         <span className="inline-flex items-center border border-[#ff453a]/45 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#ff7a70]">
           {category}

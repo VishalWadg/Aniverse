@@ -22,14 +22,16 @@ import EditPost from './pages/EditPost' // You need to export this from EditPost
 import AdminDashboard from './pages/AdminDashboard'
 
 // These don't have loaders, so standard import is fine
-import { Login, Signup, AddPost } from './pages'
+import { Login, Signup, AddPost, Profile } from './pages'
+
+const isPublicRoute = (pathname: string) => {
+  const publicRoutes = ['/', '/login', '/signup', '/all-posts']
+  return publicRoutes.includes(pathname) || pathname.startsWith('/users/')
+}
 
 const rootLoader = async ({ request }) => {
   const url = new URL(request.url)
   const pathname = url.pathname
-  // Define public routes (routes that don't need authentication)
-
-  const publicRoutes = ['/login', '/signup', '/', '/all-posts'];
   // 1. OPTIMIZATION: Check if we already have a token
   // If we have a token, we assume the session is valid. 
   // if we have already checked auth once, no need to do it again
@@ -61,12 +63,12 @@ const rootLoader = async ({ request }) => {
     store.dispatch(logout());
     setMemoryTokenNExpiry(null);
     // Same logic: allow public routes, redirect protected routes
-    if (publicRoutes.includes(pathname)) {
+    if (isPublicRoute(pathname)) {
       return null;
     }
     return redirect('/login');
   }
-  if (publicRoutes.includes(pathname)) {
+  if (isPublicRoute(pathname)) {
     return null;
   }
   return redirect('/login');
@@ -86,6 +88,8 @@ export const router = createBrowserRouter(createRoutesFromElements(
       element={<Home />}
 
     />
+
+    <Route path='users/:username' element={<Profile />} />
 
     {/* --- Auth Routes --- */}
     <Route path='login' element={

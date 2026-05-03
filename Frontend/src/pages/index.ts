@@ -5,6 +5,7 @@ import Signup from './Signup'
 import EditPost from './EditPost'
 import Post from './Post'
 import Home from './Home'
+import Profile from './Profile'
 
 
 export {
@@ -14,5 +15,6 @@ export {
     Signup,
     EditPost,
     Post,
-    Home
+    Home,
+    Profile
 }

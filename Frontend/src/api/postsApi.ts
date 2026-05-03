@@ -4,8 +4,13 @@ export type Post = {
     id: number
     title: string
     content: string
+    createdAt?: string
+    isDeleted?: boolean
     author: {
         username: string
+        name?: string
+        profilePic?: string | null
+        role?: string
     }
 }
 
