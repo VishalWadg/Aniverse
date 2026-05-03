@@ -187,6 +187,7 @@ function Header() {
                   >
                     <UserAvatar
                       userName={currentUser.name || currentUser.username}
+                      avatarSeed={currentUser.username}
                       profileUrl={currentUser.profilePic}
                       size="sm"
                       className="size-9 data-[size=sm]:size-9"
@@ -266,6 +267,7 @@ function Header() {
                   >
                     <UserAvatar
                       userName={currentUser.name || currentUser.username}
+                      avatarSeed={currentUser.username}
                       profileUrl={currentUser.profilePic}
                       size="sm"
                       className="size-10 data-[size=sm]:size-10"

@@ -56,6 +56,7 @@ const UserProfile = ({
                 <div className="flex shrink-0 flex-col items-start gap-3 sm:w-[9.5rem]">
                     <UserAvatar
                         userName={profile.name || profile.username}
+                        avatarSeed={profile.username}
                         profileUrl={profile.profilePic}
                         size="lg"
                         className="size-24 data-[size=lg]:size-24"

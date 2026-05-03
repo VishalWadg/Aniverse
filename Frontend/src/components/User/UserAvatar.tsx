@@ -7,11 +7,13 @@ import { useMemo } from "react";
 
 const UserAvatar = ({
     userName,
+    avatarSeed,
     profileUrl,
     className,
     size = "default",
 }: {
     userName: string
+    avatarSeed?: string
     profileUrl?: string | null
     className?: string
     size?: "default" | "sm" | "lg"
@@ -19,9 +21,9 @@ const UserAvatar = ({
     const avatar = useMemo(() => {
         if (profileUrl) return profileUrl
         return createAvatar(adventurer, {
-            seed: userName || "anonymous",
+            seed: avatarSeed || userName || "anonymous",
         }).toDataUri()
-    }, [userName, profileUrl])
+    }, [avatarSeed, userName, profileUrl])
 
     return (
         <Avatar
