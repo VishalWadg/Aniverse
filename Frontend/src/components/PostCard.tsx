@@ -89,6 +89,7 @@ function PostCard({
         <div className="flex items-start gap-3 text-sm text-[#9c9c9c]">
           <UserAvatar
             userName={displayName}
+            avatarSeed={author?.username || displayName}
             profileUrl={author?.profilePic}
             size="sm"
             className="size-10 data-[size=sm]:size-10"
@@ -157,6 +158,7 @@ function PostCard({
       <div className="flex flex-wrap items-center gap-3 text-sm text-[#9c9c9c]">
         <UserAvatar
           userName={displayName}
+          avatarSeed={author?.username || displayName}
           profileUrl={author?.profilePic}
           size="default"
           className="size-11 data-[size=default]:size-11"
