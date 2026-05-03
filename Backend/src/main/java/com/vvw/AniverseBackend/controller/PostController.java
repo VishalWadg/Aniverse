@@ -97,4 +97,11 @@ public class PostController {
         return ResponseEntity.ok(postService.restoreDeletedPost(id));
     }
 
+    @GetMapping("/user/{username}")
+    public ResponseEntity<Page<PostResponseDto>> getPostsByUser(
+            @PathVariable String username,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok().body(postService.getPostsByUsername(username, pageable));
+    }
+
 }
