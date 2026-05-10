@@ -5,6 +5,9 @@ import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
 import org.springframework.data.domain.Sort;
 import com.vvw.AniverseBackend.service.UserService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PageableDefault;
@@ -60,14 +63,14 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostResponseDto> createNewPost(@RequestBody CreatePostDto createPostDto,
+    public ResponseEntity<PostResponseDto> createNewPost(@Valid @RequestBody CreatePostDto createPostDto,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(postService.createNewPost(createPostDto, user.getUsername()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody UpdatePostDto updatePostDto,
+    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @Valid @RequestBody UpdatePostDto updatePostDto,
             @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok().body(postService.updatePost(id, updatePostDto, currentUser));
     }
@@ -81,7 +84,7 @@ public class PostController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<PostResponseDto> updatePostPartially(@PathVariable Long id,
-            @RequestBody Map<String, Object> updates, @AuthenticationPrincipal User currentUser) {
+            @RequestBody @Valid UpdatePostDto updates, @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok().body(postService.updatePostPartially(id, updates, currentUser));
     }
 

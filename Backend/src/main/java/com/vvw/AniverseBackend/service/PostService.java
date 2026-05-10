@@ -15,7 +15,7 @@ public interface PostService {
     PostResponseDto getPostById(Long id);
     void deletePostById(Long id, User currentUser);
     PostResponseDto updatePost(Long id, UpdatePostDto updatePostDto, User currentUser);
-    PostResponseDto updatePostPartially(Long id, Map<String, Object> updates, User currentUser);
+    PostResponseDto updatePostPartially(Long id, UpdatePostDto updates, User currentUser);
     Page<PostResponseDto> getPostsByUsername(String username, Pageable pageable);
     Boolean isUserTheAuthor(String username, Long post_id);
 
