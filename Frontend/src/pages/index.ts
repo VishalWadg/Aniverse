@@ -1,5 +1,4 @@
 import AddPost from './AddPost'
-import AllPosts from './AllPosts'
 import Login from './Login'
 import Signup from './Signup'
 import EditPost from './EditPost'
@@ -10,7 +9,6 @@ import Profile from './Profile'
 
 export {
     AddPost,
-    AllPosts,
     Login,
     Signup,
     EditPost,

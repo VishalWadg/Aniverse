@@ -10,6 +10,8 @@ import {
 } from '@/lib/post-helpers'
 import Container from '../Container/Container'
 import PostCard from '../PostCard'
+import { useGetPostsQuery } from '@/api/postsApi'
+import {Virtuoso} from "react-virtuoso"
 
 const feedTabs = {
   home: [
@@ -45,13 +47,62 @@ const feedCopy = {
   },
 }
 
-function EditorialFeed({ posts = [], authStatus = true, mode = 'home' }) {
+function TrendingManuscripts({ trendingPosts, canInteract }) {
+  return (
+    <div className="border border-white/8 bg-black/30 p-6 ">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-black uppercase tracking-[0.28em] text-[#8b8b8b]">
+          Trending Manuscripts
+        </h2>
+        <span className="text-[10px] uppercase tracking-[0.3em] text-[#5f5f5f]">
+          Desk Live
+        </span>
+      </div>
+
+      {trendingPosts.length > 0 ? (
+        <div className="space-y-6">
+          {trendingPosts.map((post, index) => (
+            <Link
+              key={post.id}
+              to={canInteract ? `/post/${post.id}` : '/login'}
+              className="group block"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#ff6c62]">
+                {String(index + 1).padStart(2, '0')} / {inferCategory(post)}
+              </p>
+              <h3 className="mt-2 text-xl font-black leading-tight text-[#f1f1f1] transition-colors group-hover:text-white">
+                {post.title}
+              </h3>
+              <p className="mt-2 text-sm text-[#7d7d7d]">
+                {getDisplayName(post.author)} / {formatRelativeTime(post.createdAt)}
+              </p>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm leading-7 text-[#8b8b8b]">
+          Trending picks will appear here once the archive has posts to rank.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function EditorialFeed({authStatus = true, mode = 'home' }) {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q')?.trim() ?? ''
   const tabs = feedTabs[mode]
   const copy = feedCopy[mode]
   const [activeTab, setActiveTab] = useState(mode === 'home' ? 'hot' : 'latest')
+  const [page, setPage] = useState(0);
+  const sortParam = activeTab === 'deep' ? 'wordCount,desc' : 'createdAt,desc';
+
+
+  const { data, isLoading, isFetching } = useGetPostsQuery({ sort: sortParam, page });
+  const posts = data?.content || [];
+  const hasNextPage = !data?.last;
+  
 
   const visiblePosts = useMemo(() => {
     let nextPosts = [...posts].filter(Boolean).filter((post) => matchesSearch(post, searchQuery))
@@ -101,6 +152,11 @@ function EditorialFeed({ posts = [], authStatus = true, mode = 'home' }) {
   const hasSearchMiss = Boolean(searchQuery) && visiblePosts.length === 0
   const canInteract = Boolean(authStatus)
 
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId)
+    setPage(0)
+  }
+
   return (
     <section className="pb-14 pt-8 sm:pt-10">
       <Container>
@@ -134,7 +190,7 @@ function EditorialFeed({ posts = [], authStatus = true, mode = 'home' }) {
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={[
                     'border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] transition-colors',
                     activeTab === tab.id
@@ -145,6 +201,10 @@ function EditorialFeed({ posts = [], authStatus = true, mode = 'home' }) {
                   {tab.label}
                 </button>
               ))}
+            </div>
+
+            <div className="mb-6 xl:hidden">
+              <TrendingManuscripts trendingPosts={trendingPosts} canInteract={canInteract} />
             </div>
 
             {hasSearchMiss && (
@@ -189,65 +249,27 @@ function EditorialFeed({ posts = [], authStatus = true, mode = 'home' }) {
 
             {!hasSearchMiss && visiblePosts.length > 0 && (
               <div className="overflow-hidden border border-white/8 bg-black/20">
-                {visiblePosts.map((post, index) => (
-                  <div
-                    key={post.id}
-                    className={index === 0 ? '' : 'border-t border-white/8'}
-                  >
-                    <PostCard {...post} canInteract={canInteract} />
-                  </div>
-                ))}
+                <Virtuoso
+                    useWindowScroll
+                    data={visiblePosts}
+                    endReached={() => {
+                        if (!isFetching && hasNextPage) {
+                          setPage((prev) => prev + 1);
+                        }
+                    }}
+                    itemContent={(index, post) => (
+                        <div className={index === 0 ? '' : 'border-t border-white/8 p-5 sm:p-7'}>
+                            <PostCard {...post} canInteract={canInteract} />
+                        </div>
+                    )}
+                />
+
               </div>
             )}
           </div>
 
-          <aside className="space-y-6 xl:sticky xl:top-28">
-            <div className="border border-white/8 bg-black/30 p-6">
-              <div className="mb-6 flex items-center justify-between gap-3">
-                <h2 className="text-sm font-black uppercase tracking-[0.28em] text-[#8b8b8b]">
-                  Trending Manuscripts
-                </h2>
-                <span className="text-[10px] uppercase tracking-[0.3em] text-[#5f5f5f]">
-                  Desk Live
-                </span>
-              </div>
-
-              {trendingPosts.length > 0 ? (
-                <div className="space-y-6">
-                  {trendingPosts.map((post, index) => (
-                    <Link
-                      key={post.id}
-                      to={canInteract ? `/post/${post.id}` : '/login'}
-                      className="group block"
-                    >
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#ff6c62]">
-                        {String(index + 1).padStart(2, '0')} / {inferCategory(post)}
-                      </p>
-                      <h3 className="mt-2 text-xl font-black leading-tight text-[#f1f1f1] transition-colors group-hover:text-white">
-                        {post.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-[#7d7d7d]">
-                        {getDisplayName(post.author)} / {formatRelativeTime(post.createdAt)}
-                      </p>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm leading-7 text-[#8b8b8b]">
-                  Trending picks will appear here once the archive has posts to rank.
-                </p>
-              )}
-            </div>
-
-            <div className="border border-white/8 bg-black/20 p-6">
-              <h2 className="text-sm font-black uppercase tracking-[0.28em] text-[#8b8b8b]">
-                Field Notes
-              </h2>
-              <p className="mt-3 text-sm leading-7 text-[#9b9b9b]">
-                Tightened grid spacing, softer dark values, and a calmer sidebar hierarchy keep the feed
-                readable without letting the chrome overpower the actual writing.
-              </p>
-            </div>
+          <aside className="hidden space-y-6 xl:sticky xl:top-28 xl:block">
+            <TrendingManuscripts trendingPosts={trendingPosts} canInteract={canInteract} />
           </aside>
         </div>
       </Container>
