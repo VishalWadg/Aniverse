@@ -35,7 +35,7 @@ public class Post {
     private String content;
 
     @Column(nullable = false)
-    pirvate int wordCount;
+    private int wordCount;
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
