@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/posts")
 public class PostController {
     private final PostService postService;
-    private static final Set<String> ALLOWED_SORTS = Set.of("createdAt");
+    private static final Set<String> ALLOWED_SORTS = Set.of("createdAt", "wordCount");
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getAllPosts(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
