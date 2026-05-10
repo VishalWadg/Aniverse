@@ -84,7 +84,7 @@ public class PostController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<PostResponseDto> updatePostPartially(@PathVariable Long id,
-            @RequestBody Map<String, Object> updates, @AuthenticationPrincipal User currentUser) {
+            @RequestBody @Valid UpdatePostDto updates, @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok().body(postService.updatePostPartially(id, updates, currentUser));
     }
 
