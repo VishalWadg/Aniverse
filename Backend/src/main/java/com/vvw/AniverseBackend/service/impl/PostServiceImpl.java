@@ -11,6 +11,8 @@ import com.vvw.AniverseBackend.exceptions.ResourceAccessDeniedException;
 import com.vvw.AniverseBackend.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
+
+import org.hibernate.sql.Update;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -103,23 +105,12 @@ public class PostServiceImpl implements PostService{
     // this can be done two ways using 1) Map<String, Object> and 2) using DTO with null values allowed fields 2nd approach is preferred
     @Override
     @Transactional
-    public PostResponseDto updatePostPartially(Long id, Map<String, Object> updates, User currentUser){
+    public PostResponseDto updatePostPartially(Long id, UpdatePostDto updates, User currentUser){
         log.warn("PostServiceImpl:: updatePostPartially");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
-        updates.forEach((field, value)->{
-            switch (field) {
-                case "title":
-                    post.setTitle((String)value);
-                    break;
-                case "content":
-                    post.setContent((String)value);
-                    break;
-                default:
-                    throw new IllegalArgumentException("PostServiceImpl :: updatePostPartially :: field Not supported");
-                    // break;
-            }
-        });
+        if (updates.getTitle() != null) post.setTitle(updates.getTitle());
+        if (updates.getContent() != null) post.setContent(updates.getContent());
         return modelMapper.map(postRepository.save(post), PostResponseDto.class);
     }
 
