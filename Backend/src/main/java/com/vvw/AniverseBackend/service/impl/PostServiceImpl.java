@@ -2,7 +2,6 @@ package com.vvw.AniverseBackend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
@@ -12,7 +11,6 @@ import com.vvw.AniverseBackend.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-import org.hibernate.sql.Update;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
