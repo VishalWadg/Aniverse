@@ -11,7 +11,6 @@ import UserAvatar from '../User/UserAvatar'
 
 const navItems = [
   { name: 'Home', slug: '/' },
-  { name: 'All Posts', slug: '/all-posts' },
   { name: "Trash Bin", slug: "/admin" }
 ]
 

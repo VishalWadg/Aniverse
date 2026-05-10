@@ -17,6 +17,8 @@ import com.vvw.AniverseBackend.dto.UpdatePostDto;
 import com.vvw.AniverseBackend.service.PostService;
 import lombok.RequiredArgsConstructor;
 import java.util.Map;
+import java.util.Set;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,10 +35,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/posts")
 public class PostController {
     private final PostService postService;
-
+    private static final Set<String> ALLOWED_SORTS = Set.of("createdAt");
     @GetMapping
     public ResponseEntity<Page<PostResponseDto>> getAllPosts(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        pageable.getSort().forEach(order -> {
+            if(!ALLOWED_SORTS.contains(order.getProperty())){
+                throw new IllegalArgumentException("Invalid sort field: "+ order.getProperty());
+            }
+        });
         return ResponseEntity.ok().body(postService.getAllPosts(pageable));
     }
 

@@ -4,7 +4,7 @@ export type Post = {
     id: number
     title: string
     content: string
-    createdAt?: string
+    createdAt: string
     isDeleted?: boolean
     author: {
         username: string
@@ -15,7 +15,10 @@ export type Post = {
 }
 
 export type PostsResponse = {
-    content: Post[]
+    content: Post[],
+    number: number,
+    totalPages: number,
+    last: boolean
 }
 
 type CreatePostInput = {
@@ -33,11 +36,25 @@ type UpdatePostInput = {
 
 const postsApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
-        getPosts: build.query<PostsResponse, void>({
-            query: () => ({
-                url: '/posts',
+        getPosts: build.query<PostsResponse, {sort?:String, page:Number}>({
+            query: ({sort='createdAt,desc', page = 0}) => ({
+                url: `/posts?sort=${sort}&page=${page}`,
                 method: 'GET',
             }),
+            serializeQueryArgs: ({endpointName, queryArgs}) => {
+                return `${endpointName}-${queryArgs.sort || 'createdAt,desc'}`;
+            },
+            merge: (currentCache, newItems) => {
+                if(!newItems.content) return;
+                const combined = [...currentCache.content, ...newItems.content];
+                const uniqueItemsMap = new Map(combined.map(item => [item.id, item]));
+                const deduplicatedArray = Array.from(uniqueItemsMap.values());
+                Object.assign(currentCache, newItems);
+                currentCache.content = deduplicatedArray;
+            },
+            forceRefetch({currentArg, previousArg}){
+                return currentArg?.page !== previousArg?.page;
+            },
             providesTags: (result) =>
                 result
                     ? [
@@ -87,12 +104,27 @@ const postsApi = baseApi.injectEndpoints({
             ],
         }),
 
-        getPostsByUsername: build.query<PostsResponse, string>({
-            query: (username: string) => ({
-                url: `/posts/user/${username}`,
+        getPostsByUsername: build.query<PostsResponse, {username: string, sort?:string, page: number}>({
+            query: ({username, sort='createdAt,desc', page=0}) => ({
+                url: `/posts/user/${username}?sort=${sort}&page=${page}`,
                 method: 'GET',
             }),
-            providesTags: (result, error, username) => [{
+            serializeQueryArgs: ({endpointName, queryArgs}) => {
+                return `${endpointName}-${queryArgs.username}-${queryArgs.sort || 'createdAt,desc'}`;
+            },
+            merge: (currentCache, newItems) => {
+                if(!newItems.content) return;
+
+                const combinedArr = [...currentCache.content, ...newItems.content];
+                const uniqueItemsMap = new Map(combinedArr.map(item => [item.id, item]));
+                const deduplicatedArray = Array.from(uniqueItemsMap.values());
+                Object.assign(currentCache, newItems);
+                currentCache.content = deduplicatedArray; 
+            },
+            forceRefetch({currentArg, previousArg}){
+                return currentArg?.page !== previousArg?.page;
+            },
+            providesTags: (result, error, {username}) => [{
                 type: 'Post' as const,
                 id: `${username}-LIST`
             }]

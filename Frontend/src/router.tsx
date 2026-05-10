@@ -16,7 +16,6 @@ import { AuthLayout, AdminLayout } from './components'
 // --- Pages & Loaders ---
 // We import these explicitly to get the named 'loader' exports
 import Home from './pages/Home'
-import AllPosts, { allPostsLoader } from './pages/AllPosts' // You need to export this from AllPosts.jsx
 import Post from './pages/Post'
 import EditPost from './pages/EditPost' // You need to export this from EditPost.jsx
 import AdminDashboard from './pages/AdminDashboard'
@@ -25,7 +24,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import { Login, Signup, AddPost, Profile } from './pages'
 
 const isPublicRoute = (pathname: string) => {
-  const publicRoutes = ['/', '/login', '/signup', '/all-posts']
+  const publicRoutes = ['/', '/login', '/signup']
   return publicRoutes.includes(pathname) || pathname.startsWith('/users/')
 }
 
@@ -105,19 +104,6 @@ export const router = createBrowserRouter(createRoutesFromElements(
     } />
 
     {/* --- Protected Routes --- */}
-
-    <Route path='all-posts' element={<AllPosts />}
-      // Add the loader here so data fetches while navigating
-      loader={allPostsLoader}
-      shouldRevalidate={({ currentUrl, nextUrl, defaultShouldRevalidate }) => {
-        // 1. If we are on home and we clicked home again..
-        if (currentUrl.pathname === nextUrl.pathname && currentUrl.search === nextUrl.search) {  // pathname means the part after domain, search means query params
-          return false; // Prevent revalidation i.e dont run the loader
-        }
-        // 2. Otherwise (Form actions, Navigation from other pages), do default behavior
-        return defaultShouldRevalidate;
-      }}
-    />
 
     <Route path='add-post' element={
       <AuthLayout authentication={true}>

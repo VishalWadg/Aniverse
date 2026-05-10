@@ -1,19 +1,23 @@
-import type { Post } from "@/api/postsApi"
+import { useGetPostsByUsernameQuery, type Post } from "@/api/postsApi"
 import PostCard from "@/components/PostCard"
+import { useState } from "react"
+import {VirtuosoGrid} from "react-virtuoso"
+import { getApiErrorMessage } from "@/lib/errorUtils"
 
 const UserPosts = ({
-    posts,
     username,
-    isLoading = false,
-    errorMessage,
     canInteract = true,
 }: {
-    posts: Post[]
+    
     username: string
-    isLoading?: boolean
-    errorMessage?: string | null
     canInteract?: boolean
 }) => {
+
+    const [page, setPage] = useState(0);
+    const { data, isLoading, isFetching, error } = useGetPostsByUsernameQuery({ username, page });
+    const posts = data?.content || [];
+    const hasNextPage = !data?.last;
+    const errorMessage = error ? getApiErrorMessage(error) : '';
     return (
         <section className="border border-white/10 bg-[#101010]">
             <div className="border-b border-white/8 px-5 py-5 sm:px-7">
@@ -44,19 +48,26 @@ const UserPosts = ({
             ) : errorMessage ? (
                 <div className="px-5 py-10 text-sm text-[#ff9d96] sm:px-7">{errorMessage}</div>
             ) : posts.length ? (
-                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7 xl:grid-cols-3">
-                    {posts.map((post) => (
-                        <PostCard
-                            key={post.id}
-                            id={post.id}
-                            title={post.title}
-                            content={post.content}
-                            author={post.author}
-                            createdAt={post.createdAt}
-                            canInteract={canInteract}
-                            variant="compact"
-                        />
-                    ))}
+                <div className="overflow-hidden">
+                    <VirtuosoGrid
+                        useWindowScroll
+                        data={posts}
+                        listClassName="grid gap-5 p-5 sm:grid-cols-2 sm:p-7 xl:grid-cols-3"
+                        itemClassName="min-w-0"
+                        endReached={() => {
+                            // When the user scrolls to the bottom, fetch the next page!
+                            if (!isFetching && hasNextPage) {
+                                setPage((prev) => prev + 1)
+                            }
+                        }}
+                        itemContent={(index, post) => (
+                            // Render your PostCard inside here exactly as you did in the map!
+                            <div className={'border-t border-white/8 p-5 sm:p-7'}>
+                                <PostCard {...post} />
+                            </div>
+                        )}
+                    />
+
                 </div>
             ) : (
                 <div className="px-5 py-10 sm:px-7">

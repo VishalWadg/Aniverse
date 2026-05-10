@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
+import org.jsoup.Jsoup;
 
 @Entity
 @Getter
@@ -32,6 +33,9 @@ public class Post {
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    @Column(nullable = false)
+    pirvate int wordCount;
 
     @Builder.Default
     @Column(name = "is_deleted", nullable = false)
@@ -59,4 +63,21 @@ public class Post {
             orphanRemoval = true
     )
     private List<Comment> comments = new ArrayList<>();
+
+
+
+        @PrePersist
+        @PreUpdate
+        private void calculateWordCount() {
+                if (this.content == null || this.content.trim().isEmpty()) {
+                        this.wordCount = 0;
+                        return;
+                }
+                String text = Jsoup.parse(this.content).text();
+                if (text.trim().isEmpty()) {
+                        this.wordCount = 0;
+                        return;
+                }
+                this.wordCount = text.trim().split("\\s+").length;
+        }
 }

@@ -3,8 +3,8 @@ import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Container } from '@/components'
-import { useGetPostsByUsernameQuery } from '@/api/postsApi'
 import { uploadImageToCloudinary } from '@/api/uploadApi'
+import { getApiErrorMessage } from '@/lib/errorUtils'
 import {
   useGetCurrentUserProfileQuery,
   useGetUserProfileQuery,
@@ -16,39 +16,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import UserPosts from '@/components/User/UserPosts'
 import UserProfileCard from '@/components/User/UserProfile'
 
-const getApiErrorMessage = (error: unknown) => {
-  if (!error) {
-    return 'Something went wrong.'
-  }
 
-  if (typeof error === 'object' && error !== null && 'status' in error) {
-    const apiError = error as { status?: number; data?: any }
-
-    if (typeof apiError.data === 'string' && apiError.data.trim()) {
-      return apiError.data
-    }
-
-    if (apiError.data && typeof apiError.data === 'object') {
-      if (typeof apiError.data.message === 'string' && apiError.data.message.trim()) {
-        return apiError.data.message
-      }
-
-      if (typeof apiError.data.error === 'string' && apiError.data.error.trim()) {
-        return apiError.data.error
-      }
-    }
-
-    if (apiError.status) {
-      return `Request failed with status ${apiError.status}.`
-    }
-  }
-
-  if (error instanceof Error && error.message.trim()) {
-    return error.message
-  }
-
-  return 'Something went wrong.'
-}
 
 function Profile() {
   const { username: routeUsername = '' } = useParams()
@@ -109,12 +77,7 @@ function Profile() {
   const profileError = isViewingOwnProfile ? currentProfileError : publicProfileError
   const isProfileLoading = isViewingOwnProfile ? isCurrentProfileLoading : isPublicProfileLoading
 
-  const { data: postsResponse, isLoading: isPostsLoading, error: postsError } =
-    useGetPostsByUsernameQuery(profile?.username ?? '', {
-      skip: !profile?.username,
-    })
 
-  const posts = postsResponse?.content ?? []
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target
@@ -370,10 +333,7 @@ function Profile() {
         </div>
 
         <UserPosts
-          posts={posts}
           username={profile.username}
-          isLoading={isPostsLoading}
-          errorMessage={postsError ? getApiErrorMessage(postsError) : null}
           canInteract={authStatus}
         />
       </Container>
