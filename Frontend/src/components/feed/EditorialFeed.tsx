@@ -258,9 +258,8 @@ function EditorialFeed({authStatus = true, mode = 'home' }) {
                         }
                     }}
                     itemContent={(index, post) => (
-                        // Render your PostCard inside here exactly as you did in the map!
                         <div className={index === 0 ? '' : 'border-t border-white/8 p-5 sm:p-7'}>
-                            <PostCard {...post} />
+                            <PostCard {...post} canInteract={canInteract} />
                         </div>
                     )}
                 />
