@@ -13,7 +13,7 @@ import com.vvw.AniverseBackend.config.properties.CloudinaryProperties;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@EnableConfigurationProperties
+@EnableConfigurationProperties(CloudinaryProperties.class)
 @RequiredArgsConstructor
 public class CloudinaryConfig {
     private final CloudinaryProperties cloudinaryProperties;
