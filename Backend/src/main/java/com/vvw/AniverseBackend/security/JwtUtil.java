@@ -4,6 +4,7 @@ import com.vvw.AniverseBackend.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.WeakKeyException;
 import com.vvw.AniverseBackend.config.properties.JwtProperties;
 import com.vvw.AniverseBackend.config.properties.SecurityProperties;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,20 @@ public class JwtUtil {
     }
 
     private SecretKey getSecretKey(){
-        return Keys.hmacShaKeyFor(jwtProperties.secretKey().getBytes(StandardCharsets.UTF_8));
+        String secretKey = jwtProperties.secretKey();
+
+        if (secretKey == null || secretKey.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET is missing. Set a value with at least 32 UTF-8 bytes for HS256.");
+        }
+
+        try {
+            return Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        } catch (WeakKeyException ex) {
+            throw new IllegalStateException(
+                    "JWT_SECRET is too short for JWT HMAC signing. Use at least 32 UTF-8 bytes for HS256.",
+                    ex
+            );
+        }
     }
     public String generateAccessToken(User user) {
         return Jwts.builder()
