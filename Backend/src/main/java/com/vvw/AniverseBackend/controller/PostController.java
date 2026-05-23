@@ -1,27 +1,21 @@
 package com.vvw.AniverseBackend.controller;
 
-import com.vvw.AniverseBackend.dto.CommentAuthorDto;
-import com.vvw.AniverseBackend.dto.CommentResponseDto;
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
 import org.springframework.data.domain.Sort;
-import com.vvw.AniverseBackend.service.UserService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-// import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RestController;
 import com.vvw.AniverseBackend.dto.UpdatePostDto;
 import com.vvw.AniverseBackend.service.PostService;
 import lombok.RequiredArgsConstructor;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.http.HttpStatus;
@@ -35,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
