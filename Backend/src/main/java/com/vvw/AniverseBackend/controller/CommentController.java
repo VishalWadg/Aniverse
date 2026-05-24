@@ -38,11 +38,7 @@ public class CommentController {
         Page<CommentResponseDto> comments = commentService.getCommentsOfPost(postId, pageable);
         return ResponseEntity.ok(comments);
     }
-    public String getMethodName(@RequestParam String param) {
-        return new String();
-    }
     
-
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponseDto> createComment(
             @PathVariable Long postId,

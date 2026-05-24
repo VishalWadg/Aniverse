@@ -9,11 +9,11 @@ import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.exceptions.DuplicateResourceException;
 import com.vvw.AniverseBackend.exceptions.EntityNotFoundException;
 import com.vvw.AniverseBackend.exceptions.InvalidOperationException;
+import com.vvw.AniverseBackend.mapper.UserMapper;
 import com.vvw.AniverseBackend.repository.PostRepository;
 import com.vvw.AniverseBackend.repository.UserRepository;
 import com.vvw.AniverseBackend.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,8 +28,7 @@ import java.util.Locale;
 public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-    private final ModelMapper modelMapper;
-
+    private final UserMapper userMapper;
     private User findExistingUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() ->
@@ -41,30 +40,11 @@ public class UserServiceImpl implements UserService{
     }
 
     private PublicUserProfileDto toPublicUserProfileDto(User user) {
-        return PublicUserProfileDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .name(user.getName())
-                .bio(user.getBio())
-                .profilePic(user.getProfilePic())
-                .role(user.getRole())
-                .createdAt(user.getCreatedAt())
-                .postCount(getPostCount(user.getUsername()))
-                .build();
+        return userMapper.toPublicUserProfileDto(user, 0);
     }
 
     private CurrentUserProfileDto toCurrentUserProfileDto(User user) {
-        return CurrentUserProfileDto.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .name(user.getName())
-                .email(user.getEmail())
-                .bio(user.getBio())
-                .profilePic(user.getProfilePic())
-                .role(user.getRole())
-                .createdAt(user.getCreatedAt())
-                .postCount(getPostCount(user.getUsername()))
-                .build();
+        return userMapper.toCurrentUserProfileDto(user, getPostCount(user.getUsername()));
     }
 
     private String normalizeNullableText(String value) {
@@ -88,7 +68,7 @@ public class UserServiceImpl implements UserService{
     @Transactional(readOnly = true)
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable)
-                .map(user -> modelMapper.map(user, UserResponseDto.class));
+                .map(user -> userMapper.toUserResponseDto(user));
     }
 
     @Override
@@ -134,7 +114,7 @@ public class UserServiceImpl implements UserService{
 
         return toCurrentUserProfileDto(userRepository.save(user));
     }
-
+    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username)

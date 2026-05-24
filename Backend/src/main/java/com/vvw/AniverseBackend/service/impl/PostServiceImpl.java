@@ -7,11 +7,11 @@ import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.exceptions.EntityNotFoundException;
 import com.vvw.AniverseBackend.exceptions.ResourceAccessDeniedException;
+import com.vvw.AniverseBackend.mapper.PostMapper;
 import com.vvw.AniverseBackend.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
-    private final ModelMapper modelMapper;
+    private final PostMapper postMapper;
     private final UserService userService;
     private final PostRetentionProperties postRetentionProperties;
 
@@ -53,29 +53,29 @@ public class PostServiceImpl implements PostService{
     @Override
     @Transactional
     public PostResponseDto createNewPost(CreatePostDto createPostDto, String username){
-        Post newPost = modelMapper.map(createPostDto, Post.class);
+        Post newPost = postMapper.toEntity(createPostDto);
         User author = userService.findByUsername(username);
         newPost.setAuthor(author);
-        return modelMapper.map(postRepository.save(newPost), PostResponseDto.class);
+        return postMapper.toPostResponseDto(postRepository.save(newPost));
     }
 
     @Override
     public Page<PostResponseDto> getAllPosts(Pageable pageable){
-        return postRepository.findActiveWithAuthor(pageable).map((element) -> modelMapper.map(element, PostResponseDto.class));
+        return postRepository.findActiveWithAuthor(pageable).map((element) -> postMapper.toPostResponseDto(element));
     }
 
     @Override   
     public PostResponseDto getPostById(Long id){
         log.warn("PostServiceImpl:: getPostById");
         Post post = findActivePostOrThrow(id);
-        return modelMapper.map(post, PostResponseDto.class);
+        return postMapper.toPostResponseDto(post);
     }
 
     @Override
     public Page<PostResponseDto> getPostsByUsername(String username, Pageable pageable){
         // User user = userService.findByUsername(username);
         Page<Post> posts = postRepository.findActiveByAuthorUsernameWithAuthor(username, pageable);
-        return posts.map((element) -> modelMapper.map(element, PostResponseDto.class));
+        return posts.map((element) -> postMapper.toPostResponseDto(element));
     }
 
 
@@ -86,8 +86,8 @@ public class PostServiceImpl implements PostService{
         log.warn("PostServiceImpl:: updatePost");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
-        modelMapper.map(updatePostDto, post);
-        return modelMapper.map(postRepository.save(post), PostResponseDto.class);
+        postMapper.updatePostFromDto(updatePostDto, post);
+        return postMapper.toPostResponseDto(postRepository.save(post));
     }
 
     @Override
@@ -107,9 +107,8 @@ public class PostServiceImpl implements PostService{
         log.warn("PostServiceImpl:: updatePostPartially");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
-        if (updates.getTitle() != null) post.setTitle(updates.getTitle());
-        if (updates.getContent() != null) post.setContent(updates.getContent());
-        return modelMapper.map(postRepository.save(post), PostResponseDto.class);
+        postMapper.updatePostFromDto(updates, post);
+        return postMapper.toPostResponseDto(postRepository.save(post));
     }
 
     @Override
@@ -120,7 +119,7 @@ public class PostServiceImpl implements PostService{
     @Override
     public Page<PostResponseDto> getDeletedPosts(Pageable pageable){
         Page<Post> posts = postRepository.findDeletedWithAuthor(pageable);
-        return posts.map(element -> modelMapper.map(element, PostResponseDto.class));
+        return posts.map(element -> postMapper.toPostResponseDto(element));
     }
 
     @Override
@@ -129,7 +128,7 @@ public class PostServiceImpl implements PostService{
         Post post = findDeletedPostOrThrow(id);
         post.setIsDeleted(false);
         post.setDeletedAt(null);
-        return modelMapper.map(postRepository.save(post), PostResponseDto.class);
+        return postMapper.toPostResponseDto(postRepository.save(post));
     }
 
     @Override

@@ -1,16 +1,16 @@
 package com.vvw.AniverseBackend.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
-@Data
+@Builder
 public class CommentAuthorDto {
     private Long id;
     private String username;
-    private String profilepic;
+    private String profilePic;
 }
