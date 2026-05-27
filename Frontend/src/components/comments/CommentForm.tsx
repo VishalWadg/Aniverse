@@ -53,7 +53,7 @@ export const CommentForm = ({
                     You must be Logged in to leave a comment.
                 </p>
                 <Button asChild>
-                    <a href="/login">Log In</a>
+                    <Link to='/login'>Log In</Link>
                 </Button>
             </div>
         )
