@@ -53,7 +53,6 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentMapper.toEntity(dto);
         comment.setPost(post);
         comment.setAuthor(currentUser);
-        post.getComments().add(comment);
         Comment savedComment = commentRepository.save(comment);
         return commentMapper.toCommentResponseDto(savedComment);
     }
