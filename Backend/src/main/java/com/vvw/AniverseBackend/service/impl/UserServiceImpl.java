@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService{
     }
 
     private PublicUserProfileDto toPublicUserProfileDto(User user) {
-        return userMapper.toPublicUserProfileDto(user, 0);
+        return userMapper.toPublicUserProfileDto(user, getPostCount(user.getUsername()));
     }
 
     private CurrentUserProfileDto toCurrentUserProfileDto(User user) {
