@@ -25,7 +25,7 @@ import { Login, Signup, AddPost, Profile } from './pages'
 
 const isPublicRoute = (pathname: string) => {
   const publicRoutes = ['/', '/login', '/signup']
-  return publicRoutes.includes(pathname) || pathname.startsWith('/users/')
+  return publicRoutes.includes(pathname) || pathname.startsWith('/users/') || pathname.startsWith('/post/')
 }
 
 const rootLoader = async ({ request }) => {
@@ -103,6 +103,10 @@ export const router = createBrowserRouter(createRoutesFromElements(
       </AuthLayout>
     } />
 
+  <Route path='post/:id' element={
+      <Post />
+  }
+  />
     {/* --- Protected Routes --- */}
 
     <Route path='add-post' element={
@@ -119,13 +123,6 @@ export const router = createBrowserRouter(createRoutesFromElements(
     // Loader fetches the existing post data to fill the form
     />
 
-    <Route path='post/:id' element={
-      <AuthLayout authentication={true}>
-        <Post />
-      </AuthLayout>
-    }
-
-    />
 
     <Route
       path="/admin"

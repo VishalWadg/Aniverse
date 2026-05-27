@@ -64,7 +64,7 @@ function TrendingManuscripts({ trendingPosts, canInteract }) {
           {trendingPosts.map((post, index) => (
             <Link
               key={post.id}
-              to={canInteract ? `/post/${post.id}` : '/login'}
+              to={`/post/${post.id}`}
               className="group block"
             >
               <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#ff6c62]">

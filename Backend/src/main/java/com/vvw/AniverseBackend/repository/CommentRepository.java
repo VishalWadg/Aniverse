@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository <Comment, Long> {
-    @Query(value = "SELECT c FROM Comment c JOIN FETCH c.author WHERE c.post.id = :postId AND c.post.isDeleted = false",
-            countQuery = "SELECT count(c) FROM Comment c WHERE c.post.id = :postId")
+    @Query(value = "SELECT c FROM Comment c JOIN FETCH c.author WHERE c.post.id = :postId AND c.post.isDeleted = false AND c.isDeleted = false",
+            countQuery = "SELECT count(c) FROM Comment c WHERE c.post.id = :postId AND c.post.isDeleted = false AND c.isDeleted = false")
     Page<Comment> findByPostIdWithAuthor(
             @Param("postId") Long postId,
             Pageable pageable
