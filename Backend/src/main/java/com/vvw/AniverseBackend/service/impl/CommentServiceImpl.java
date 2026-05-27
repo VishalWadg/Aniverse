@@ -61,7 +61,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentResponseDto updateComment(CreateCommentDto dto, Long commentId, User currentUser){
-        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new EntityNotFoundException("Comment not found with id : " + commentId));
+        Comment comment = commentRepository.findActiveCommentById(commentId).orElseThrow(() -> new EntityNotFoundException("Comment not found with id : " + commentId));
         assertCanModifyComment(comment, currentUser);
         commentMapper.updateCommentFromDto(dto, comment);
         return commentMapper.toCommentResponseDto(commentRepository.save(comment));
