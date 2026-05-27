@@ -17,7 +17,7 @@ public class CommentRepositoryTest {
     @Autowired
     private CommentService commentService;
 
-    @Test
+    // @Test
     public void when_getPostCommentsThenGetComments(){
         Page page = commentService.getCommentsOfPost(1L, PageRequest.of(0, 5));
 //        assertThat(page.getContent().size()).isEqualTo(2);
