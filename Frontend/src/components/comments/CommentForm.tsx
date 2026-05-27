@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import UserAvatar from "../User/UserAvatar";
 
 interface CommentFormProps {
-    postId: string,
+    postId: number,
     existingCommentId?: number,
     initialContent?: string,
     onSuccess?: () => void,
