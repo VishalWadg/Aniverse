@@ -33,7 +33,7 @@ public class CommentServiceImpl implements CommentService {
         boolean isAuthor = comment.getAuthor() != null
                 && comment.getAuthor().getUsername().equals(currentUser.getUsername());
         if(!isAuthor){
-            throw new ResourceAccessDeniedException("You can only modify your own posts.");
+            throw new ResourceAccessDeniedException("You can only modify your own comments.");
         }
     }
 
