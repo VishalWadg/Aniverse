@@ -24,7 +24,6 @@ import org.jsoup.Jsoup;
         }
 )
 @ToString(exclude = {"author", "comments"})
-@SQLRestriction("is_deleted = false")
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
