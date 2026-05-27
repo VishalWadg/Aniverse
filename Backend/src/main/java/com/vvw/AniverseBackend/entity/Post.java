@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.jsoup.Jsoup;
 
 @Entity
@@ -51,15 +52,15 @@ public class Post {
     //  --------------------------------------------------  relationships  --------------------------------------------------  
 
 //    @ToString.Exclude
-    @ManyToOne(fetch = FetchType.LAZY) // <-- 5. CRITICAL: Added FetchType.LAZY
-    @JoinColumn(name = "author_id", nullable = false) // <-- 5. Added explicit column name
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "author_id", nullable = false) 
     private User author;
 
 //    @ToString.Exclude
     @OneToMany(
             mappedBy = "post",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL, // <-- 6. Changed to CascadeType.ALL
+            cascade = CascadeType.PERSIST, 
             orphanRemoval = true
     )
     private List<Comment> comments = new ArrayList<>();

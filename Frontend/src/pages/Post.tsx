@@ -8,6 +8,7 @@ import useToasts from "../hooks/useToasts";
 import { sanitizeMonolithHtml } from "../lib/monolith-html";
 import { useGetPostQuery } from "@/api/postsApi";
 import { useDeletePostMutation } from "@/api/postsApi";
+import { CommentSection } from "@/components/comments/CommentSection";
 
 export const postLoader = async ({ params, request }) => {
     try {
@@ -20,6 +21,7 @@ export const postLoader = async ({ params, request }) => {
 
 export default function Post() {
     const {id}  = useParams() ;
+    const postIdNumber = Number(id);
     const {data, error, isLoading} = useGetPostQuery(id);
     const [deletePostMutation] = useDeletePostMutation();
     const post = data;
@@ -93,6 +95,9 @@ export default function Post() {
                         {parse(sanitizeMonolithHtml(post.content ?? ''))}
                     </div>
                 </article>
+                <CommentSection
+                    postId={postIdNumber}
+                />
             </Container>
         </div>
     ) : null;

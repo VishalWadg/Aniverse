@@ -21,7 +21,7 @@ function PostCard({
   variant = 'default',
 }) {
   const postHref = `/post/${id}`
-  const interactionHref = canInteract ? postHref : '/login'
+  const interactionHref = postHref
   const displayName = getDisplayName(author)
   const category = inferCategory({ title, content })
   const isCompact = variant === 'compact'
@@ -136,7 +136,7 @@ function PostCard({
               className="inline-flex items-center gap-2 text-[#b7b7b7] transition-colors hover:text-white"
             >
               <CommentIcon className="size-4" />
-              {canInteract ? 'Read' : 'Log in'}
+              {'Read'}
             </Link>
           </div>
 
@@ -205,7 +205,7 @@ function PostCard({
             className="inline-flex items-center gap-2 text-[#b7b7b7] transition-colors hover:text-white"
           >
             <CommentIcon className="size-4" />
-            {canInteract ? 'Open thread' : 'Log in to open'}
+            {'Open thread'}
           </Link>
         </div>
 

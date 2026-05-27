@@ -29,7 +29,7 @@ const isPublicFeedRequest = (config: any) => {
 
     if (method !== "get") return false;
 
-    return url === "/posts" || url === "posts" || url.startsWith("/posts?");
+    return url === "/posts" || url === "posts" || url.startsWith("/posts?") || url.startsWith("/posts/");
 }
 
 export const shouldCheckAuth = () => {

@@ -7,6 +7,8 @@ import com.vvw.AniverseBackend.dto.UserResponseDto;
 import com.vvw.AniverseBackend.dto.internal.TokenRotationResponse;
 import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.exceptions.DuplicateResourceException;
+import com.vvw.AniverseBackend.mapper.AuthMapper;
+import com.vvw.AniverseBackend.mapper.UserMapper;
 import com.vvw.AniverseBackend.repository.UserRepository;
 import com.vvw.AniverseBackend.security.JwtUtil;
 import com.vvw.AniverseBackend.service.AuthService;
@@ -14,7 +16,6 @@ import com.vvw.AniverseBackend.service.RefreshTokenService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,8 +28,9 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ModelMapper modelMapper;
     private final RefreshTokenService refreshTokenService;
+    private final UserMapper userMapper;
+    private final AuthMapper authMapper;
     private final JwtUtil jwtUtil;
 
     @Override
@@ -42,13 +44,13 @@ public class AuthServiceImpl implements AuthService {
             throw new DuplicateResourceException("Email is already in use");
         }
 
-        User user = modelMapper.map(createUserDto, User.class);
+        User user = userMapper.toEntity(createUserDto);
 
         user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
 
         User savedUser = userRepository.save(user);
 
-        return modelMapper.map(savedUser, UserResponseDto.class);
+        return userMapper.toUserResponseDto(savedUser);
     }
 
     @Override
@@ -58,15 +60,8 @@ public class AuthServiceImpl implements AuthService {
                 new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword()));
         User user = (User) authentication.getPrincipal();
         String token = jwtUtil.generateAccessToken(user);
-        UserResponseDto userResponseDto = modelMapper.map(user, UserResponseDto.class);
         String refToken = refreshTokenService.createRefreshToken(user.getId());
-
-        return AuthenticationResponseDto.builder()
-                .expiresIn(jwtUtil.getExpirationInSeconds())
-                .token(token)
-                .refToken(refToken)
-                .user(userResponseDto)
-                .build();
+        return authMapper.toAuthenticationResponseDto(token, refToken, jwtUtil.getExpirationInSeconds(), user);
     }
 
     @Override
@@ -76,14 +71,7 @@ public class AuthServiceImpl implements AuthService {
         User user = response.user();
         String newRawToken = response.rawToken();
         String newAccessToken = jwtUtil.generateAccessToken(user);
-        UserResponseDto userResponseDto = modelMapper.map(user, UserResponseDto.class);
-
-        return AuthenticationResponseDto.builder()
-                .token(newAccessToken)
-                .refToken(newRawToken)
-                .user(userResponseDto)
-                .expiresIn(jwtUtil.getExpirationInSeconds())
-                .build();
+        return authMapper.toAuthenticationResponseDto(newAccessToken, newRawToken, jwtUtil.getExpirationInSeconds(), user);
     }
 
     @Override
