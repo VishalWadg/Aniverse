@@ -81,16 +81,12 @@ function PostForm({ post }: PostFormProps) {
                 />
             </div>
             
-            <div className="lg:sticky lg:top-24">
                 <Button
                     type="submit"
-                    bgColor="bg-white hover:bg-zinc-200 dark:bg-zinc-100 dark:hover:bg-white"
-                    textColor="text-zinc-950"
-                    className="w-full rounded-xl border border-white/10 py-3 font-medium transition-colors"
+                    className="w-full"
                 >
                     {post ? "Update Post" : "Submit Post"}
                 </Button>
-            </div>
         </form>
     )
 }

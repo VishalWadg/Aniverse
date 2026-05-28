@@ -53,7 +53,7 @@ function Login() {
   }
 
   return (
-    <div className='bg-black mt-0'>
+    <div className='bg-background mt-0'>
     <AuthScene
       title="Log In"
       description="Log in to continue to Aniverse."
@@ -99,7 +99,7 @@ function Login() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="h-14 w-full rounded-none bg-[#ff1018] text-base font-black uppercase tracking-[0.08em] text-white hover:bg-[#ff2b31]"
+          className="h-control-h w-full rounded-control bg-primary text-sm font-black uppercase tracking-[0.08em] text-on-primary hover:bg-primary/90"
         >
           {isSubmitting ? 'Logging In...' : 'Log In'}
         </Button>

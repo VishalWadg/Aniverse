@@ -4,7 +4,7 @@ import { Footer, Header, RouteToast } from './components';
 import { subscribeAuthFailure } from './lib/authSession';
 import { useAppDispatch } from './store/hooks';
 import { logout } from './store';
-import './App.css';
+import './index.css';
 
 function App() {
   const location = useLocation();
@@ -20,8 +20,8 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className="dark min-h-screen bg-[#191919] text-foreground">
-      <div className="flex min-h-screen flex-col bg-[#191919]">
+    <div className="min-h-screen bg-background text-foreground theme-transition">
+      <div className="flex min-h-screen flex-col bg-background">
         <RouteToast />
         <Header />
         <main className={isAuthRoute ? 'flex-1' : 'min-h-[calc(100vh-9rem)]'}>

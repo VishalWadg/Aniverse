@@ -2,7 +2,7 @@ import React from 'react'
 
 function Logo({width = '100px'}) {
   return (
-    <div style={{width}} className="text-white">
+    <div style={{width}} className="text-on-surface">
         <svg
             viewBox="0 0 320 56"
             className="h-auto w-full"

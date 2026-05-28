@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import UserAvatar from "../User/UserAvatar";
+import { Link } from "react-router-dom";
 
 interface CommentFormProps {
     postId: number,

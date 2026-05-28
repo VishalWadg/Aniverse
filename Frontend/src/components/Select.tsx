@@ -9,7 +9,7 @@ function Select({options, label, className, ...props}, ref) {
             id={id} 
             {...props}
             ref={ref}
-            className={`px-3 py-2 rounded-lg bg-white text-black outline-none focus:bg-gray-50 duration-200 border border-gray-200 w-full ${className}`}
+            className={`px-control-x py-control-y h-control-h rounded-control bg-surface-container text-on-surface outline-none focus:bg-surface-container-high border border-outline-variant w-full transition-colors duration-200 ${className}`}
             >
                 {options?.map((option) =>(
                     <option key={option} value={option}>
