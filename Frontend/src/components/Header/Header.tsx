@@ -9,11 +9,27 @@ import Logo from '../Logo'
 import LogoutBtn from './LogoutBtn'
 import UserAvatar from '../User/UserAvatar'
 import { normalizeBrandHex, useTheme } from '../ThemeProvider'
+import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 
 const navItems = [
   { name: 'Home', slug: '/' },
   { name: "Trash Bin", slug: "/admin" }
 ]
+
+const headerVariants = {
+  hidden: { 
+    y: "-100%", 
+    opacity: 0 
+  },
+  visibleAtTop: { 
+    y: 0, 
+    opacity: 1 
+  },
+  visibleScrolled: { 
+    y: 0, 
+    opacity: 0.7 // Sleek 70% opacity when scrolled down!
+  }
+};
 
 function Header() {
   const authStatus = useAppSelector((state) => state.auth.status)
@@ -32,6 +48,28 @@ function Header() {
 
   const [colorInput, setColorInput] = useState(brandColor);
   const [colorError, setColorError] = useState('');
+
+  const [isAtTop, setIsAtTop] = useState(true);
+  const { scrollY } = useScroll();
+  const [headerHidden, setHeaderHidden] = useState(false);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious() ?? 0;
+    
+    setIsAtTop(latest < 50);
+    
+    // 1. If at the top of the page (less than 80px), always keep the header visible
+    if (latest < 80) {
+      setHeaderHidden(false);
+      return;
+    }
+    // 2. Hide on scroll down, show on scroll up (with a minor 10px buffer to prevent jitter)
+    if (latest > previous && latest > 120) {
+      setHeaderHidden(true);  // Scrolling down
+    } else if (previous - latest > 10) {
+      setHeaderHidden(false); // Scrolling up
+    }
+  })
 
   useEffect(() => {
     setColorInput(brandColor);
@@ -173,7 +211,11 @@ function Header() {
 
   if (isAuthRoute) {
     return (
-      <header className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
+      <motion.header 
+        variants={headerVariants}
+        animate={headerHidden ? "hidden" : isAtTop ? "visibleAtTop" : "visibleScrolled"}
+        transition={{duration: 0.3, ease: "easeInOut"}}
+        className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
         <Container className="py-4">
           <div className="flex min-h-10 items-center justify-between gap-6 shrink-0">
             <Link to="/" className="shrink-0">
@@ -214,12 +256,16 @@ function Header() {
             </div>
           </div>
         </Container>
-      </header>
+      </motion.header>
     )
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
+    <motion.header
+      variants={headerVariants}
+      animate={headerHidden ? "hidden" : isAtTop ? "visibleAtTop" : "visibleScrolled"}
+      transition={{ duration: 0.3, ease: "easeInOut" }} 
+      className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
       <Container className="py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center justify-between gap-6 shrink-0">
@@ -439,7 +485,7 @@ function Header() {
           ) : null}
         </div>
       </Container>
-    </header>
+    </motion.header>
   )
 }
 
