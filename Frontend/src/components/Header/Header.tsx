@@ -77,6 +77,7 @@ function Header() {
       if (!headerHiddenRef.current) {
         headerHiddenRef.current = true;
         setHeaderHidden(true);
+        setIsSettingsOpen(false);
       }
     } else if (previous - latest > 10) {
       if (headerHiddenRef.current) {
