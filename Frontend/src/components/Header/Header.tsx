@@ -21,14 +21,10 @@ const headerVariants = {
     y: "-100%", 
     opacity: 0 
   },
-  visibleAtTop: { 
+  visible: { 
     y: 0, 
-    opacity: 1 
   },
-  visibleScrolled: { 
-    y: 0, 
-    opacity: 1 
-  }
+
 };
 
 function Header() {
@@ -81,7 +77,6 @@ function Header() {
       if (!headerHiddenRef.current) {
         headerHiddenRef.current = true;
         setHeaderHidden(true);
-        setIsSettingsOpen(false);
       }
     } else if (previous - latest > 10) {
       if (headerHiddenRef.current) {
@@ -233,14 +228,9 @@ function Header() {
     return (
       <motion.header 
         variants={headerVariants}
-        animate={headerHidden ? "hidden" : isAtTop ? "visibleAtTop" : "visibleScrolled"}
+        animate={headerHidden ? "hidden" :"visible"}
         transition={{duration: 0.3, ease: "easeInOut"}}
-        className={cn(
-          "sticky top-0 z-40 border-b backdrop-blur-xl transition-all duration-300",
-          isAtTop 
-            ? "bg-surface-container/0 border-transparent py-5" 
-            : "bg-surface-variant/80 border-outline-variant/60 py-3.5 shadow-md"
-        )}>
+        className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
         <Container className="py-4">
           <div className="flex min-h-10 items-center justify-between gap-6 shrink-0">
             <Link to="/" className="shrink-0">
@@ -288,14 +278,9 @@ function Header() {
   return (
     <motion.header
       variants={headerVariants}
-      animate={headerHidden ? "hidden" : isAtTop ? "visibleAtTop" : "visibleScrolled"}
+      animate={headerHidden ? "hidden" :"visible"}
       transition={{ duration: 0.3, ease: "easeInOut" }} 
-      className={cn(
-          "sticky top-0 z-40 border-b backdrop-blur-xl transition-all duration-300",
-          isAtTop 
-            ? "bg-surface-container/0 border-transparent py-5" 
-            : "bg-surface-variant/80 border-outline-variant/60 py-3.5 shadow-md"
-        )}>
+      className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
       <Container className="py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center justify-between gap-6 shrink-0">
