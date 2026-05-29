@@ -8,6 +8,7 @@ import Container from '../Container/Container'
 import Logo from '../Logo'
 import LogoutBtn from './LogoutBtn'
 import UserAvatar from '../User/UserAvatar'
+import { normalizeBrandHex, useTheme } from '../ThemeProvider'
 
 const navItems = [
   { name: 'Home', slug: '/' },
@@ -21,9 +22,21 @@ function Header() {
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
-  const navControlClass = 'h-10'
+  const navControlClass = 'h-control-h'
   const userRole = useAppSelector((state) => state.auth.userData?.role);
+
+  // Dynamic Theme API
+  const { theme, setTheme, brandColor, setBrandColor, resetBrandColor } = useTheme();
+
+  const [colorInput, setColorInput] = useState(brandColor);
+  const [colorError, setColorError] = useState('');
+
+  useEffect(() => {
+    setColorInput(brandColor);
+    setColorError('');
+  }, [brandColor]);
 
   const navRoutes = navItems.filter((item) => {
     if (item.slug === "/admin") {
@@ -63,9 +76,104 @@ function Header() {
     })
   }
 
+  const commitBrandColor = () => {
+    const normalizedColor = normalizeBrandHex(colorInput);
+
+    if (!normalizedColor) {
+      setColorError('Use a valid hex color.');
+      return;
+    }
+
+    setColorInput(normalizedColor);
+    setColorError('');
+    setBrandColor(normalizedColor);
+  }
+
+  // Common Settings Dropdown Panel
+  const renderSettingsPanel = () => (
+    <div className="absolute right-0 top-12 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest p-card shadow-elevation-2 animate-in fade-in slide-in-from-top-2 duration-200">
+      <h3 className="text-xs font-black uppercase tracking-[0.16em] text-on-surface mb-3">Settings</h3>
+      
+      {/* Mode Selector */}
+      <div className="mb-4">
+        <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant mb-2">Appearance</span>
+        <div className="grid grid-cols-3 gap-2">
+          {(['light', 'dark', 'system'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setTheme(m)}
+              className={`h-8 text-[10px] font-black uppercase tracking-[0.08em] rounded-control border transition-all cursor-pointer ${
+                theme === m
+                  ? 'bg-primary text-on-primary border-transparent shadow-sm'
+                  : 'border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+              }`}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+
+
+
+      {/* Brand Color Selector */}
+      <div>
+        <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant mb-2">Accent Color</span>
+        <div className="flex items-center gap-3">
+          <div className="relative size-8 rounded-full border border-outline-variant shadow-inner transition-colors duration-300 shrink-0 overflow-hidden">
+            <input
+              type="color"
+              value={brandColor}
+              onChange={(e) => {
+                setColorInput(e.target.value);
+                setColorError('');
+                setBrandColor(e.target.value);
+              }}
+              className="absolute inset-0 size-full scale-150 cursor-pointer opacity-0"
+              aria-label="Accent color picker"
+            />
+            <div 
+              className="size-full"
+              style={{ backgroundColor: brandColor }}
+            />
+          </div>
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={colorInput}
+              onChange={(e) => {
+                setColorInput(e.target.value);
+                setColorError('');
+              }}
+              onBlur={commitBrandColor}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  commitBrandColor();
+                }
+              }}
+              placeholder="#769CDF"
+              aria-invalid={Boolean(colorError)}
+              className="h-8 w-full rounded-control border border-outline-variant bg-surface-container px-3 text-xs font-mono text-on-surface outline-none focus:border-primary aria-invalid:border-error"
+            />
+          </div>
+        </div>
+        {colorError ? (
+          <p className="mt-2 text-xs font-medium text-error">{colorError}</p>
+        ) : null}
+        <button
+          type="button"
+          onClick={resetBrandColor}
+          className="mt-3 h-8 rounded-control border border-outline-variant px-control-x text-[10px] font-black uppercase tracking-[0.12em] text-on-surface-variant transition-colors hover:border-outline hover:bg-surface-container hover:text-on-surface"
+        >
+          Reset Accent
+        </button>
+      </div>
+    </div>
+  )
+
   if (isAuthRoute) {
     return (
-      <header className="sticky top-0 z-40 border-b border-white/8 bg-[#0b0b0b]/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
         <Container className="py-4">
           <div className="flex min-h-10 items-center justify-between gap-6 shrink-0">
             <Link to="/" className="shrink-0">
@@ -76,19 +184,33 @@ function Header() {
               <Button
                 asChild
                 variant="ghost"
-                className={`${navControlClass} rounded-none border border-white/10 bg-transparent px-4 text-[#d6d6d6] hover:bg-white/[0.04] hover:text-white`}
+                className={`${navControlClass} rounded-none border border-outline-variant bg-transparent px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
               >
                 <Link to="/">Home</Link>
               </Button>
 
               <Button
                 asChild
-                className={`${navControlClass} rounded-none bg-[#ff453a] px-5 font-black uppercase tracking-[0.18em] text-white hover:bg-[#ff5f55]`}
+                className={`${navControlClass} rounded-none px-5 font-black uppercase tracking-[0.18em]`}
               >
                 <Link to={location.pathname === '/login' ? '/signup' : '/login'}>
                   {location.pathname === '/login' ? 'Sign Up' : 'Log In'}
                 </Link>
               </Button>
+
+              {/* Theme Settings Control */}
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsSettingsOpen((open) => !open)}
+                  className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
+                  aria-label="Theme settings"
+                  aria-expanded={isSettingsOpen}
+                >
+                  <SettingsIcon className={`size-5 transition-transform duration-300 ${isSettingsOpen ? 'rotate-45' : ''}`} />
+                </button>
+                {isSettingsOpen && renderSettingsPanel()}
+              </div>
             </div>
           </div>
         </Container>
@@ -97,7 +219,7 @@ function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/8 bg-[#0b0b0b]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
       <Container className="py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center justify-between gap-6 shrink-0">
@@ -108,17 +230,31 @@ function Header() {
             <div className="flex items-center gap-2 lg:hidden">
               <Button
                 asChild
-                className="rounded-none bg-[#ff453a] px-5 font-black uppercase tracking-[0.18em] text-white hover:bg-[#ff5f55]"
+                className="rounded-none px-5 font-black uppercase tracking-[0.18em]"
               >
                 <Link to={authStatus ? '/add-post' : '/signup'}>Write</Link>
               </Button>
+
+              {/* Theme Settings Control Mobile */}
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsSettingsOpen((open) => !open)}
+                  className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
+                  aria-label="Theme settings"
+                  aria-expanded={isSettingsOpen}
+                >
+                  <SettingsIcon className={`size-5 transition-transform duration-300 ${isSettingsOpen ? 'rotate-45' : ''}`} />
+                </button>
+                {isSettingsOpen && renderSettingsPanel()}
+              </div>
 
               <button
                 type="button"
                 aria-label={isMobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 aria-expanded={isMobileNavOpen}
                 onClick={() => setIsMobileNavOpen((open) => !open)}
-                className="inline-flex size-10 items-center justify-center border border-white/10 text-[#d6d6d6] transition hover:bg-white/[0.04] hover:text-white"
+                className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface-variant transition hover:bg-surface-container hover:text-on-surface"
               >
                 {isMobileNavOpen ? <CloseIcon className="size-4" /> : <MenuIcon className="size-4" />}
               </button>
@@ -134,8 +270,8 @@ function Header() {
                   className={cn(
                     'text-sm font-black uppercase tracking-[0.18em] transition-colors',
                     location.pathname === item.slug
-                      ? 'text-[#ff453a]'
-                      : 'text-[#d5d5d5] hover:text-white'
+                      ? 'text-primary'
+                      : 'text-on-surface-variant hover:text-on-surface'
                   )}
                 >
                   {item.name}
@@ -149,12 +285,12 @@ function Header() {
                 className="flex w-full max-w-md items-center gap-2"
               >
                 <div className="relative flex-1">
-                  <SearchIcon className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-[#5f5f5f]" />
+                  <SearchIcon className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-on-surface-variant" />
                   <Input
                     value={searchValue}
                     onChange={(event) => setSearchValue(event.target.value)}
                     placeholder="Search the archives..."
-                    className={`${navControlClass} rounded-none border-white/10 bg-black/40 pr-4 pl-11 text-[11px] font-medium uppercase tracking-[0.28em] placeholder:text-[#5f5f5f]`}
+                    className={`${navControlClass} rounded-none pr-4 pl-11 text-[11px] font-medium uppercase tracking-[0.28em]`}
                   />
                 </div>
               </form>
@@ -164,7 +300,7 @@ function Header() {
                   <Button
                     asChild
                     variant="ghost"
-                    className={`${navControlClass} rounded-none border border-white/10 bg-transparent px-4 text-[#d6d6d6] hover:bg-white/[0.04] hover:text-white`}
+                    className={`${navControlClass} rounded-none border border-outline-variant bg-transparent px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
                   >
                     <Link to="/login">Log In</Link>
                   </Button>
@@ -172,7 +308,7 @@ function Header() {
 
                 <Button
                   asChild
-                  className="hidden rounded-none bg-[#ff453a] px-5 font-black uppercase tracking-[0.18em] text-white hover:bg-[#ff5f55] lg:inline-flex"
+                  className="hidden rounded-none px-5 font-black uppercase tracking-[0.18em] lg:inline-flex"
                 >
                   <Link to={authStatus ? '/add-post' : '/signup'}>
                     Write a Theory
@@ -182,7 +318,7 @@ function Header() {
                 {authStatus && currentUser && (
                   <Link
                     to={`/users/${currentUser.username}`}
-                    className="hidden items-center gap-3 border border-white/10 bg-white/[0.03] px-3 py-2 transition hover:bg-white/[0.06] md:inline-flex"
+                    className="hidden items-center gap-3 border border-outline-variant bg-surface-container/50 px-3 py-2 transition hover:bg-surface-container md:inline-flex"
                   >
                     <UserAvatar
                       userName={currentUser.name || currentUser.username}
@@ -193,10 +329,10 @@ function Header() {
                     />
 
                     <span className="min-w-0 text-left">
-                      <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-[#727272]">
+                      <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-on-surface-variant">
                         Profile
                       </span>
-                      <span className="block max-w-[9rem] truncate text-sm font-semibold text-white">
+                      <span className="block max-w-[9rem] truncate text-sm font-semibold text-on-surface">
                         {currentUser.username}
                       </span>
                     </span>
@@ -204,12 +340,26 @@ function Header() {
                 )}
 
                 {authStatus && <LogoutBtn />}
+
+                {/* Theme Settings Control Desktop */}
+                <div className="relative shrink-0 hidden lg:inline-block">
+                  <button
+                    type="button"
+                    onClick={() => setIsSettingsOpen((open) => !open)}
+                    className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
+                    aria-label="Theme settings"
+                    aria-expanded={isSettingsOpen}
+                  >
+                    <SettingsIcon className={`size-5 transition-transform duration-300 ${isSettingsOpen ? 'rotate-45' : ''}`} />
+                  </button>
+                  {isSettingsOpen && renderSettingsPanel()}
+                </div>
               </div>
             </div>
           </div>
 
           {isMobileNavOpen ? (
-            <div className="border-t border-white/8 pt-4 lg:hidden">
+            <div className="border-t border-outline-variant pt-4 lg:hidden">
               <nav className="flex flex-col gap-3">
                 {navRoutes.map((item) => (
                   <Link
@@ -218,8 +368,8 @@ function Header() {
                     className={cn(
                       'text-sm font-black uppercase tracking-[0.18em] transition-colors',
                       location.pathname === item.slug
-                        ? 'text-[#ff453a]'
-                        : 'text-[#d5d5d5] hover:text-white'
+                        ? 'text-primary'
+                        : 'text-on-surface-variant hover:text-on-surface'
                     )}
                   >
                     {item.name}
@@ -229,12 +379,12 @@ function Header() {
 
               <form onSubmit={handleSearch} className="mt-4 flex w-full items-center gap-2">
                 <div className="relative flex-1">
-                  <SearchIcon className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-[#5f5f5f]" />
+                  <SearchIcon className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-on-surface-variant" />
                   <Input
                     value={searchValue}
                     onChange={(event) => setSearchValue(event.target.value)}
                     placeholder="Search the archives..."
-                    className={`${navControlClass} rounded-none border-white/10 bg-black/40 pr-4 pl-11 text-[11px] font-medium uppercase tracking-[0.28em] placeholder:text-[#5f5f5f]`}
+                    className={`${navControlClass} rounded-none pr-4 pl-11 text-[11px] font-medium uppercase tracking-[0.28em]`}
                   />
                 </div>
               </form>
@@ -244,7 +394,7 @@ function Header() {
                   <Button
                     asChild
                     variant="ghost"
-                    className={`${navControlClass} w-full rounded-none border border-white/10 bg-transparent px-4 text-[#d6d6d6] hover:bg-white/[0.04] hover:text-white`}
+                    className={`${navControlClass} w-full rounded-none border border-outline-variant bg-transparent px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
                   >
                     <Link to="/login">Log In</Link>
                   </Button>
@@ -252,7 +402,7 @@ function Header() {
 
                 <Button
                   asChild
-                  className={`${navControlClass} w-full rounded-none bg-[#ff453a] px-5 font-black uppercase tracking-[0.18em] text-white hover:bg-[#ff5f55]`}
+                  className={`${navControlClass} w-full rounded-none px-5 font-black uppercase tracking-[0.18em]`}
                 >
                   <Link to={authStatus ? '/add-post' : '/signup'}>
                     Write a Theory
@@ -262,7 +412,7 @@ function Header() {
                 {authStatus && currentUser && (
                   <Link
                     to={`/users/${currentUser.username}`}
-                    className="flex items-center gap-3 border border-white/10 bg-white/[0.03] px-3 py-3 transition hover:bg-white/[0.06]"
+                    className="flex items-center gap-3 border border-outline-variant bg-surface-container/50 px-3 py-3 transition hover:bg-surface-container"
                   >
                     <UserAvatar
                       userName={currentUser.name || currentUser.username}
@@ -273,10 +423,10 @@ function Header() {
                     />
 
                     <span className="min-w-0 text-left">
-                      <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-[#727272]">
+                      <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-on-surface-variant">
                         Profile
                       </span>
-                      <span className="block truncate text-sm font-semibold text-white">
+                      <span className="block truncate text-sm font-semibold text-on-surface">
                         {currentUser.username}
                       </span>
                     </span>
@@ -344,6 +494,24 @@ function CloseIcon({ className = '' }) {
     >
       <path d="m6 6 12 12" />
       <path d="M18 6 6 18" />
+    </svg>
+  )
+}
+
+function SettingsIcon({ className = '' }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   )
 }

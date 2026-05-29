@@ -58,7 +58,7 @@ function PostCard({
     <div className="min-w-0 flex-1">
       <div
         className={cn(
-          'flex flex-wrap items-center gap-2 font-medium uppercase text-[#7f7f7f]',
+          'flex flex-wrap items-center gap-2 font-medium uppercase text-on-surface-variant/80',
           isCompact ? 'text-[10px] tracking-[0.2em]' : 'text-[11px] tracking-[0.24em]'
         )}
       >
@@ -66,18 +66,18 @@ function PostCard({
           <Link
             to={authorHref}
             className={cn(
-              'normal-case tracking-normal text-[#ededed] transition-colors hover:text-white',
+              'normal-case tracking-normal text-on-surface transition-colors hover:text-primary',
               isCompact ? 'text-[13px]' : 'text-sm'
             )}
           >
             u/{displayName}
           </Link>
         ) : (
-          <span className={cn('normal-case tracking-normal text-[#ededed]', isCompact ? 'text-[13px]' : 'text-sm')}>
+          <span className={cn('normal-case tracking-normal text-on-surface', isCompact ? 'text-[13px]' : 'text-sm')}>
             u/{displayName}
           </span>
         )}
-        <span className="text-[#5c5c5c]">/</span>
+        <span className="text-on-surface-variant/40">/</span>
         <span>{formatRelativeTime(createdAt)}</span>
       </div>
     </div>
@@ -85,8 +85,8 @@ function PostCard({
 
   if (isCompact) {
     return (
-      <article className="group flex h-full flex-col border border-white/8 bg-black/25 p-5 transition-colors hover:border-white/14 hover:bg-black/35">
-        <div className="flex items-start gap-3 text-sm text-[#9c9c9c]">
+      <article className="group flex h-full min-w-0 flex-col border border-outline-variant bg-surface-container p-card rounded-card transition-all duration-300 hover:border-outline hover:bg-surface-container-high shadow-sm">
+        <div className="flex items-start gap-3 text-sm text-on-surface-variant">
           <UserAvatar
             userName={displayName}
             avatarSeed={author?.username || displayName}
@@ -97,20 +97,20 @@ function PostCard({
 
           {authorMeta}
 
-          <span className="inline-flex shrink-0 items-center border border-[#ff453a]/35 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-[#ff8f86]">
+          <span className="inline-flex shrink-0 items-center border border-primary/30 rounded-control px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-primary">
             {category}
           </span>
         </div>
 
-        <div className="mt-4 flex flex-1 flex-col space-y-3">
+        <div className="mt-card flex flex-1 flex-col gap-cluster">
           <Link to={interactionHref} className="block">
-            <h2 className="text-xl font-black leading-tight text-[#f5f5f5] transition-colors duration-200 group-hover:text-white">
+            <h2 className="text-xl font-black leading-tight text-on-surface transition-colors duration-200 group-hover:text-primary">
               {title}
             </h2>
           </Link>
 
           {coverImage && (
-            <Link to={interactionHref} className="block overflow-hidden border border-white/10 bg-[#121212]">
+            <Link to={interactionHref} className="block overflow-hidden border border-outline-variant/60 bg-card rounded-card">
               <img
                 src={coverImage}
                 alt={title}
@@ -119,12 +119,12 @@ function PostCard({
             </Link>
           )}
 
-          <p className="text-sm leading-6 text-[#a3a3a3]">
+          <p className="text-sm leading-6 text-on-surface-variant">
             {excerpt || 'Open the manuscript to read the full entry.'}
           </p>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/8 pt-4 text-sm text-[#909090]">
+        <div className="mt-card flex items-center justify-between gap-cluster border-t border-outline-variant/50 pt-card text-sm text-on-surface-variant/80">
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-2">
               <ClockIcon className="size-4" />
@@ -133,7 +133,7 @@ function PostCard({
 
             <Link
               to={interactionHref}
-              className="inline-flex items-center gap-2 text-[#b7b7b7] transition-colors hover:text-white"
+              className="inline-flex items-center gap-2 text-on-surface-variant/90 transition-colors hover:text-primary"
             >
               <CommentIcon className="size-4" />
               {'Read'}
@@ -143,7 +143,7 @@ function PostCard({
           <button
             type="button"
             onClick={handleShare}
-            className="inline-flex h-8 w-8 items-center justify-center border border-transparent text-[#8f8f8f] transition hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+            className="inline-flex h-control-h w-control-h items-center justify-center border border-outline-variant/40 rounded-control text-on-surface-variant/80 transition-colors hover:border-outline-variant hover:bg-surface-container-high hover:text-primary cursor-pointer"
             aria-label={`Share ${title}`}
           >
             <ShareIcon className="size-4" />
@@ -154,8 +154,8 @@ function PostCard({
   }
 
   return (
-    <article className="group px-5 py-6 sm:px-6 sm:py-7">
-      <div className="flex flex-wrap items-center gap-3 text-sm text-[#9c9c9c]">
+    <article className="group flex h-full min-w-0 flex-col border border-outline-variant/40 rounded-card bg-surface-container p-card transition-all duration-300 hover:border-outline-variant hover:bg-surface-container-high shadow-sm">
+      <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant">
         <UserAvatar
           userName={displayName}
           avatarSeed={author?.username || displayName}
@@ -166,20 +166,20 @@ function PostCard({
 
         {authorMeta}
 
-        <span className="inline-flex items-center border border-[#ff453a]/45 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-[#ff7a70]">
+        <span className="inline-flex items-center border border-primary/40 rounded-control px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
           {category}
         </span>
       </div>
 
-      <div className="mt-5 space-y-4">
+      <div className="mt-card flex flex-1 flex-col gap-card">
         <Link to={interactionHref} className="block">
-          <h2 className="max-w-4xl text-2xl font-black leading-tight text-[#f5f5f5] transition-colors duration-200 group-hover:text-white sm:text-[2rem]">
+          <h2 className="max-w-4xl text-2xl font-black leading-tight text-on-surface transition-colors duration-200 group-hover:text-primary sm:text-[2rem]">
             {title}
           </h2>
         </Link>
 
         {coverImage && (
-          <Link to={interactionHref} className="block overflow-hidden border border-white/10 bg-[#121212]">
+          <Link to={interactionHref} className="block overflow-hidden border border-outline-variant/60 bg-card rounded-card">
             <img
               src={coverImage}
               alt={title}
@@ -188,13 +188,13 @@ function PostCard({
           </Link>
         )}
 
-        <p className="max-w-4xl text-base leading-8 text-[#a3a3a3]">
+        <p className="max-w-4xl text-base leading-8 text-on-surface-variant">
           {excerpt || 'Open the manuscript to read the full entry.'}
         </p>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-4 border-t border-white/8 pt-4">
-        <div className="flex items-center gap-3 text-sm text-[#909090] sm:gap-5">
+      <div className="mt-card flex items-center justify-between gap-cluster border-t border-outline-variant/50 pt-card">
+        <div className="flex items-center gap-3 text-sm text-on-surface-variant/80 sm:gap-5">
           <span className="inline-flex items-center gap-2">
             <ClockIcon className="size-4" />
             {readTime} min read
@@ -202,7 +202,7 @@ function PostCard({
 
           <Link
             to={interactionHref}
-            className="inline-flex items-center gap-2 text-[#b7b7b7] transition-colors hover:text-white"
+            className="inline-flex items-center gap-2 text-on-surface-variant/90 transition-colors hover:text-primary"
           >
             <CommentIcon className="size-4" />
             {'Open thread'}
@@ -212,7 +212,7 @@ function PostCard({
         <button
           type="button"
           onClick={handleShare}
-          className="inline-flex h-9 w-9 items-center justify-center border border-transparent text-[#8f8f8f] transition hover:border-white/10 hover:bg-white/[0.04] hover:text-white"
+          className="inline-flex h-control-h w-control-h items-center justify-center border border-outline-variant/40 rounded-control text-on-surface-variant/80 transition-colors hover:border-outline-variant hover:bg-surface-container-high hover:text-primary cursor-pointer"
           aria-label={`Share ${title}`}
         >
           <ShareIcon className="size-4" />

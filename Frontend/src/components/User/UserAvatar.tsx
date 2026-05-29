@@ -28,10 +28,10 @@ const UserAvatar = ({
     return (
         <Avatar
             size={size}
-            className={cn("border border-white/10 bg-white/[0.04] after:border-white/10", className)}
+            className={cn("border border-outline-variant bg-surface-container after:border-outline-variant", className)}
         >
             <AvatarImage src={avatar} alt={userName} />
-            <AvatarFallback className="bg-[#241413] font-black uppercase tracking-[0.16em] text-[#ffb4ae]">
+            <AvatarFallback className="bg-primary-container text-on-primary-container font-black uppercase tracking-[0.16em]">
                 {getInitials(userName)}
             </AvatarFallback>
         </Avatar>

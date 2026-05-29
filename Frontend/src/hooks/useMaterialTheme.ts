@@ -1,10 +1,9 @@
-import { applyThemeScheme, getMaterialTheme } from "@/lib/theme-utils"
+import { applyThemeScheme, getMaterialThemeScheme } from "@/lib/theme-utils"
 import { useEffect } from "react"
 
 export const useMaterialTheme = (baseHexColor: string, isDarkMode: boolean) => {
     useEffect(() => {
-        const theme = getMaterialTheme(baseHexColor);
-        const scheme = isDarkMode ? theme.schemes.dark : theme.schemes.light;
+        const scheme = getMaterialThemeScheme(baseHexColor, isDarkMode);
         applyThemeScheme(scheme);
     }, [baseHexColor, isDarkMode]);
 }

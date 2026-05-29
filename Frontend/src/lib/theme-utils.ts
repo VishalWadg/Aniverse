@@ -1,49 +1,104 @@
-import { themeFromSourceColor, argbFromHex, hexFromArgb, Scheme } from "@material/material-color-utilities";
-import { colord } from "colord";
+import { 
+  type DynamicColor,
+  MaterialDynamicColors, 
+  Hct, 
+  SchemeTonalSpot, 
+  argbFromHex, 
+  hexFromArgb 
+} from "@material/material-color-utilities";
 
-const argbToShadcnHsl = (argb: number): string => {
-  const hex = hexFromArgb(argb);
-  const { h, s, l } = colord(hex).toHsl();
-  return `hsl(${h.toFixed(1)} ${(s).toFixed(1)}% ${(l).toFixed(1)}%)`;
+/**
+ * Converts an ARGB number back to a standard Hex code.
+ */
+export const argbToHex = (argb: number): string => {
+  return hexFromArgb(argb);
 };
 
-export const applyThemeScheme = (scheme: Scheme) => {
+/**
+ * Generates a calm, harmonized SchemeTonalSpot from a hex brand color.
+ */
+export const getMaterialThemeScheme = (brandColor: string, isDark: boolean): SchemeTonalSpot => {
+  const sourceColorHct = Hct.fromInt(argbFromHex(brandColor));
+  // SchemeTonalSpot parameters: sourceColorHct, isDark (boolean), contrastLevel (0.0 is standard)
+  return new SchemeTonalSpot(sourceColorHct, isDark, 0.0);
+};
+
+/**
+ * Maps all dynamic scheme roles to HTML document CSS variables.
+ */
+export const applyThemeScheme = (scheme: SchemeTonalSpot) => {
   const root = document.documentElement;
-  
-  // 1. Core Colors
-  root.style.setProperty("--color-primary", argbToShadcnHsl(scheme.primary));
-  root.style.setProperty("--color-primary-foreground", argbToShadcnHsl(scheme.onPrimary));
-  
-  root.style.setProperty("--color-secondary", argbToShadcnHsl(scheme.secondary));
-  root.style.setProperty("--color-secondary-foreground", argbToShadcnHsl(scheme.onSecondary));
-  // Material's 'Tertiary' is perfect for Shadcn's 'Accent'
-  root.style.setProperty("--color-accent", argbToShadcnHsl(scheme.tertiary));
-  root.style.setProperty("--color-accent-foreground", argbToShadcnHsl(scheme.onTertiary));
-  // Material's 'Error' maps directly to Shadcn's 'Destructive'
-  root.style.setProperty("--color-destructive", argbToShadcnHsl(scheme.error));
-  root.style.setProperty("--color-destructive-foreground", argbToShadcnHsl(scheme.onError));
-  // 2. Surfaces & Backgrounds
-  root.style.setProperty("--color-background", argbToShadcnHsl(scheme.background));
-  root.style.setProperty("--color-foreground", argbToShadcnHsl(scheme.onBackground));
-  
-  // Material uses 'Surface' for cards and popovers
-  root.style.setProperty("--color-card", argbToShadcnHsl(scheme.surface));
-  root.style.setProperty("--color-card-foreground", argbToShadcnHsl(scheme.onSurface));
-  root.style.setProperty("--color-popover", argbToShadcnHsl(scheme.surface));
-  root.style.setProperty("--color-popover-foreground", argbToShadcnHsl(scheme.onSurface));
-  
-  // Material's 'Surface Variant' is slightly tinted
-  root.style.setProperty("--color-muted", argbToShadcnHsl(scheme.surfaceVariant));
-  root.style.setProperty("--color-muted-foreground", argbToShadcnHsl(scheme.onSurfaceVariant));
-  // 3. Borders & Inputs
-  // Material's 'Outline Variant' is a subtle border, 'Outline' is stronger
-  root.style.setProperty("--color-border", argbToShadcnHsl(scheme.outlineVariant));
-  root.style.setProperty("--color-input", argbToShadcnHsl(scheme.outlineVariant));
-  root.style.setProperty("--color-ring", argbToShadcnHsl(scheme.outline));
-  
-  root.style.setProperty("--radius", "0.75rem");
-};
 
-export const getMaterialTheme = (baseHexColor: string) => {
-    return themeFromSourceColor(argbFromHex(baseHexColor));
-}
+  const getColor = (dynamicColor: DynamicColor): string => {
+    return hexFromArgb(dynamicColor.getArgb(scheme));
+  };
+
+  const setMaterialRole = (name: string, dynamicColor: DynamicColor) => {
+    const color = getColor(dynamicColor);
+    root.style.setProperty(`--md-${name}`, color);
+    root.style.setProperty(`--${name}`, color);
+    return color;
+  };
+
+  // Material-generated roles.
+  setMaterialRole("primary", MaterialDynamicColors.primary);
+  setMaterialRole("primary-foreground", MaterialDynamicColors.onPrimary);
+  setMaterialRole("on-primary", MaterialDynamicColors.onPrimary);
+  setMaterialRole("primary-container", MaterialDynamicColors.primaryContainer);
+  setMaterialRole("on-primary-container", MaterialDynamicColors.onPrimaryContainer);
+
+  setMaterialRole("secondary", MaterialDynamicColors.secondary);
+  setMaterialRole("secondary-foreground", MaterialDynamicColors.onSecondary);
+  setMaterialRole("on-secondary", MaterialDynamicColors.onSecondary);
+  setMaterialRole("secondary-container", MaterialDynamicColors.secondaryContainer);
+  setMaterialRole("on-secondary-container", MaterialDynamicColors.onSecondaryContainer);
+
+  setMaterialRole("tertiary", MaterialDynamicColors.tertiary);
+  setMaterialRole("tertiary-foreground", MaterialDynamicColors.onTertiary);
+  setMaterialRole("on-tertiary", MaterialDynamicColors.onTertiary);
+  setMaterialRole("tertiary-container", MaterialDynamicColors.tertiaryContainer);
+  setMaterialRole("on-tertiary-container", MaterialDynamicColors.onTertiaryContainer);
+
+  setMaterialRole("error", MaterialDynamicColors.error);
+  setMaterialRole("error-container", MaterialDynamicColors.errorContainer);
+  setMaterialRole("on-error", MaterialDynamicColors.onError);
+  setMaterialRole("on-error-container", MaterialDynamicColors.onErrorContainer);
+
+  const materialBackground = setMaterialRole("background", MaterialDynamicColors.background);
+  const materialOnBackground = setMaterialRole("on-background", MaterialDynamicColors.onBackground);
+  setMaterialRole("surface", MaterialDynamicColors.surface);
+  setMaterialRole("surface-dim", MaterialDynamicColors.surfaceDim);
+  setMaterialRole("surface-bright", MaterialDynamicColors.surfaceBright);
+  setMaterialRole("surface-tint", MaterialDynamicColors.surfaceTint);
+  setMaterialRole("on-surface", MaterialDynamicColors.onSurface);
+  setMaterialRole("surface-variant", MaterialDynamicColors.surfaceVariant);
+  setMaterialRole("on-surface-variant", MaterialDynamicColors.onSurfaceVariant);
+
+  setMaterialRole("surface-container-lowest", MaterialDynamicColors.surfaceContainerLowest);
+  const surfaceContainerLow = setMaterialRole("surface-container-low", MaterialDynamicColors.surfaceContainerLow);
+  setMaterialRole("surface-container", MaterialDynamicColors.surfaceContainer);
+  setMaterialRole("surface-container-high", MaterialDynamicColors.surfaceContainerHigh);
+  setMaterialRole("surface-container-highest", MaterialDynamicColors.surfaceContainerHighest);
+
+  setMaterialRole("outline", MaterialDynamicColors.outline);
+  setMaterialRole("outline-variant", MaterialDynamicColors.outlineVariant);
+  setMaterialRole("shadow", MaterialDynamicColors.shadow);
+  setMaterialRole("scrim", MaterialDynamicColors.scrim);
+  setMaterialRole("inverse-surface", MaterialDynamicColors.inverseSurface);
+  setMaterialRole("inverse-on-surface", MaterialDynamicColors.inverseOnSurface);
+  setMaterialRole("inverse-primary", MaterialDynamicColors.inversePrimary);
+
+  // App-facing aliases. Light mode uses a softer container for the page canvas
+  // while the raw Material value remains available as --md-background.
+  root.style.setProperty("--background", scheme.isDark ? materialBackground : surfaceContainerLow);
+  root.style.setProperty("--on-background", materialOnBackground);
+  root.style.setProperty("--card", "var(--surface-container)");
+  root.style.setProperty("--card-foreground", "var(--on-surface)");
+  root.style.setProperty("--popover", "var(--surface-container-high)");
+  root.style.setProperty("--popover-foreground", "var(--on-surface)");
+  root.style.setProperty("--muted", "var(--surface-container-low)");
+  root.style.setProperty("--muted-foreground", "var(--on-surface-variant)");
+  root.style.setProperty("--border", "var(--outline-variant)");
+  root.style.setProperty("--input", "var(--outline-variant)");
+  root.style.setProperty("--ring", "var(--primary)");
+};

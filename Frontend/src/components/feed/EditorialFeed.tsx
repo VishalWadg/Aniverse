@@ -11,7 +11,7 @@ import {
 import Container from '../Container/Container'
 import PostCard from '../PostCard'
 import { useGetPostsQuery } from '@/api/postsApi'
-import {Virtuoso} from "react-virtuoso"
+import { Virtuoso } from "react-virtuoso"
 
 const feedTabs = {
   home: [
@@ -47,14 +47,16 @@ const feedCopy = {
   },
 }
 
+const FEED_PAGE_SIZE = 10
+
 function TrendingManuscripts({ trendingPosts, canInteract }) {
   return (
-    <div className="border border-white/8 bg-black/30 p-6 ">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-black uppercase tracking-[0.28em] text-[#8b8b8b]">
+    <div className="border border-outline-variant bg-surface-container p-card rounded-card shadow-elevation-1">
+      <div className="mb-6 flex items-center justify-between gap-3 border-b border-outline-variant/40 pb-3">
+        <h2 className="text-sm font-black uppercase tracking-[0.28em] text-on-surface-variant">
           Trending Manuscripts
         </h2>
-        <span className="text-[10px] uppercase tracking-[0.3em] text-[#5f5f5f]">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-on-surface-variant/60">
           Desk Live
         </span>
       </div>
@@ -67,20 +69,20 @@ function TrendingManuscripts({ trendingPosts, canInteract }) {
               to={`/post/${post.id}`}
               className="group block"
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[#ff6c62]">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-primary">
                 {String(index + 1).padStart(2, '0')} / {inferCategory(post)}
               </p>
-              <h3 className="mt-2 text-xl font-black leading-tight text-[#f1f1f1] transition-colors group-hover:text-white">
+              <h3 className="mt-2 text-xl font-black leading-tight text-on-surface transition-colors group-hover:text-primary">
                 {post.title}
               </h3>
-              <p className="mt-2 text-sm text-[#7d7d7d]">
+              <p className="mt-2 text-sm text-on-surface-variant/85">
                 {getDisplayName(post.author)} / {formatRelativeTime(post.createdAt)}
               </p>
             </Link>
           ))}
         </div>
       ) : (
-        <p className="text-sm leading-7 text-[#8b8b8b]">
+        <p className="text-sm leading-7 text-on-surface-variant">
           Trending picks will appear here once the archive has posts to rank.
         </p>
       )}
@@ -88,7 +90,7 @@ function TrendingManuscripts({ trendingPosts, canInteract }) {
   )
 }
 
-function EditorialFeed({authStatus = true, mode = 'home' }) {
+function EditorialFeed({ authStatus = true, mode = 'home' }) {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q')?.trim() ?? ''
@@ -98,11 +100,9 @@ function EditorialFeed({authStatus = true, mode = 'home' }) {
   const [page, setPage] = useState(0);
   const sortParam = activeTab === 'deep' ? 'wordCount,desc' : 'createdAt,desc';
 
-
-  const { data, isLoading, isFetching } = useGetPostsQuery({ sort: sortParam, page });
+  const { data, isLoading, isFetching } = useGetPostsQuery({ sort: sortParam, page, size: FEED_PAGE_SIZE });
   const posts = data?.content || [];
-  const hasNextPage = !data?.last;
-  
+  const hasNextPage = Boolean(data && !data.last);
 
   const visiblePosts = useMemo(() => {
     let nextPosts = [...posts].filter(Boolean).filter((post) => matchesSearch(post, searchQuery))
@@ -112,25 +112,11 @@ function EditorialFeed({authStatus = true, mode = 'home' }) {
         nextPosts.sort((left, right) => getHotScore(right) - getHotScore(left))
         break
       case 'latest':
-        nextPosts.sort(
-          (left, right) =>
-            new Date(right?.createdAt ?? 0).getTime() -
-            new Date(left?.createdAt ?? 0).getTime()
-        )
         break
       case 'deep':
-        nextPosts.sort(
-          (left, right) => (right?.content?.length ?? 0) - (left?.content?.length ?? 0)
-        )
         break
       case 'editorial':
-        nextPosts = nextPosts
-          .filter((post) => inferCategory(post) === 'Editorial')
-          .sort(
-            (left, right) =>
-              new Date(right?.createdAt ?? 0).getTime() -
-              new Date(left?.createdAt ?? 0).getTime()
-          )
+        nextPosts = nextPosts.filter((post) => inferCategory(post) === 'Editorial')
         break
       default:
         break
@@ -149,7 +135,8 @@ function EditorialFeed({authStatus = true, mode = 'home' }) {
   )
 
   const clearSearchHref = location.pathname
-  const hasSearchMiss = Boolean(searchQuery) && visiblePosts.length === 0
+  const isInitialLoading = isLoading && posts.length === 0
+  const hasSearchMiss = !isInitialLoading && Boolean(searchQuery) && visiblePosts.length === 0
   const canInteract = Boolean(authStatus)
 
   const handleTabChange = (tabId: string) => {
@@ -160,24 +147,24 @@ function EditorialFeed({authStatus = true, mode = 'home' }) {
   return (
     <section className="pb-14 pt-8 sm:pt-10">
       <Container>
-        <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-8">
+        <div className="flex flex-col gap-stack xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-stack">
           <div className="min-w-0">
-            <div className="border border-white/8 bg-black/30 px-5 py-6 sm:px-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#ff453a]">
+            <div className="border border-outline-variant bg-surface-container p-card rounded-card shadow-elevation-1">
+              <p className="text-[11px] font-black uppercase tracking-[0.32em] text-primary">
                 {copy.eyebrow}
               </p>
 
               <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
-                  <h1 className="text-3xl font-black leading-tight text-[#f5f5f5] sm:text-4xl">
+                  <h1 className="text-3xl font-black leading-tight text-on-surface sm:text-4xl">
                     {copy.title}
                   </h1>
-                  <p className="mt-3 text-base leading-7 text-[#a3a3a3]">
+                  <p className="mt-3 text-base leading-7 text-on-surface-variant">
                     {copy.description}
                   </p>
                 </div>
 
-                <p className="text-sm text-[#858585]">
+                <p className="text-sm text-on-surface-variant/70">
                   {searchQuery
                     ? `Results for "${searchQuery}"`
                     : `${posts.length} manuscript${posts.length === 1 ? '' : 's'} loaded`}
@@ -185,17 +172,17 @@ function EditorialFeed({authStatus = true, mode = 'home' }) {
               </div>
             </div>
 
-            <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-white/8 py-4">
+            <div className="mb-6 flex flex-wrap items-center gap-cluster border-b border-outline-variant/60 py-4">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => handleTabChange(tab.id)}
                   className={[
-                    'border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] transition-colors',
+                    'border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] transition-colors rounded-control cursor-pointer',
                     activeTab === tab.id
-                      ? 'border-[#ff453a] bg-[#ff453a] text-white'
-                      : 'border-white/10 bg-white/[0.02] text-[#7f7f7f] hover:border-white/20 hover:text-[#ededed]',
+                      ? 'border-transparent bg-primary text-on-primary'
+                      : 'border-outline-variant bg-surface-container/40 text-on-surface-variant hover:border-outline hover:text-on-surface hover:bg-surface-container-high',
                   ].join(' ')}
                 >
                   {tab.label}
@@ -207,40 +194,53 @@ function EditorialFeed({authStatus = true, mode = 'home' }) {
               <TrendingManuscripts trendingPosts={trendingPosts} canInteract={canInteract} />
             </div>
 
+            {isInitialLoading && (
+              <div className="border border-outline-variant bg-surface-container-low p-card rounded-card shadow-sm">
+                <p className="text-[11px] font-black uppercase tracking-[0.32em] text-primary">
+                  Loading Desk
+                </p>
+                <div className="mt-card space-y-4">
+                  <div className="h-6 w-2/3 animate-pulse bg-on-surface/10" />
+                  <div className="h-24 animate-pulse bg-on-surface/6" />
+                  <div className="h-4 w-1/4 animate-pulse bg-on-surface/8" />
+                </div>
+              </div>
+            )}
+
             {hasSearchMiss && (
-              <div className="border border-white/8 bg-black/20 px-6 py-10 sm:px-8">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#ff453a]">
+              <div className="border border-outline-variant bg-surface-container-low p-card rounded-card shadow-sm">
+                <p className="text-[11px] font-black uppercase tracking-[0.32em] text-primary">
                   Search Miss
                 </p>
-                <h2 className="mt-4 text-3xl font-black text-[#f5f5f5]">
+                <h2 className="mt-4 text-3xl font-black text-on-surface">
                   Nothing matched "{searchQuery}".
                 </h2>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-[#a3a3a3]">
+                <p className="mt-4 max-w-2xl text-base leading-7 text-on-surface-variant">
                   Try a broader title, author handle, or franchise keyword. The current feed filter is
                   working against an empty result set.
                 </p>
                 <Button
                   asChild
                   variant="outline"
-                  className="mt-6 rounded-none border-white/20 bg-transparent text-[#f5f5f5] hover:bg-white/[0.05] hover:text-white"
+                  className="mt-6 border-outline-variant text-on-surface hover:bg-surface-container-high"
                 >
                   <Link to={clearSearchHref}>Clear Search</Link>
                 </Button>
               </div>
             )}
 
-            {!hasSearchMiss && visiblePosts.length === 0 && (
-              <div className="border border-white/8 bg-black/20 px-6 py-10 sm:px-8">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#ff453a]">
+            {!isInitialLoading && !hasSearchMiss && visiblePosts.length === 0 && (
+              <div className="border border-outline-variant bg-surface-container-low p-card rounded-card shadow-sm">
+                <p className="text-[11px] font-black uppercase tracking-[0.32em] text-primary">
                   Empty Desk
                 </p>
-                <h2 className="mt-4 text-3xl font-black text-[#f5f5f5]">{copy.emptyTitle}</h2>
-                <p className="mt-4 max-w-2xl text-base leading-7 text-[#a3a3a3]">
+                <h2 className="mt-4 text-3xl font-black text-on-surface">{copy.emptyTitle}</h2>
+                <p className="mt-4 max-w-2xl text-base leading-7 text-on-surface-variant">
                   {copy.emptyDescription}
                 </p>
                 <Button
                   asChild
-                  className="mt-6 rounded-none bg-[#ff453a] px-5 font-black uppercase tracking-[0.18em] text-white hover:bg-[#ff5f55]"
+                  className="mt-6 px-5 font-black uppercase tracking-[0.18em]"
                 >
                   <Link to="/add-post">Write a Theory</Link>
                 </Button>
@@ -248,22 +248,34 @@ function EditorialFeed({authStatus = true, mode = 'home' }) {
             )}
 
             {!hasSearchMiss && visiblePosts.length > 0 && (
-              <div className="overflow-hidden border border-white/8 bg-black/20">
+              <div className="rounded-card border border-outline-variant/60 bg-surface-container-low p-card">
                 <Virtuoso
-                    useWindowScroll
-                    data={visiblePosts}
-                    endReached={() => {
-                        if (!isFetching && hasNextPage) {
-                          setPage((prev) => prev + 1);
-                        }
-                    }}
-                    itemContent={(index, post) => (
-                        <div className={index === 0 ? '' : 'border-t border-white/8 p-5 sm:p-7'}>
-                            <PostCard {...post} canInteract={canInteract} />
-                        </div>
-                    )}
+                  useWindowScroll
+                  data={visiblePosts}
+                  computeItemKey={(_, post) => post.id}
+                  increaseViewportBy={{ top: 400, bottom: 800 }}
+                  endReached={() => {
+                    if (!isLoading && !isFetching && hasNextPage) {
+                      setPage((prev) => prev + 1);
+                    }
+                  }}
+                  components={{
+                    Footer: () => (
+                      <div className="pt-card text-center text-sm text-on-surface-variant/70">
+                        {isFetching && !isLoading
+                          ? 'Loading more manuscripts...'
+                          : hasNextPage
+                            ? null
+                            : 'End of the archive.'}
+                      </div>
+                    ),
+                  }}
+                  itemContent={(index, post) => (
+                    <div className={`px-card ${index === 0 ? 'border-t border-outline-variant/30 pt-card mt-card' : index === visiblePosts.length-1} ? border-b border-outline-variant/30 pb-card mb-card`}>
+                      <PostCard {...post} canInteract={canInteract} />
+                    </div>
+                  )}
                 />
-
               </div>
             )}
           </div>
