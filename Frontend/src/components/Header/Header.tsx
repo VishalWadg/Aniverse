@@ -230,7 +230,7 @@ function Header() {
       <motion.header 
         variants={headerVariants}
         animate={headerHidden ? "hidden" :"visible"}
-        transition={{duration: 0.3, ease: "easeInOut"}}
+        transition={{type:"decay", duration: 0.3, ease: "easeInOut"}}
         className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
         <Container className="py-4">
           <div className="flex min-h-10 items-center justify-between gap-6 shrink-0">
@@ -280,7 +280,7 @@ function Header() {
     <motion.header
       variants={headerVariants}
       animate={headerHidden ? "hidden" :"visible"}
-      transition={{ duration: 0.3, ease: "easeInOut" }} 
+      transition={{type:"decay", duration: 0.3, ease: "easeInOut" }} 
       className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
       <Container className="py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
