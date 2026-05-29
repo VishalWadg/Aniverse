@@ -46,24 +46,15 @@ function Header() {
   const [colorInput, setColorInput] = useState(brandColor);
   const [colorError, setColorError] = useState('');
 
-  const [isAtTop, setIsAtTop] = useState(true);
   const { scrollY } = useScroll();
   const [headerHidden, setHeaderHidden] = useState(false);
 
-  const isAtTopRef = useRef(true);
   const headerHiddenRef = useRef(false);
 
    useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
     
-    // 1. Guard `isAtTop` (uses our unified threshold of 80px)
-    const nextIsAtTop = latest < TOP_THRESHOLD;
-    if (nextIsAtTop !== isAtTopRef.current) {
-      isAtTopRef.current = nextIsAtTop;
-      setIsAtTop(nextIsAtTop);
-    }
-    
-    // 2. Guard `headerHidden` visibility (uses our unified threshold of 80px)
+    // 1. Guard `headerHidden` visibility (uses our unified threshold of 80px)
     if (latest < TOP_THRESHOLD) {
       if (headerHiddenRef.current) {
         headerHiddenRef.current = false;
@@ -72,7 +63,7 @@ function Header() {
       return;
     }
     
-    // 3. Hide on scroll down, show on scroll up (with a 10px buffer)
+    // 2. Hide on scroll down, show on scroll up (with a 10px buffer)
     if (latest > previous && latest > 120) {
       if (!headerHiddenRef.current) {
         headerHiddenRef.current = true;
