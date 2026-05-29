@@ -28,7 +28,7 @@ function Header() {
   const userRole = useAppSelector((state) => state.auth.userData?.role);
 
   // Dynamic Theme API
-  const { theme, setTheme, brandColor, setBrandColor, resetBrandColor, density, setDensity } = useTheme();
+  const { theme, setTheme, brandColor, setBrandColor, resetBrandColor } = useTheme();
 
   const [colorInput, setColorInput] = useState(brandColor);
   const [colorError, setColorError] = useState('');
@@ -114,25 +114,7 @@ function Header() {
         </div>
       </div>
 
-      {/* Density Selector */}
-      <div className="mb-4">
-        <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant mb-2">Density</span>
-        <div className="grid grid-cols-3 gap-2">
-          {(['compact', 'comfortable', 'spacious'] as const).map((d) => (
-            <button
-              key={d}
-              onClick={() => setDensity(d)}
-              className={`h-8 text-[10px] font-black uppercase tracking-[0.08em] rounded-control border transition-all cursor-pointer ${
-                density === d
-                  ? 'bg-primary text-on-primary border-transparent shadow-sm'
-                  : 'border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
-              }`}
-            >
-              {d}
-            </button>
-          ))}
-        </div>
-      </div>
+
 
       {/* Brand Color Selector */}
       <div>

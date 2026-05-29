@@ -271,7 +271,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                     ),
                   }}
                   itemContent={(index, post) => (
-                    <div className={index === 0 ? '' : 'border-t border-outline-variant/30 pt-card mt-card'}>
+                    <div className={`px-card ${index === 0 ? 'border-t border-outline-variant/30 pt-card mt-card' : index === visiblePosts.length-1} ? border-b border-outline-variant/30 pb-card mb-card`}>
                       <PostCard {...post} canInteract={canInteract} />
                     </div>
                   )}

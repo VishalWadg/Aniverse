@@ -11,8 +11,6 @@ type ThemeProviderState = {
   brandColor: string;
   setBrandColor: (hex: string) => void;
   resetBrandColor: () => void;
-  density: Density;
-  setDensity: (density: Density) => void;
 };
 
 const initialState: ThemeProviderState = {
@@ -22,8 +20,6 @@ const initialState: ThemeProviderState = {
   brandColor: '#769CDF',
   setBrandColor: () => null,
   resetBrandColor: () => null,
-  density: 'comfortable',
-  setDensity: () => null,
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
@@ -53,10 +49,6 @@ const isValidTheme = (theme: any): theme is ThemeMode => {
   return ['light', 'dark', 'system'].includes(theme);
 };
 
-const isValidDensity = (density: any): density is Density => {
-  return ['compact', 'comfortable', 'spacious'].includes(density);
-};
-
 const startThemeTransition = () => {
   if (typeof window === 'undefined') return;
 
@@ -72,13 +64,11 @@ export function ThemeProvider({
   children,
   defaultTheme = 'system',
   defaultBrandColor = '#769CDF',
-  defaultDensity = 'comfortable',
   storageKey = 'aniverse-ui-theme',
 }: {
   children: React.ReactNode;
   defaultTheme?: ThemeMode;
   defaultBrandColor?: string;
-  defaultDensity?: Density;
   storageKey?: string;
 }) {
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -97,14 +87,6 @@ export function ThemeProvider({
       return normalizeBrandHex(saved) ?? normalizedDefault;
     }
     return normalizedDefault;
-  });
-
-  const [density, setDensityState] = useState<Density>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(`${storageKey}-density`);
-      return isValidDensity(saved) ? saved : defaultDensity;
-    }
-    return defaultDensity;
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
@@ -138,13 +120,6 @@ export function ThemeProvider({
     }
   }, [theme]);
 
-  // Apply Density CSS Class on root HTML element
-  useLayoutEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('density-compact', 'density-comfortable', 'density-spacious');
-    root.classList.add(`density-${density}`);
-  }, [density]);
-
   // Apply Dynamic Material Theme Colors using our updated hook
   useMaterialTheme(brandColor, resolvedTheme === 'dark');
 
@@ -175,13 +150,7 @@ export function ThemeProvider({
       localStorage.setItem(`${storageKey}-color`, normalizedDefault);
       setBrandColorState(normalizedDefault);
     },
-    density,
-    setDensity: (newDensity: Density) => {
-      startThemeTransition();
-      localStorage.setItem(`${storageKey}-density`, newDensity);
-      setDensityState(newDensity);
-    },
-  }), [theme, resolvedTheme, brandColor, density, storageKey, defaultBrandColor]);
+  }), [theme, resolvedTheme, brandColor, storageKey, defaultBrandColor]);
 
   return (
     <ThemeProviderContext.Provider value={value}>

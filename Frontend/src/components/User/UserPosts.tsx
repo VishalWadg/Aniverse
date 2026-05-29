@@ -12,16 +12,20 @@ const UserPosts = ({
     username: string
     canInteract?: boolean
 }) => {
+    const [prevUsername, setPrevUsername] = useState(username);
     const [page, setPage] = useState(0);
+
+    if (username !== prevUsername) {
+        setPrevUsername(username);
+        setPage(0);
+    }
+
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
-    const { data, isLoading, isFetching, error } = useGetPostsByUsernameQuery({ username, page, size: USER_POSTS_PAGE_SIZE });
+    const currentPage = username !== prevUsername ? 0 : page;
+    const { data, isLoading, isFetching, error } = useGetPostsByUsernameQuery({ username, page: currentPage, size: USER_POSTS_PAGE_SIZE });
     const posts = data?.content || [];
     const hasNextPage = Boolean(data && !data.last);
     const errorMessage = error ? getApiErrorMessage(error) : '';
-
-    useEffect(() => {
-        setPage(0);
-    }, [username]);
 
     useEffect(() => {
         const loadMoreNode = loadMoreRef.current;

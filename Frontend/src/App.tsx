@@ -20,7 +20,7 @@ function App() {
   }, [dispatch]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground theme-transition">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen flex-col bg-background">
         <RouteToast />
         <Header />
