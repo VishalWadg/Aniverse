@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +27,7 @@ const headerVariants = {
   },
   visibleScrolled: { 
     y: 0, 
-    opacity: 0.7 // Sleek 70% opacity when scrolled down!
+    opacity: 1 
   }
 };
 
@@ -42,6 +42,7 @@ function Header() {
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
   const navControlClass = 'h-control-h'
   const userRole = useAppSelector((state) => state.auth.userData?.role);
+  const TOP_THRESHOLD = 80;
 
   // Dynamic Theme API
   const { theme, setTheme, brandColor, setBrandColor, resetBrandColor } = useTheme();
@@ -53,23 +54,42 @@ function Header() {
   const { scrollY } = useScroll();
   const [headerHidden, setHeaderHidden] = useState(false);
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
+  const isAtTopRef = useRef(true);
+  const headerHiddenRef = useRef(false);
+
+   useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
     
-    setIsAtTop(latest < 50);
+    // 1. Guard `isAtTop` (uses our unified threshold of 80px)
+    const nextIsAtTop = latest < TOP_THRESHOLD;
+    if (nextIsAtTop !== isAtTopRef.current) {
+      isAtTopRef.current = nextIsAtTop;
+      setIsAtTop(nextIsAtTop);
+    }
     
-    // 1. If at the top of the page (less than 80px), always keep the header visible
-    if (latest < 80) {
-      setHeaderHidden(false);
+    // 2. Guard `headerHidden` visibility (uses our unified threshold of 80px)
+    if (latest < TOP_THRESHOLD) {
+      if (headerHiddenRef.current) {
+        headerHiddenRef.current = false;
+        setHeaderHidden(false);
+      }
       return;
     }
-    // 2. Hide on scroll down, show on scroll up (with a minor 10px buffer to prevent jitter)
+    
+    // 3. Hide on scroll down, show on scroll up (with a 10px buffer)
     if (latest > previous && latest > 120) {
-      setHeaderHidden(true);  // Scrolling down
+      if (!headerHiddenRef.current) {
+        headerHiddenRef.current = true;
+        setHeaderHidden(true);
+        setIsSettingsOpen(false);
+      }
     } else if (previous - latest > 10) {
-      setHeaderHidden(false); // Scrolling up
+      if (headerHiddenRef.current) {
+        headerHiddenRef.current = false;
+        setHeaderHidden(false);
+      }
     }
-  })
+  });
 
   useEffect(() => {
     setColorInput(brandColor);
@@ -215,7 +235,12 @@ function Header() {
         variants={headerVariants}
         animate={headerHidden ? "hidden" : isAtTop ? "visibleAtTop" : "visibleScrolled"}
         transition={{duration: 0.3, ease: "easeInOut"}}
-        className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
+        className={cn(
+          "sticky top-0 z-40 border-b backdrop-blur-xl transition-all duration-300",
+          isAtTop 
+            ? "bg-surface-container/0 border-transparent py-5" 
+            : "bg-surface-variant/80 border-outline-variant/60 py-3.5 shadow-md"
+        )}>
         <Container className="py-4">
           <div className="flex min-h-10 items-center justify-between gap-6 shrink-0">
             <Link to="/" className="shrink-0">
@@ -265,7 +290,12 @@ function Header() {
       variants={headerVariants}
       animate={headerHidden ? "hidden" : isAtTop ? "visibleAtTop" : "visibleScrolled"}
       transition={{ duration: 0.3, ease: "easeInOut" }} 
-      className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
+      className={cn(
+          "sticky top-0 z-40 border-b backdrop-blur-xl transition-all duration-300",
+          isAtTop 
+            ? "bg-surface-container/0 border-transparent py-5" 
+            : "bg-surface-variant/80 border-outline-variant/60 py-3.5 shadow-md"
+        )}>
       <Container className="py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center justify-between gap-6 shrink-0">
