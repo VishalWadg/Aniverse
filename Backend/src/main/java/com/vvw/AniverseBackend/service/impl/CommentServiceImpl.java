@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<CommentResponseDto> getCommentsOfPost(Long post_id, Pageable pageable){
+    public Page<CommentResponseDto> getCommentsOfPost(UUID post_id, Pageable pageable){
         if(!postRepository.existsById(post_id)){
             throw new EntityNotFoundException("Post Not found with id : "+ post_id);
         }
@@ -48,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponseDto createComment(CreateCommentDto dto, User currentUser, Long postId){
+    public CommentResponseDto createComment(CreateCommentDto dto, User currentUser, UUID postId){
         Post post = postRepository.findActiveByIdWithAuthor(postId).orElseThrow(() -> new EntityNotFoundException("Post Not found with id : "+ postId));
         Comment comment = commentMapper.toEntity(dto);
         comment.setPost(post);
@@ -59,7 +60,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponseDto updateComment(CreateCommentDto dto, Long commentId, User currentUser){
+    public CommentResponseDto updateComment(CreateCommentDto dto, UUID commentId, User currentUser){
         Comment comment = commentRepository.findActiveCommentById(commentId).orElseThrow(() -> new EntityNotFoundException("Comment not found with id : " + commentId));
         assertCanModifyComment(comment, currentUser);
         commentMapper.updateCommentFromDto(dto, comment);
@@ -68,7 +69,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public void deleteComment(Long commentId, User currentUser){
+    public void deleteComment(UUID commentId, User currentUser){
         Comment comment = commentRepository.findActiveCommentById(commentId).orElseThrow(() -> new EntityNotFoundException("Comment not found."));
         assertCanModifyComment(comment, currentUser);
         commentRepository.delete(comment);

@@ -17,6 +17,7 @@ import com.vvw.AniverseBackend.dto.UpdatePostDto;
 import com.vvw.AniverseBackend.service.PostService;
 import lombok.RequiredArgsConstructor;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +58,7 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long id) {
+    public ResponseEntity<PostResponseDto> getPost(@PathVariable UUID id) {
         return ResponseEntity.ok().body(postService.getPostById(id));
     }
 
@@ -69,20 +70,20 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @Valid @RequestBody UpdatePostDto updatePostDto,
+    public ResponseEntity<PostResponseDto> updatePost(@PathVariable UUID id, @Valid @RequestBody UpdatePostDto updatePostDto,
             @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok().body(postService.updatePost(id, updatePostDto, currentUser));
     }
 
     @DeleteMapping("/{id}")
     // @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<Void> deletePost(@PathVariable UUID id, @AuthenticationPrincipal User currentUser) {
         postService.deletePostById(id, currentUser);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<PostResponseDto> updatePostPartially(@PathVariable Long id,
+    public ResponseEntity<PostResponseDto> updatePostPartially(@PathVariable UUID id,
             @RequestBody @Valid UpdatePostDto updates, @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok().body(postService.updatePostPartially(id, updates, currentUser));
     }
@@ -95,14 +96,14 @@ public class PostController {
 
     @DeleteMapping("/cleanup/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteExpiredPost(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteExpiredPost(@PathVariable UUID id) {
         postService.purgeDeletedPost(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/restore/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PostResponseDto> restoreDeletedPost(@PathVariable Long id) {
+    public ResponseEntity<PostResponseDto> restoreDeletedPost(@PathVariable UUID id) {
         return ResponseEntity.ok(postService.restoreDeletedPost(id));
     }
 

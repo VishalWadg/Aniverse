@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,9 +33,9 @@ public class PostServiceImplTest {
     private UserRepository userRepository;
 
     private User author;
-    private Long activePostId;
-    private Long expiredDeletedPostId;
-    private Long recentDeletedPostId;
+    private UUID activePostId;
+    private UUID expiredDeletedPostId;
+    private UUID recentDeletedPostId;
 
     @BeforeEach
     void setUp() {

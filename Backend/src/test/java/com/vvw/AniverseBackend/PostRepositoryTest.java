@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,8 +32,8 @@ public class PostRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private Long ghibliPostId;
-    private Long deletedPostId;
+    private UUID ghibliPostId;
+    private UUID deletedPostId;
 
     @BeforeEach
     void setUp() {
