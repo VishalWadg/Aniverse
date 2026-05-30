@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +35,7 @@ public class CommentController {
 
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<CommentResponseDto>> getComments(
-        @PathVariable Long postId,
+        @PathVariable UUID postId,
         @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable
     ){
         Page<CommentResponseDto> comments = commentService.getCommentsOfPost(postId, pageable);
@@ -41,7 +44,7 @@ public class CommentController {
     
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponseDto> createComment(
-            @PathVariable Long postId,
+            @PathVariable UUID postId,
             @Valid @RequestBody CreateCommentDto dto,
             @AuthenticationPrincipal User currentUser) {
             
@@ -51,7 +54,7 @@ public class CommentController {
     
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponseDto> updateComment(
-        @PathVariable Long commentId, @Valid @RequestBody CreateCommentDto commentDto, @AuthenticationPrincipal User currentUser
+        @PathVariable UUID commentId, @Valid @RequestBody CreateCommentDto commentDto, @AuthenticationPrincipal User currentUser
     ) {
         CommentResponseDto responseDto = commentService.updateComment(commentDto, commentId, currentUser);
         return ResponseEntity.ok(responseDto); 
@@ -59,7 +62,7 @@ public class CommentController {
 
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(
-        @PathVariable Long commentId, @AuthenticationPrincipal User currentUser
+        @PathVariable UUID commentId, @AuthenticationPrincipal User currentUser
     ) {
         commentService.deleteComment(commentId, currentUser);
         return ResponseEntity.noContent().build();

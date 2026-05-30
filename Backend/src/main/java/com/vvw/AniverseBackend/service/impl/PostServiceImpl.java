@@ -2,6 +2,8 @@ package com.vvw.AniverseBackend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
@@ -33,12 +35,12 @@ public class PostServiceImpl implements PostService{
     private final UserService userService;
     private final PostRetentionProperties postRetentionProperties;
 
-    private Post findDeletedPostOrThrow(Long id) {
+    private Post findDeletedPostOrThrow(UUID id) {
         return postRepository.findDeletedByIdWithAuthor(id)
                 .orElseThrow(() -> new EntityNotFoundException("Deleted post with id " + id + " not found"));
     }
 
-    private Post findActivePostOrThrow(Long id){
+    private Post findActivePostOrThrow(UUID id){
         return postRepository.findActiveByIdWithAuthor(id).orElseThrow(() -> new EntityNotFoundException("Post with id "+ id + "not found"));
     }
 
@@ -65,7 +67,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override   
-    public PostResponseDto getPostById(Long id){
+    public PostResponseDto getPostById(UUID id){
         log.warn("PostServiceImpl:: getPostById");
         Post post = findActivePostOrThrow(id);
         return postMapper.toPostResponseDto(post);
@@ -82,7 +84,7 @@ public class PostServiceImpl implements PostService{
     // PUT Request (All fields are required) mostly not needed as we use PATCH instead
     @Override
     @Transactional
-    public PostResponseDto updatePost(Long id, UpdatePostDto updatePostDto, User currentUser){
+    public PostResponseDto updatePost(UUID id, UpdatePostDto updatePostDto, User currentUser){
         log.warn("PostServiceImpl:: updatePost");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
@@ -92,7 +94,7 @@ public class PostServiceImpl implements PostService{
 
     @Override
     @Transactional
-    public void deletePostById(Long id, User currentUser){
+    public void deletePostById(UUID id, User currentUser){
         log.warn("PostServiceImpl:: deletePostById");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
@@ -103,7 +105,7 @@ public class PostServiceImpl implements PostService{
     // this can be done two ways using 1) Map<String, Object> and 2) using DTO with null values allowed fields 2nd approach is preferred
     @Override
     @Transactional
-    public PostResponseDto updatePostPartially(Long id, UpdatePostDto updates, User currentUser){
+    public PostResponseDto updatePostPartially(UUID id, UpdatePostDto updates, User currentUser){
         log.warn("PostServiceImpl:: updatePostPartially");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
@@ -112,7 +114,7 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public Boolean isUserTheAuthor(String username, Long post_id){
+    public Boolean isUserTheAuthor(String username, UUID post_id){
         return postRepository.findAuthorUsernameByPostId(post_id).map(authorUsername -> authorUsername.equals(username)).orElse(false);
     }
 
@@ -124,7 +126,7 @@ public class PostServiceImpl implements PostService{
 
     @Override
     @Transactional
-    public PostResponseDto restoreDeletedPost(Long id){
+    public PostResponseDto restoreDeletedPost(UUID id){
         Post post = findDeletedPostOrThrow(id);
         post.setIsDeleted(false);
         post.setDeletedAt(null);
@@ -133,7 +135,7 @@ public class PostServiceImpl implements PostService{
 
     @Override
     @Transactional
-    public void purgeDeletedPost(Long id) {
+    public void purgeDeletedPost(UUID id) {
         findDeletedPostOrThrow(id);
 
         int count = postRepository.hardDeleteById(id);
@@ -148,7 +150,7 @@ public class PostServiceImpl implements PostService{
     @Transactional
     public int purgeExpiredDeletedPosts() {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(postRetentionProperties.days());
-        List<Long> ids = postRepository.findIdsDeletedBefore(cutoff);
+        List<UUID> ids = postRepository.findIdsDeletedBefore(cutoff);
 
         if (ids.isEmpty()) {
             return 0;

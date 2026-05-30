@@ -14,15 +14,16 @@ import com.vvw.AniverseBackend.entity.Post;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Long> {
+public interface PostRepository extends JpaRepository<Post, UUID> {
 
     @Query("SELECT p FROM Post p JOIN FETCH p.author WHERE p.id = :postId AND p.isDeleted = false")
-    Optional<Post> findActiveByIdWithAuthor(@Param("postId") Long postId);
+    Optional<Post> findActiveByIdWithAuthor(@Param("postId") UUID postId);
 
     @Query("SELECT p.author.username FROM Post p WHERE p.id = :postId AND p.isDeleted = false")
-    Optional<String> findAuthorUsernameByPostId(@Param("postId") Long postId);
+    Optional<String> findAuthorUsernameByPostId(@Param("postId") UUID postId);
 
     @Query(value = "SELECT p FROM Post p JOIN FETCH p.author WHERE p.isDeleted = false",
            countQuery = "SELECT count(p) FROM Post p WHERE p.isDeleted = false")
@@ -39,16 +40,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findDeletedWithAuthor(Pageable pageable);
 
     @Query("SELECT p FROM Post p JOIN FETCH p.author WHERE p.id = :postId AND p.isDeleted = true")
-    Optional<Post> findDeletedByIdWithAuthor(@Param("postId") Long postId);
+    Optional<Post> findDeletedByIdWithAuthor(@Param("postId") UUID postId);
 
     @Query("SELECT p.id FROM Post p WHERE p.isDeleted = true AND p.deletedAt < :cutoff")
-    List<Long> findIdsDeletedBefore(@Param("cutoff") LocalDateTime cutoff);
+    List<UUID> findIdsDeletedBefore(@Param("cutoff") LocalDateTime cutoff);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Post p WHERE p.id = :postId AND p.isDeleted = true")
-    int hardDeleteById(@Param("postId") Long postId);
+    int hardDeleteById(@Param("postId") UUID postId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Post p WHERE p.id IN :postIds AND p.isDeleted = true")
-    int hardDeleteAllByIds(@Param("postIds") List<Long> postIds);
+    int hardDeleteAllByIds(@Param("postIds") List<UUID> postIds);
 }

@@ -6,13 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Data
 public class CommentResponseDto {
-    private Long id;
+    private UUID id;
     private String content;
     private LocalDateTime createdAt;
     private CommentAuthorDto author;

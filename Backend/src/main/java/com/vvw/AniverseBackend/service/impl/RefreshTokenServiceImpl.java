@@ -41,14 +41,14 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Transactional
     @Override
-    public String createRefreshToken(Long userId){
+    public String createRefreshToken(UUID userId){
         Instant newAbsoluteExpiry = Instant.now().plusMillis(securityProperties.refreshToken().absoluteExpirationMs());
         TokenRotationResponse response = createRefreshTokenInternal(userId, newAbsoluteExpiry);
         return response.rawToken();
     }
 
 //    @Transactional
-    public TokenRotationResponse createRefreshTokenInternal(Long userId, Instant absoluteExpiry) {
+    public TokenRotationResponse createRefreshTokenInternal(UUID userId, Instant absoluteExpiry) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
         refreshTokenRepository.deleteByUser(user);
         String rawToken = UUID.randomUUID().toString();
@@ -73,7 +73,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Transactional
     @Override
-    public int deleteByUserId(Long userId) {
+    public int deleteByUserId(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("Deletion Failed: User not found with id: "+userId));
         return refreshTokenRepository.deleteByUser(user);
     }
