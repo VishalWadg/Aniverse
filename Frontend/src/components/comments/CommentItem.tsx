@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 
 interface commentItemProps {
     comment: Comment;
-    postId: number;
+    postId: string;
 }
 
 export const CommentItem = ({comment, postId} : commentItemProps) => {

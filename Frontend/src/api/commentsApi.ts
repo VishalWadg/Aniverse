@@ -1,13 +1,13 @@
 import { baseApi } from "./baseApi";
 
 export interface CommentAuthor {
-    id: number
+    id: string
     username: string
     profilePic: string
 }
 
 export interface Comment {
-    id: number
+    id: string
     content: string
     createdAt: string
     author: CommentAuthor
@@ -23,7 +23,7 @@ export interface CommentResponse {
 
 export const commentsApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
-        getComments: builder.query<CommentResponse, {postId: number, page?: number}>({
+        getComments: builder.query<CommentResponse, {postId: string, page?: number}>({
             query: ({ postId, page = 0 }) => ({
                 url: `/posts/${postId}/comments?page=${page}&size=10&sort=createdAt,asc`,
                 method: 'GET'
@@ -45,7 +45,7 @@ export const commentsApi = baseApi.injectEndpoints({
             providesTags: (result, error, {postId}) => [{type: 'Comment', id: `POST-${postId}`}],
         }),
 
-        createComment: builder.mutation<Comment, {postId: number, content: string}>({
+        createComment: builder.mutation<Comment, {postId: string, content: string}>({
             query: ({postId, content}) => ({
                 url: `/posts/${postId}/comments`,
                 method: 'POST',
@@ -54,7 +54,7 @@ export const commentsApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, {postId}) => [{type: 'Comment', id: `POST-${postId}`}],
         }),
         
-        updateComment: builder.mutation<Comment, {postId: number, commentId: number, content: string}>({
+        updateComment: builder.mutation<Comment, {postId: string, commentId: string, content: string}>({
             query: ({commentId, content}) => ({
                 url: `/comments/${commentId}`,
                 method: "PUT",
@@ -63,7 +63,7 @@ export const commentsApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, {postId}) => [{type: 'Comment', id: `POST-${postId}`}],
         }),
 
-        deleteComment: builder.mutation<void, {postId: number, commentId: number}>({
+        deleteComment: builder.mutation<void, {postId: string, commentId: string}>({
             query: ({commentId}) => ({
                 url: `/comments/${commentId}`,
                 method: "DELETE"

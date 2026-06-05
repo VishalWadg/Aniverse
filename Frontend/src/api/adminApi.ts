@@ -19,7 +19,7 @@ const adminApi = baseApi.injectEndpoints({
                     : [{ type: 'Post' as const, id: 'LIST' }]
         }),
 
-        restorePost: build.mutation<Post, number>({
+        restorePost: build.mutation<Post, string>({
             query: (id) => ({
                 url: `/posts/restore/${id}`,
                 method: 'PUT',
@@ -30,7 +30,7 @@ const adminApi = baseApi.injectEndpoints({
             ],
         }),
 
-        purgePost: build.mutation<void, number>({
+        purgePost: build.mutation<void, string>({
             query: (id) => ({
                 url: `/posts/cleanup/${id}`,
                 method: 'DELETE',

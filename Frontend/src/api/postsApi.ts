@@ -1,7 +1,7 @@
 import { baseApi } from "./baseApi";
 
 export type Post = {
-    id: number
+    id: string
     title: string
     content: string
     createdAt: string
@@ -27,7 +27,7 @@ type CreatePostInput = {
 }
 
 type UpdatePostInput = {
-    id: number
+    id: string
     updates: {
         title: string
         content: string
@@ -111,7 +111,7 @@ const postsApi = baseApi.injectEndpoints({
             ]
         }),
 
-        deletePost: build.mutation<void, number>({
+        deletePost: build.mutation<void, string>({
             query: (id) => ({
                 url: `/posts/${id}`,
                 method: 'DELETE'
