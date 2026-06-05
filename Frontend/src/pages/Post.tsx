@@ -21,7 +21,6 @@ export const postLoader = async ({ params, request }) => {
 
 export default function Post() {
     const {id}  = useParams() ;
-    const postIdNumber = Number(id);
     const {data, error, isLoading} = useGetPostQuery(id);
     const [deletePostMutation] = useDeletePostMutation();
     const post = data;
@@ -92,7 +91,7 @@ export default function Post() {
                     </div>
                 </article>
                 <CommentSection
-                    postId={postIdNumber}
+                    postId={id}
                 />
             </Container>
         </div>

@@ -5,7 +5,7 @@ import { Virtuoso } from "react-virtuoso";
 import { CommentItem } from "./CommentItem";
 
 interface CommentSectionProps{
-    postId: number;
+    postId: string;
 }
 
 export const CommentSection = ({postId}: CommentSectionProps) => {

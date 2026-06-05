@@ -9,8 +9,8 @@ import UserAvatar from "../User/UserAvatar";
 import { Link } from "react-router-dom";
 
 interface CommentFormProps {
-    postId: number,
-    existingCommentId?: number,
+    postId: string,
+    existingCommentId?: string,
     initialContent?: string,
     onSuccess?: () => void,
     onCancel? : () => void,
