@@ -54,7 +54,7 @@ export const commentsApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, {postId}) => [{type: 'Comment', id: `POST-${postId}`}],
         }),
         
-        updateComment: builder.mutation<Comment, {postId: string, commentId: number, content: string}>({
+        updateComment: builder.mutation<Comment, {postId: string, commentId: string, content: string}>({
             query: ({commentId, content}) => ({
                 url: `/comments/${commentId}`,
                 method: "PUT",
@@ -63,7 +63,7 @@ export const commentsApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, {postId}) => [{type: 'Comment', id: `POST-${postId}`}],
         }),
 
-        deleteComment: builder.mutation<void, {postId: string, commentId: number}>({
+        deleteComment: builder.mutation<void, {postId: string, commentId: string}>({
             query: ({commentId}) => ({
                 url: `/comments/${commentId}`,
                 method: "DELETE"
