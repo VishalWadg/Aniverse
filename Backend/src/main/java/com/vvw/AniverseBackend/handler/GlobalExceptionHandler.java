@@ -72,6 +72,18 @@ public class GlobalExceptionHandler {
                 return new ResponseEntity<>(apiErrorDto, HttpStatus.BAD_REQUEST);
         }
 
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ApiErrorDto> handleIllegalArgument(IllegalArgumentException ex,
+                        HttpServletRequest request) {
+                log.warn("Invalid Argument: {} | URL: {}", ex.getMessage(), request.getRequestURI());
+                ApiErrorDto apiErrorDto = new ApiErrorDto(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad Request",
+                                ex.getMessage(),
+                                request.getRequestURI());
+                return new ResponseEntity<>(apiErrorDto, HttpStatus.BAD_REQUEST);
+        }
+
         @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
         public ResponseEntity<ApiErrorDto> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
                 log.warn("Method Not Supported: {} tried {}  | URL: {}", request.getRemoteAddr(), ex.getMethod(), request.getRequestURI());
