@@ -1,6 +1,5 @@
 package com.vvw.AniverseBackend.repository;
 
-import com.vvw.AniverseBackend.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -49,6 +48,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     int hardDeleteById(@Param("postId") Long postId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM Post p WHERE p.id IN :postIds AND p.isDeleted = true")
-    int hardDeleteAllByIds(@Param("postIds") List<Long> postIds);
+    @Query("DELETE FROM Post p WHERE p.isDeleted = true AND p.deletedAt < :cutoff")
+    int purgeExpiredPosts(@Param("cutoff") LocalDateTime cutoff);
+
+
 }

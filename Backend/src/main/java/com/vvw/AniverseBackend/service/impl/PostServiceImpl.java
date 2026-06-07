@@ -148,26 +148,11 @@ public class PostServiceImpl implements PostService{
     @Override
     @Transactional
     public int purgeExpiredDeletedPosts() {
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(postRetentionProperties.days());
-        List<Long> ids = postRepository.findIdsDeletedBefore(cutoff);
-
-        if (ids.isEmpty()) {
-            return 0;
-        }
-
-        int deletedCount = postRepository.hardDeleteAllByIds(ids);
-
-        if (deletedCount != ids.size()) {
-            log.warn(
-                "Expired post purge mismatch. Expected to delete {} posts, actually deleted {}",
-                ids.size(),
-                deletedCount
-            );
-        } else {
+           LocalDateTime cutoff = LocalDateTime.now().minusDays(postRetentionProperties.days());
+            // Deletes expired posts and returns the count in one step
+            int deletedCount = postRepository.purgeExpiredPosts(cutoff);
             log.info("Expired post purge completed. Deleted {} posts", deletedCount);
-        }
-
-        return deletedCount;
+            return deletedCount;
     }
 
 }
