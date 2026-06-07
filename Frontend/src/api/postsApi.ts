@@ -18,6 +18,7 @@ export type PostsResponse = {
     content: Post[],
     number: number,
     totalPages: number,
+    totalElements?: number,
     last: boolean
 }
 
