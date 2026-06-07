@@ -155,13 +155,13 @@ const postsApi = baseApi.injectEndpoints({
                     ]
                     : [{ type: 'Post' as const, id: `${username}-LIST` }]
         }),
-        searchPosts: build.query<PostsResponse, { q: string, page: number, size?: number }>({
-            query: ({ q, page = 0, size = DEFAULT_POSTS_PAGE_SIZE }) => ({
-                url: `/public/posts/search?q=${encodeURIComponent(q)}&page=${page}&size=${size}`,
+        searchPosts: build.query<PostsResponse, { q: string, sort?: string, page: number, size?: number }>({
+            query: ({ q, sort = 'createdAt,desc', page = 0, size = DEFAULT_POSTS_PAGE_SIZE }) => ({
+                url: `/public/posts/search?q=${encodeURIComponent(q)}&sort=${sort}&page=${page}&size=${size}`,
                 method: 'GET',
             }),
             serializeQueryArgs: ({ endpointName, queryArgs }) => {
-                return `${endpointName}-${queryArgs.q}-${queryArgs.size || DEFAULT_POSTS_PAGE_SIZE}`;
+                return `${endpointName}-${queryArgs.q}-${queryArgs.sort || 'createdAt,desc'}-${queryArgs.size || DEFAULT_POSTS_PAGE_SIZE}`;
             },
             merge: (currentCache, newItems, { arg }) => {
                 if (!newItems.content) return;

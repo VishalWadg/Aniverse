@@ -115,7 +115,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
 
   // 3. Fetch search results, skip if search is not active
   const { data: searchData, isLoading: searchLoading, isFetching: searchFetching } = useSearchPostsQuery(
-    { q: searchQuery, page, size: FEED_PAGE_SIZE },
+    { q: searchQuery, sort: sortParam, page, size: FEED_PAGE_SIZE }, // <-- Forward sortParam
     { skip: !isSearchActive }
   );
 
