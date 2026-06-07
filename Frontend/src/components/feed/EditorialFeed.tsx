@@ -10,7 +10,7 @@ import {
 } from '@/lib/post-helpers'
 import Container from '../Container/Container'
 import PostCard from '../PostCard'
-import { useGetPostsQuery } from '@/api/postsApi'
+import { useGetPostsQuery, useSearchPostsQuery } from '@/api/postsApi'
 import { Virtuoso } from "react-virtuoso"
 
 const feedTabs = {
@@ -100,30 +100,56 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
   const [page, setPage] = useState(0);
   const sortParam = activeTab === 'deep' ? 'wordCount,desc' : 'createdAt,desc';
 
-  const { data, isLoading, isFetching } = useGetPostsQuery({ sort: sortParam, page, size: FEED_PAGE_SIZE });
+  const isSearchActive = Boolean(searchQuery);
+
+  // 1. Reset page to 0 when search query changes
+  React.useEffect(() => {
+    setPage(0);
+  }, [searchQuery]);
+
+  // 2. Fetch standard feed, skip if search is active
+  const { data: feedData, isLoading: feedLoading, isFetching: feedFetching } = useGetPostsQuery(
+    { sort: sortParam, page, size: FEED_PAGE_SIZE },
+    { skip: isSearchActive }
+  );
+
+  // 3. Fetch search results, skip if search is not active
+  const { data: searchData, isLoading: searchLoading, isFetching: searchFetching } = useSearchPostsQuery(
+    { q: searchQuery, page, size: FEED_PAGE_SIZE },
+    { skip: !isSearchActive }
+  );
+
+  const data = isSearchActive ? searchData : feedData;
+  const isLoading = isSearchActive ? searchLoading : feedLoading;
+  const isFetching = isSearchActive ? searchFetching : feedFetching;
+
   const posts = data?.content || [];
-  const hasNextPage = Boolean(data && !data.last);
+  const hasNextPage = Boolean(data && !data.last);;
+
+
 
   const visiblePosts = useMemo(() => {
-    let nextPosts = [...posts].filter(Boolean).filter((post) => matchesSearch(post, searchQuery))
+    let nextPosts = [...posts].filter(Boolean); // No client-side matchesSearch filtering!
 
     switch (activeTab) {
       case 'hot':
-        nextPosts.sort((left, right) => getHotScore(right) - getHotScore(left))
-        break
+        if (!isSearchActive) {
+          nextPosts.sort((left, right) => getHotScore(right) - getHotScore(left));
+        }
+        break;
       case 'latest':
-        break
+        break;
       case 'deep':
-        break
+        break;
       case 'editorial':
-        nextPosts = nextPosts.filter((post) => inferCategory(post) === 'Editorial')
-        break
+        nextPosts = nextPosts.filter((post) => inferCategory(post) === 'Editorial');
+        break;
       default:
-        break
+        break;
     }
 
-    return nextPosts
-  }, [activeTab, posts, searchQuery])
+    return nextPosts;
+  }, [activeTab, posts, isSearchActive])
 
   const trendingPosts = useMemo(
     () =>

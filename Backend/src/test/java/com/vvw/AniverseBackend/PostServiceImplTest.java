@@ -144,4 +144,38 @@ public class PostServiceImplTest {
         assertThat(postRepository.findDeletedByIdWithAuthor(recentDeletedPostId)).isPresent();
         assertThat(postRepository.findActiveByIdWithAuthor(activePostId)).isPresent();
     }
+
+        @Test
+    void whenSearchPosts_ByTitle_ThenReturnsMatchingActivePosts() {
+        // "Active Theory" matches "theory" case-insensitively
+        var results = postService.searchPosts("theory", PageRequest.of(0, 10));
+
+        assertThat(results.getContent()).hasSize(1);
+        assertThat(results.getContent().get(0).getTitle()).isEqualTo("Active Theory");
+    }
+
+    @Test
+    void whenSearchPosts_ByContent_ThenReturnsMatchingActivePosts() {
+        // "Active Theory" has content: "This is still active."
+        var results = postService.searchPosts("still active", PageRequest.of(0, 10));
+
+        assertThat(results.getContent()).hasSize(1);
+        assertThat(results.getContent().get(0).getTitle()).isEqualTo("Active Theory");
+    }
+
+    @Test
+    void whenSearchPosts_EmptyQuery_ThenReturnsEmptyPage() {
+        // Blank search queries should return an empty page immediately
+        var results = postService.searchPosts("   ", PageRequest.of(0, 10));
+
+        assertThat(results.getContent()).isEmpty();
+    }
+
+    @Test
+    void whenSearchPosts_MatchingSoftDeleted_ThenExcludesThem() {
+        // "Expired Deleted Theory" matches "Expired" but is soft-deleted (isDeleted = true)
+        var results = postService.searchPosts("Expired", PageRequest.of(0, 10));
+
+        assertThat(results.getContent()).isEmpty();
+    }
 }

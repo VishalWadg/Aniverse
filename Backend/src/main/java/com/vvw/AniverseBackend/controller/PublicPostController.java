@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -51,4 +53,18 @@ public class PublicPostController {
         });
         return ResponseEntity.ok(postService.getPostsByUsername(username, pageable));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PostResponseDto>> searchPosts(
+        @RequestParam("q") String query,
+        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        pageable.getSort().forEach(order -> {
+            if (!ALLOWED_SORTS.contains(order.getProperty())) {
+                throw new IllegalArgumentException("Invalid sort field: " + order.getProperty());
+            }
+        });
+        return ResponseEntity.ok(postService.searchPosts(query, pageable));
+    }
+    
 }

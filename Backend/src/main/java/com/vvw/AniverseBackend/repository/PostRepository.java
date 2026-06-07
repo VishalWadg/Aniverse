@@ -56,4 +56,15 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     int purgeExpiredPosts(@Param("cutoff") LocalDateTime cutoff);
 
 
+    @Query(value = "SELECT p FROM Post p JOIN FETCH p.author WHERE " + 
+                     "p.isDeleted = false AND " +
+                     "(LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " + 
+                     "LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%')))",
+              countQuery = "SELECT count(p) FROM Post p WHERE " + 
+                     "p.isDeleted = false AND " +
+                     "(LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " + 
+                     "LOWER(p.content) LIKE LOWER(CONCAT('%', :query, '%')))")
+    Page<Post> searchActivePosts(@Param("query") String query, Pageable pageable);
+
+
 }
