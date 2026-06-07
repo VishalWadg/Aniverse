@@ -44,6 +44,11 @@ public class PublicPostController {
     public ResponseEntity<Page<PostResponseDto>> getPostsByUser(
             @PathVariable String username,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        pageable.getSort().forEach(order -> {
+            if (!ALLOWED_SORTS.contains(order.getProperty())) {
+                throw new IllegalArgumentException("Invalid sort field: " + order.getProperty());
+            }
+        });
         return ResponseEntity.ok(postService.getPostsByUsername(username, pageable));
     }
 }
