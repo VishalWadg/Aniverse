@@ -71,8 +71,8 @@ public class User implements UserDetails {
         @Column(nullable = false, updatable = false)
         private LocalDateTime createdAt;
 
-        // -------------------------------------------------- relationships
-        // --------------------------------------------------
+        // -------------------------------------------------- relationships --------------------------------------------------
+
 
         @OneToMany(mappedBy = "author", // <-- 5. Changed 'user' to 'author' (more semantic)
                         fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -82,8 +82,7 @@ public class User implements UserDetails {
                         fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
         private List<Comment> comments = new ArrayList<>(); // <-- 5. FIXED TYPO
 
-        // -------------------------------------------------- Methods
-        // --------------------------------------------------
+        // -------------------------------------------------- Methods --------------------------------------------------
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {

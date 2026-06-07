@@ -7,12 +7,12 @@ type RequestOptions = {
 const postApi = {
     // Fetch all posts
     getPosts: async (options: RequestOptions = {}) => {
-        const response = await axiosClient.get('/posts', options);
+        const response = await axiosClient.get('/public/posts', options);
         return response.data; // Returns an array of post objects
     },
 
     getPost: async (postId, options: RequestOptions = {}) => {
-        const response = await axiosClient.get(`/posts/${postId}`, options)
+        const response = await axiosClient.get(`/public/posts/${postId}`, options)
         return response.data; // Returns a single post object
     },
 

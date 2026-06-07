@@ -18,9 +18,7 @@ import ParagraphWithAlignment from 'editorjs-paragraph-with-alignment'
 import { uploadImageToCloudinary, uploadImageUrlToCloudinary } from '@/api/uploadApi'
 
 const editorBackendBaseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '')
-const linkToolEndpoint = editorBackendBaseUrl
-  ? `${editorBackendBaseUrl}/url-meta`
-  : '/api/v1/url-meta'
+
 
 export const tools = {
   header: {
@@ -126,7 +124,6 @@ export const tools = {
   },
   linkTool: {
     class: LinkTool,
-    config: { endpoint: linkToolEndpoint },
   },
   marker: {
     class: Marker,

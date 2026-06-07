@@ -1,7 +1,7 @@
 import { baseApi } from "./baseApi";
 
 export type PublicUserProfile = {
-    id: number
+    id: string
     username: string
     name: string
     role: string
@@ -26,7 +26,7 @@ const userApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getUserProfile: build.query<PublicUserProfile, string>({
             query: (username: string) => ({
-                url: `/users/profile/${username}`,
+                url: `/public/users/profile/${username}`,
                 method: 'GET',
             }),
             providesTags: (_result, _error, username) => [{ type: 'User' as const, id: username }]

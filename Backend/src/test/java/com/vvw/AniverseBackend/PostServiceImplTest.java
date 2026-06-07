@@ -1,8 +1,10 @@
 package com.vvw.AniverseBackend;
 
 import com.vvw.AniverseBackend.dto.PostResponseDto;
+import com.vvw.AniverseBackend.entity.Comment;
 import com.vvw.AniverseBackend.entity.Post;
 import com.vvw.AniverseBackend.entity.User;
+import com.vvw.AniverseBackend.repository.CommentRepository;
 import com.vvw.AniverseBackend.repository.PostRepository;
 import com.vvw.AniverseBackend.repository.UserRepository;
 import com.vvw.AniverseBackend.service.PostService;
@@ -30,10 +32,14 @@ public class PostServiceImplTest {
     private PostRepository postRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     private User author;
     private UUID activePostId;
+    private UUID activeCommentId;
     private UUID expiredDeletedPostId;
     private UUID recentDeletedPostId;
 
@@ -50,7 +56,14 @@ public class PostServiceImplTest {
         activePost.setTitle("Active Theory");
         activePost.setContent("This is still active.");
         activePost.setAuthor(author);
-        activePostId = postRepository.save(activePost).getId();
+        Post savedActivePost = postRepository.save(activePost);
+        activePostId = savedActivePost.getId();
+
+        Comment activeComment = new Comment();
+        activeComment.setContent("This comment belongs to the active post.");
+        activeComment.setAuthor(author);
+        activeComment.setPost(savedActivePost);
+        activeCommentId = commentRepository.save(activeComment).getId();
 
         Post expiredDeletedPost = new Post();
         expiredDeletedPost.setTitle("Expired Deleted Theory");
@@ -81,6 +94,25 @@ public class PostServiceImplTest {
 
         assertThat(postRepository.findActiveByIdWithAuthor(activePostId)).isNotPresent();
         assertThat(postRepository.findDeletedByIdWithAuthor(activePostId)).isPresent();
+    }
+
+    @Test
+    void whenDeletePostById_ThenCommentsRemainActiveButHiddenUntilPostRestore() {
+        postService.deletePostById(activePostId, author);
+        postRepository.flush();
+        commentRepository.flush();
+
+        Comment commentAfterPostDelete = commentRepository.findById(activeCommentId).orElseThrow();
+        assertThat(commentAfterPostDelete.getIsDeleted()).isFalse();
+        assertThat(commentRepository.findByPostIdWithAuthor(activePostId, PageRequest.of(0, 10)).getContent())
+                .isEmpty();
+
+        postService.restoreDeletedPost(activePostId);
+        postRepository.flush();
+
+        assertThat(commentRepository.findByPostIdWithAuthor(activePostId, PageRequest.of(0, 10)).getContent())
+                .extracting(Comment::getId)
+                .containsExactly(activeCommentId);
     }
 
     @Test

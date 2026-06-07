@@ -23,15 +23,6 @@ const axiosClient = axios.create({
     withCredentials: true 
 });
 
-const isPublicFeedRequest = (config: any) => {
-    const method = typeof config?.method === "string" ? config.method.toLowerCase() : "";
-    const url = typeof config?.url === "string" ? config.url : "";
-
-    if (method !== "get") return false;
-
-    return url === "/posts" || url === "posts" || url.startsWith("/posts?") || url.startsWith("/posts/");
-}
-
 export const shouldCheckAuth = () => {
     if(memoryToken) return false;
     if(isAuthInitialized) return false;
@@ -111,8 +102,7 @@ axiosClient.interceptors.request.use(
     async (config: any) => {
         const url = typeof config?.url === "string" ? config.url : "";
 
-        // 1. skip public paths
-        if(url.includes('/auth/') || isPublicFeedRequest(config)) return config;
+        if (url.includes('/auth/') || url.includes('/public/')) return config;
 
         // 2. CASE A: A refresh is already happening (Queueing)
         if(refreshPromise) {
@@ -166,10 +156,6 @@ axiosClient.interceptors.response.use(
     (response) => response,
     async (error: any) => {
         const originalRequest: any = error?.config ?? {};
-
-        if (isPublicFeedRequest(originalRequest)) {
-            return Promise.reject(error);
-        }
 
         // check 3 conditions:
         // 1. is error response status 401
