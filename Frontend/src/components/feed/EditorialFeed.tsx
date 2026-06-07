@@ -94,6 +94,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q')?.trim() ?? ''
+
   const tabs = feedTabs[mode]
   const copy = feedCopy[mode]
   const [activeTab, setActiveTab] = useState(mode === 'home' ? 'hot' : 'latest')
@@ -101,6 +102,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
   const sortParam = activeTab === 'deep' ? 'wordCount,desc' : 'createdAt,desc';
 
   const isSearchActive = Boolean(searchQuery);
+  
 
   // 1. Reset page to 0 when search query changes
   React.useEffect(() => {
@@ -126,6 +128,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
   const posts = data?.content || [];
   const hasNextPage = Boolean(data && !data.last);
 
+  const totalMatches = data?.totalElements ?? posts.length;
 
 
   const visiblePosts = useMemo(() => {
@@ -191,9 +194,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                 </div>
 
                 <p className="text-sm text-on-surface-variant/70">
-                  {searchQuery
-                    ? `Results for "${searchQuery}"`
-                    : `${posts.length} manuscript${posts.length === 1 ? '' : 's'} loaded`}
+                  {`${posts.length} manuscript${posts.length === 1 ? '' : 's'} loaded`}
                 </p>
               </div>
             </div>
@@ -215,6 +216,30 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                 </button>
               ))}
             </div>
+
+                        {isSearchActive && (
+              <div className="mb-6 flex items-center justify-between gap-4 border border-outline-variant bg-surface-container-low p-4 rounded-card shadow-sm">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="text-sm font-bold text-on-surface shrink-0">
+                    Showing results for:
+                  </span>
+                  <span className="inline-block rounded-control bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary truncate max-w-[120px] sm:max-w-[240px]">
+                    "{searchQuery}"
+                  </span>
+                  <span className="text-xs text-on-surface-variant/80 shrink-0">
+                    ({totalMatches} match{totalMatches === 1 ? '' : 'es'})
+                  </span>
+                </div>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="border-outline-variant text-on-surface hover:bg-surface-container-high text-xs shrink-0"
+                >
+                  <Link to={clearSearchHref}>Clear Search</Link>
+                </Button>
+              </div>
+            )}
 
             <div className="mb-6 xl:hidden">
               <TrendingManuscripts trendingPosts={trendingPosts} canInteract={canInteract} />
@@ -238,8 +263,8 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                 <p className="text-[11px] font-black uppercase tracking-[0.32em] text-primary">
                   Search Miss
                 </p>
-                <h2 className="mt-4 text-3xl font-black text-on-surface">
-                  Nothing matched "{searchQuery}".
+                <h2 className="mt-4 text-3xl font-black text-on-surface break-words">
+                  Nothing matched <span className="inline-block max-w-full truncate align-bottom">"{searchQuery}"</span>.
                 </h2>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-on-surface-variant">
                   Try a broader title, author handle, or franchise keyword. The current feed filter is
