@@ -178,4 +178,28 @@ public class PostServiceImplTest {
 
         assertThat(results.getContent()).isEmpty();
     }
+
+    @Test
+    void whenSearchPosts_Pagination_ThenReturnsCorrectPageAndSize() {
+        // We already have "Active Theory" from setUp. Let's create two more matching posts:
+        Post post2 = new Post();
+        post2.setTitle("Second Theory");
+        post2.setContent("More research content.");
+        post2.setAuthor(author);
+        postRepository.save(post2);
+        Post post3 = new Post();
+        post3.setTitle("Third Theory");
+        post3.setContent("Further signal cuts.");
+        post3.setAuthor(author);
+        postRepository.save(post3);
+        postRepository.flush();
+        // 1. Query page 0 with size 2 (Expects 2 posts back, with a next page available)
+        var page0 = postService.searchPosts("Theory", PageRequest.of(0, 2));
+        assertThat(page0.getContent()).hasSize(2);
+        assertThat(page0.hasNext()).isTrue();
+        // 2. Query page 1 with size 2 (Expects the remaining 1 post, with no next page)
+        var page1 = postService.searchPosts("Theory", PageRequest.of(1, 2));
+        assertThat(page1.getContent()).hasSize(1);
+        assertThat(page1.hasNext()).isFalse();
+    }
 }
