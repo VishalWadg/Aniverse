@@ -48,6 +48,9 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Query("DELETE FROM Post p WHERE p.id = :postId AND p.isDeleted = true")
     int hardDeleteById(@Param("postId") UUID postId);
 
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.isDeleted = true AND p.deletedAt < :cutoff")
+    long countExpiredPosts(@Param("cutoff") LocalDateTime cutoff);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Post p WHERE p.isDeleted = true AND p.deletedAt < :cutoff")
     int purgeExpiredPosts(@Param("cutoff") LocalDateTime cutoff);
