@@ -124,7 +124,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
   const isFetching = isSearchActive ? searchFetching : feedFetching;
 
   const posts = data?.content || [];
-  const hasNextPage = Boolean(data && !data.last);;
+  const hasNextPage = Boolean(data && !data.last);
 
 
 
