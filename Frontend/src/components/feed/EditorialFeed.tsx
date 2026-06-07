@@ -95,11 +95,6 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get('q')?.trim() ?? ''
 
-  // Truncate query safely to prevent UI breakage from excessively long strings
-  const displayQuery = searchQuery.length > 30 
-    ? `${searchQuery.slice(0, 30)}...` 
-    : searchQuery;
-
   const tabs = feedTabs[mode]
   const copy = feedCopy[mode]
   const [activeTab, setActiveTab] = useState(mode === 'home' ? 'hot' : 'latest')
@@ -229,7 +224,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                     Showing results for:
                   </span>
                   <span className="inline-block rounded-control bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary truncate max-w-[120px] sm:max-w-[240px]">
-                    "{displayQuery}"
+                    "{searchQuery}"
                   </span>
                   <span className="text-xs text-on-surface-variant/80 shrink-0">
                     ({totalMatches} match{totalMatches === 1 ? '' : 'es'})
@@ -268,8 +263,8 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                 <p className="text-[11px] font-black uppercase tracking-[0.32em] text-primary">
                   Search Miss
                 </p>
-                <h2 className="mt-4 text-3xl font-black text-on-surface">
-                  Nothing matched "{displayQuery}".
+                <h2 className="mt-4 text-3xl font-black text-on-surface break-words">
+                  Nothing matched <span className="inline-block max-w-full truncate align-bottom">"{searchQuery}"</span>.
                 </h2>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-on-surface-variant">
                   Try a broader title, author handle, or franchise keyword. The current feed filter is
