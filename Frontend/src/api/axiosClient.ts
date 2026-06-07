@@ -102,7 +102,7 @@ axiosClient.interceptors.request.use(
     async (config: any) => {
         const url = typeof config?.url === "string" ? config.url : "";
 
-        if(url.includes('/auth/')) return config;
+        if (url.includes('/auth/') || url.includes('/public/')) return config;
 
         // 2. CASE A: A refresh is already happening (Queueing)
         if(refreshPromise) {
