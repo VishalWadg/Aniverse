@@ -25,7 +25,7 @@ export const commentsApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getComments: builder.query<CommentResponse, {postId: string, page?: number}>({
             query: ({ postId, page = 0 }) => ({
-                url: `/posts/${postId}/comments?page=${page}&size=10&sort=createdAt,asc`,
+                url: `/public/posts/${postId}/comments?page=${page}&size=10&sort=createdAt,asc`,
                 method: 'GET'
             }),
             serializeQueryArgs: ({queryArgs}) =>{

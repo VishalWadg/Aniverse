@@ -50,7 +50,7 @@ const postsApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getPosts: build.query<PostsResponse, PostsQueryArgs>({
             query: ({sort='createdAt,desc', page = 0, size = DEFAULT_POSTS_PAGE_SIZE}) => ({
-                url: `/posts?sort=${sort}&page=${page}&size=${size}`,
+                url: `/public/posts?sort=${sort}&page=${page}&size=${size}`,
                 method: 'GET',
             }),
             serializeQueryArgs: ({endpointName, queryArgs}) => {
@@ -84,7 +84,7 @@ const postsApi = baseApi.injectEndpoints({
 
         getPost: build.query<Post, string>({
             query: (id) => ({
-                url: `/posts/${id}`,
+                url: `/public/posts/${id}`,
                 method: 'GET',
             }),
             providesTags: (result, error, id) => [{ type: 'Post', id }]
@@ -124,7 +124,7 @@ const postsApi = baseApi.injectEndpoints({
 
         getPostsByUsername: build.query<PostsResponse, UserPostsQueryArgs>({
             query: ({username, sort='createdAt,desc', page=0, size = DEFAULT_POSTS_PAGE_SIZE}) => ({
-                url: `/posts/user/${username}?sort=${sort}&page=${page}&size=${size}`,
+                url: `/public/posts/user/${username}?sort=${sort}&page=${page}&size=${size}`,
                 method: 'GET',
             }),
             serializeQueryArgs: ({endpointName, queryArgs}) => {

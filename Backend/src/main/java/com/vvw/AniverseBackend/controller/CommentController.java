@@ -10,13 +10,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
 import com.vvw.AniverseBackend.dto.CommentResponseDto;
 import com.vvw.AniverseBackend.dto.CreateCommentDto;
 import com.vvw.AniverseBackend.entity.User;
@@ -24,23 +17,14 @@ import com.vvw.AniverseBackend.service.CommentService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.UUID;
 
 
 @RestController
 @RequiredArgsConstructor
 public class CommentController {
     private final CommentService commentService;
-
-    @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<Page<CommentResponseDto>> getComments(
-        @PathVariable UUID postId,
-        @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable
-    ){
-        Page<CommentResponseDto> comments = commentService.getCommentsOfPost(postId, pageable);
-        return ResponseEntity.ok(comments);
-    }
     
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponseDto> createComment(
