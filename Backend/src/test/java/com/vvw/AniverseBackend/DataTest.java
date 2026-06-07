@@ -6,6 +6,9 @@ import com.vvw.AniverseBackend.repository.CommentRepository;
 import com.vvw.AniverseBackend.service.PostService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
+
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +52,7 @@ public class DataTest {
 
         posts.getContent().forEach((post) -> {
             System.out.println(post);
-            Long id = post.getId();
+            UUID id = post.getId();
             System.out.println(postService.isUserTheAuthor("Alice Johnson",id));
 
         });

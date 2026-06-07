@@ -1,5 +1,7 @@
 package com.vvw.AniverseBackend.dto;
 
+import java.util.UUID;
+
 import com.vvw.AniverseBackend.entity.type.Role;
 
 import lombok.AllArgsConstructor;
@@ -12,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class UserResponseDto {
-    private Long id;
+    private UUID id;
     private String username;
     private String name;
     private String email;

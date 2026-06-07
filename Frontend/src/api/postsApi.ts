@@ -1,7 +1,7 @@
 import { baseApi } from "./baseApi";
 
 export type Post = {
-    id: number
+    id: string
     title: string
     content: string
     createdAt: string
@@ -27,25 +27,43 @@ type CreatePostInput = {
 }
 
 type UpdatePostInput = {
-    id: number
+    id: string
     updates: {
         title: string
         content: string
     }
 }
 
+const DEFAULT_POSTS_PAGE_SIZE = 10;
+
+type PostsQueryArgs = {
+    sort?: string
+    page: number
+    size?: number
+}
+
+type UserPostsQueryArgs = PostsQueryArgs & {
+    username: string
+}
+
 const postsApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
-        getPosts: build.query<PostsResponse, {sort?:String, page:Number}>({
-            query: ({sort='createdAt,desc', page = 0}) => ({
-                url: `/posts?sort=${sort}&page=${page}`,
+        getPosts: build.query<PostsResponse, PostsQueryArgs>({
+            query: ({sort='createdAt,desc', page = 0, size = DEFAULT_POSTS_PAGE_SIZE}) => ({
+                url: `/public/posts?sort=${sort}&page=${page}&size=${size}`,
                 method: 'GET',
             }),
             serializeQueryArgs: ({endpointName, queryArgs}) => {
-                return `${endpointName}-${queryArgs.sort || 'createdAt,desc'}`;
+                return `${endpointName}-${queryArgs.sort || 'createdAt,desc'}-${queryArgs.size || DEFAULT_POSTS_PAGE_SIZE}`;
             },
-            merge: (currentCache, newItems) => {
+            merge: (currentCache, newItems, { arg }) => {
                 if(!newItems.content) return;
+
+                if (arg.page === 0) {
+                    Object.assign(currentCache, newItems);
+                    return;
+                }
+
                 const combined = [...currentCache.content, ...newItems.content];
                 const uniqueItemsMap = new Map(combined.map(item => [item.id, item]));
                 const deduplicatedArray = Array.from(uniqueItemsMap.values());
@@ -53,7 +71,7 @@ const postsApi = baseApi.injectEndpoints({
                 currentCache.content = deduplicatedArray;
             },
             forceRefetch({currentArg, previousArg}){
-                return currentArg?.page !== previousArg?.page;
+                return currentArg?.page !== previousArg?.page || currentArg?.size !== previousArg?.size;
             },
             providesTags: (result) =>
                 result
@@ -66,7 +84,7 @@ const postsApi = baseApi.injectEndpoints({
 
         getPost: build.query<Post, string>({
             query: (id) => ({
-                url: `/posts/${id}`,
+                url: `/public/posts/${id}`,
                 method: 'GET',
             }),
             providesTags: (result, error, id) => [{ type: 'Post', id }]
@@ -93,7 +111,7 @@ const postsApi = baseApi.injectEndpoints({
             ]
         }),
 
-        deletePost: build.mutation<void, number>({
+        deletePost: build.mutation<void, string>({
             query: (id) => ({
                 url: `/posts/${id}`,
                 method: 'DELETE'
@@ -104,16 +122,21 @@ const postsApi = baseApi.injectEndpoints({
             ],
         }),
 
-        getPostsByUsername: build.query<PostsResponse, {username: string, sort?:string, page: number}>({
-            query: ({username, sort='createdAt,desc', page=0}) => ({
-                url: `/posts/user/${username}?sort=${sort}&page=${page}`,
+        getPostsByUsername: build.query<PostsResponse, UserPostsQueryArgs>({
+            query: ({username, sort='createdAt,desc', page=0, size = DEFAULT_POSTS_PAGE_SIZE}) => ({
+                url: `/public/posts/user/${username}?sort=${sort}&page=${page}&size=${size}`,
                 method: 'GET',
             }),
             serializeQueryArgs: ({endpointName, queryArgs}) => {
-                return `${endpointName}-${queryArgs.username}-${queryArgs.sort || 'createdAt,desc'}`;
+                return `${endpointName}-${queryArgs.username}-${queryArgs.sort || 'createdAt,desc'}-${queryArgs.size || DEFAULT_POSTS_PAGE_SIZE}`;
             },
-            merge: (currentCache, newItems) => {
+            merge: (currentCache, newItems, { arg }) => {
                 if(!newItems.content) return;
+
+                if (arg.page === 0) {
+                    Object.assign(currentCache, newItems);
+                    return;
+                }
 
                 const combinedArr = [...currentCache.content, ...newItems.content];
                 const uniqueItemsMap = new Map(combinedArr.map(item => [item.id, item]));
@@ -122,12 +145,15 @@ const postsApi = baseApi.injectEndpoints({
                 currentCache.content = deduplicatedArray; 
             },
             forceRefetch({currentArg, previousArg}){
-                return currentArg?.page !== previousArg?.page;
+                return currentArg?.page !== previousArg?.page || currentArg?.size !== previousArg?.size;
             },
-            providesTags: (result, error, {username}) => [{
-                type: 'Post' as const,
-                id: `${username}-LIST`
-            }]
+            providesTags: (result, error, {username}) =>
+                result
+                    ? [
+                        ...result.content.map((post) => ({ type: 'Post' as const, id: post.id })),
+                        { type: 'Post' as const, id: `${username}-LIST` },
+                    ]
+                    : [{ type: 'Post' as const, id: `${username}-LIST` }]
         })
     }),
     overrideExisting: false,

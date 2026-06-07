@@ -17,11 +17,11 @@ export default function AdminDataTable({ posts }: { posts: Post[] }) {
     const [restorePost, { isLoading: isRestoring }] = useRestorePostMutation()
     const [purgePost, { isLoading: isPurging }] = usePurgePostMutation()
 
-    const handleRestore = (id: number) => {
+    const handleRestore = (id: string) => {
         restorePost(id)
     }
 
-    const handlePurge = (id: number) => {
+    const handlePurge = (id: string) => {
         purgePost(id)
     }
 

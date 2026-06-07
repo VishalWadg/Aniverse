@@ -1,4 +1,3 @@
-import axios from "axios";
 import { baseApi } from "./baseApi";
 import { PostsResponse, Post } from "./postsApi";
 
@@ -7,7 +6,7 @@ const adminApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
         getDeletedPosts: build.query<PostsResponse, void>({
             query: () => ({
-                url: '/posts/deleted',
+                url: '/admin/posts/deleted',
                 method: 'GET',
             }),
             providesTags: (result) =>
@@ -19,9 +18,9 @@ const adminApi = baseApi.injectEndpoints({
                     : [{ type: 'Post' as const, id: 'LIST' }]
         }),
 
-        restorePost: build.mutation<Post, number>({
+        restorePost: build.mutation<Post, string>({
             query: (id) => ({
-                url: `/posts/restore/${id}`,
+                url: `/admin/posts/restore/${id}`,
                 method: 'PUT',
             }),
             invalidatesTags: (result, error, id) => [
@@ -30,9 +29,9 @@ const adminApi = baseApi.injectEndpoints({
             ],
         }),
 
-        purgePost: build.mutation<void, number>({
+        purgePost: build.mutation<void, string>({
             query: (id) => ({
-                url: `/posts/cleanup/${id}`,
+                url: `/admin/posts/cleanup/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: (result, error, id) => [
@@ -43,7 +42,7 @@ const adminApi = baseApi.injectEndpoints({
 
         cleanupDeletedPosts: build.mutation<number, void>({
             query: () => ({
-                url: '/posts/cleanup',
+                url: '/admin/posts/cleanup',
                 method: 'DELETE',
             }),
             invalidatesTags: () => [

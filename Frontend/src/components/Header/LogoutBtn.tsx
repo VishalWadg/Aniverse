@@ -38,8 +38,8 @@ function LogoutBtn() {
   return (
     <Button
       type="button"
-      variant="ghost"
-      className="rounded-none border border-white/10 bg-transparent px-4 text-[#d6d6d6] hover:bg-white/[0.04] hover:text-white"
+      variant="outline"
+      className="border-outline-variant bg-transparent px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
       onClick={logoutHandler}
     >
       Logout

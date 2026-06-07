@@ -8,6 +8,7 @@ import useToasts from "../hooks/useToasts";
 import { sanitizeMonolithHtml } from "../lib/monolith-html";
 import { useGetPostQuery } from "@/api/postsApi";
 import { useDeletePostMutation } from "@/api/postsApi";
+import { CommentSection } from "@/components/comments/CommentSection";
 
 export const postLoader = async ({ params, request }) => {
     try {
@@ -66,18 +67,14 @@ export default function Post() {
                         <div className="mb-6 flex flex-wrap justify-end gap-3">
                             <Link to={`/edit-post/${post.id}`}>
                                 <Button
-                                    bgColor="bg-white hover:bg-zinc-200 dark:bg-zinc-100 dark:hover:bg-white"
-                                    textColor="text-zinc-950"
-                                    className="rounded-md border border-white/10"
+                                    variant="outline"
                                 >
                                     Edit
                                 </Button>
                             </Link>
                             <Button
-                                bgColor="bg-red-500/90 hover:bg-red-500"
-                                textColor="text-white"
+                                variant="destructive"
                                 onClick={deletePost}
-                                className="rounded-md"
                             >
                                 Delete
                             </Button>
@@ -93,6 +90,9 @@ export default function Post() {
                         {parse(sanitizeMonolithHtml(post.content ?? ''))}
                     </div>
                 </article>
+                <CommentSection
+                    postId={id}
+                />
             </Container>
         </div>
     ) : null;

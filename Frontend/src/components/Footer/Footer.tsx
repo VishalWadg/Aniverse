@@ -10,13 +10,13 @@ function Footer() {
 
   if (isAuthRoute) {
     return (
-      <footer className="relative z-10 border-t border-white/8 bg-[#080808]/95">
-        <Container className="flex flex-col gap-3 py-4 text-[10px] font-medium uppercase tracking-[0.28em] text-[#666666] md:flex-row md:items-center md:justify-between">
+      <footer className="relative z-10 border-t border-outline-variant/60 bg-surface-container">
+        <Container className="flex flex-col gap-3 py-4 text-[10px] font-medium uppercase tracking-[0.28em] text-on-surface-variant/75 md:flex-row md:items-center md:justify-between">
           <p>(c) 2026 Aniverse Manuscript. All rights reserved.</p>
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
             <span>Manuscript</span>
-            <Link className="transition-colors hover:text-white" to="/all-posts">
+            <Link className="transition-colors hover:text-on-surface" to="/all-posts">
               Archive
             </Link>
             <span>Legal</span>
@@ -27,23 +27,23 @@ function Footer() {
   }
 
   return (
-    <footer className="border-t border-white/8 bg-[#0a0a0a]/95">
-      <Container className="flex flex-col gap-4 py-8 md:flex-row md:items-center md:justify-between">
+    <footer className="border-t border-outline-variant/60 bg-surface-container-low">
+      <Container className="flex flex-col gap-4 py-section md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-3">
           <Logo width="132px" />
-          <p className="max-w-md text-sm leading-6 text-[#7f7f7f]">
+          <p className="max-w-md text-sm leading-6 text-on-surface-variant">
             Long-form theories, editorial takes, and archive notes built for late-night reading.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[11px] font-medium uppercase tracking-[0.28em] text-[#6f6f6f]">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[11px] font-medium uppercase tracking-[0.28em] text-on-surface-variant/80">
           <span>Privacy</span>
-          <Link className="transition-colors hover:text-white" to="/all-posts">
+          <Link className="transition-colors hover:text-on-surface" to="/all-posts">
             Archive
           </Link>
           <span>Rules</span>
           <span>API</span>
-          <span className="text-[#5a5a5a]">(c) 2026 Aniverse</span>
+          <span className="text-on-surface-variant/50">(c) 2026 Aniverse</span>
         </div>
       </Container>
     </footer>

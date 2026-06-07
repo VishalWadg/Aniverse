@@ -3,10 +3,13 @@ package com.vvw.AniverseBackend.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.jsoup.Jsoup;
 
 @Entity
@@ -25,8 +28,8 @@ import org.jsoup.Jsoup;
 @ToString(exclude = {"author", "comments"})
 public class Post {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -51,16 +54,15 @@ public class Post {
     //  --------------------------------------------------  relationships  --------------------------------------------------  
 
 //    @ToString.Exclude
-    @ManyToOne(fetch = FetchType.LAZY) // <-- 5. CRITICAL: Added FetchType.LAZY
-    @JoinColumn(name = "author_id", nullable = false) // <-- 5. Added explicit column name
+    @ManyToOne(fetch = FetchType.LAZY) 
+    @JoinColumn(name = "author_id", nullable = false) 
     private User author;
 
 //    @ToString.Exclude
     @OneToMany(
             mappedBy = "post",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL, // <-- 6. Changed to CascadeType.ALL
-            orphanRemoval = true
+            cascade = CascadeType.PERSIST
     )
     private List<Comment> comments = new ArrayList<>();
 

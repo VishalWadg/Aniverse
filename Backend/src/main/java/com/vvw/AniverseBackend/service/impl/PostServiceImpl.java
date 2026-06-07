@@ -2,16 +2,18 @@ package com.vvw.AniverseBackend.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+
 import com.vvw.AniverseBackend.dto.CreatePostDto;
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
 import com.vvw.AniverseBackend.exceptions.EntityNotFoundException;
 import com.vvw.AniverseBackend.exceptions.ResourceAccessDeniedException;
+import com.vvw.AniverseBackend.mapper.PostMapper;
 import com.vvw.AniverseBackend.service.UserService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,16 +31,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService{
     private final PostRepository postRepository;
-    private final ModelMapper modelMapper;
+    private final PostMapper postMapper;
     private final UserService userService;
     private final PostRetentionProperties postRetentionProperties;
 
-    private Post findDeletedPostOrThrow(Long id) {
+    private Post findDeletedPostOrThrow(UUID id) {
         return postRepository.findDeletedByIdWithAuthor(id)
                 .orElseThrow(() -> new EntityNotFoundException("Deleted post with id " + id + " not found"));
     }
 
-    private Post findActivePostOrThrow(Long id){
+    private Post findActivePostOrThrow(UUID id){
         return postRepository.findActiveByIdWithAuthor(id).orElseThrow(() -> new EntityNotFoundException("Post with id "+ id + "not found"));
     }
 
@@ -53,46 +55,46 @@ public class PostServiceImpl implements PostService{
     @Override
     @Transactional
     public PostResponseDto createNewPost(CreatePostDto createPostDto, String username){
-        Post newPost = modelMapper.map(createPostDto, Post.class);
+        Post newPost = postMapper.toEntity(createPostDto);
         User author = userService.findByUsername(username);
         newPost.setAuthor(author);
-        return modelMapper.map(postRepository.save(newPost), PostResponseDto.class);
+        return postMapper.toPostResponseDto(postRepository.save(newPost));
     }
 
     @Override
     public Page<PostResponseDto> getAllPosts(Pageable pageable){
-        return postRepository.findActiveWithAuthor(pageable).map((element) -> modelMapper.map(element, PostResponseDto.class));
+        return postRepository.findActiveWithAuthor(pageable).map((element) -> postMapper.toPostResponseDto(element));
     }
 
     @Override   
-    public PostResponseDto getPostById(Long id){
+    public PostResponseDto getPostById(UUID id){
         log.warn("PostServiceImpl:: getPostById");
         Post post = findActivePostOrThrow(id);
-        return modelMapper.map(post, PostResponseDto.class);
+        return postMapper.toPostResponseDto(post);
     }
 
     @Override
     public Page<PostResponseDto> getPostsByUsername(String username, Pageable pageable){
         // User user = userService.findByUsername(username);
         Page<Post> posts = postRepository.findActiveByAuthorUsernameWithAuthor(username, pageable);
-        return posts.map((element) -> modelMapper.map(element, PostResponseDto.class));
+        return posts.map((element) -> postMapper.toPostResponseDto(element));
     }
 
 
     // PUT Request (All fields are required) mostly not needed as we use PATCH instead
     @Override
     @Transactional
-    public PostResponseDto updatePost(Long id, UpdatePostDto updatePostDto, User currentUser){
+    public PostResponseDto updatePost(UUID id, UpdatePostDto updatePostDto, User currentUser){
         log.warn("PostServiceImpl:: updatePost");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
-        modelMapper.map(updatePostDto, post);
-        return modelMapper.map(postRepository.save(post), PostResponseDto.class);
+        postMapper.updatePostFromDto(updatePostDto, post);
+        return postMapper.toPostResponseDto(postRepository.save(post));
     }
 
     @Override
     @Transactional
-    public void deletePostById(Long id, User currentUser){
+    public void deletePostById(UUID id, User currentUser){
         log.warn("PostServiceImpl:: deletePostById");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
@@ -103,38 +105,37 @@ public class PostServiceImpl implements PostService{
     // this can be done two ways using 1) Map<String, Object> and 2) using DTO with null values allowed fields 2nd approach is preferred
     @Override
     @Transactional
-    public PostResponseDto updatePostPartially(Long id, UpdatePostDto updates, User currentUser){
+    public PostResponseDto updatePostPartially(UUID id, UpdatePostDto updates, User currentUser){
         log.warn("PostServiceImpl:: updatePostPartially");
         Post post = findActivePostOrThrow(id);
         assertCanModifyPost(post, currentUser);
-        if (updates.getTitle() != null) post.setTitle(updates.getTitle());
-        if (updates.getContent() != null) post.setContent(updates.getContent());
-        return modelMapper.map(postRepository.save(post), PostResponseDto.class);
+        postMapper.updatePostFromDto(updates, post);
+        return postMapper.toPostResponseDto(postRepository.save(post));
     }
 
     @Override
-    public Boolean isUserTheAuthor(String username, Long post_id){
+    public Boolean isUserTheAuthor(String username, UUID post_id){
         return postRepository.findAuthorUsernameByPostId(post_id).map(authorUsername -> authorUsername.equals(username)).orElse(false);
     }
 
     @Override
     public Page<PostResponseDto> getDeletedPosts(Pageable pageable){
         Page<Post> posts = postRepository.findDeletedWithAuthor(pageable);
-        return posts.map(element -> modelMapper.map(element, PostResponseDto.class));
+        return posts.map(element -> postMapper.toPostResponseDto(element));
     }
 
     @Override
     @Transactional
-    public PostResponseDto restoreDeletedPost(Long id){
+    public PostResponseDto restoreDeletedPost(UUID id){
         Post post = findDeletedPostOrThrow(id);
         post.setIsDeleted(false);
         post.setDeletedAt(null);
-        return modelMapper.map(postRepository.save(post), PostResponseDto.class);
+        return postMapper.toPostResponseDto(postRepository.save(post));
     }
 
     @Override
     @Transactional
-    public void purgeDeletedPost(Long id) {
+    public void purgeDeletedPost(UUID id) {
         findDeletedPostOrThrow(id);
 
         int count = postRepository.hardDeleteById(id);

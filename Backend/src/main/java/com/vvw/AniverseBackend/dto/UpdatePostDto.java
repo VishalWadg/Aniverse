@@ -10,8 +10,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdatePostDto {
-    @Size(min=5, max=25, message = "Title should be of lenght 5-25")
+    
+    @NotBlank(message = "Title cannot be empty")
+    @Size(min=3, max=100, message = "Title should be of lenght 3-100")
     private String title;
+
+    @NotBlank(message = "Content cannot be empty")
     @Size(min=10, message = "Post should be Greater than 10 characters")
     private String content;
 }

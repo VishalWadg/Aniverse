@@ -16,8 +16,6 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import UserPosts from '@/components/User/UserPosts'
 import UserProfileCard from '@/components/User/UserProfile'
 
-
-
 function Profile() {
   const { username: routeUsername = '' } = useParams()
   const authStatus = useAppSelector((state) => state.auth.status)
@@ -76,8 +74,6 @@ function Profile() {
   const profile = isViewingOwnProfile ? currentProfile : publicProfile
   const profileError = isViewingOwnProfile ? currentProfileError : publicProfileError
   const isProfileLoading = isViewingOwnProfile ? isCurrentProfileLoading : isPublicProfileLoading
-
-
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target
@@ -167,8 +163,8 @@ function Profile() {
       <div className="relative overflow-hidden py-10 sm:py-14">
         <Container>
           <div className="space-y-6">
-            <div className="h-64 animate-pulse border border-white/10 bg-white/[0.03]" />
-            <div className="h-56 animate-pulse border border-white/8 bg-white/[0.02]" />
+            <div className="h-64 animate-pulse rounded-card border border-outline-variant bg-surface-container/30" />
+            <div className="h-56 animate-pulse rounded-card border border-outline-variant bg-surface-container/20" />
           </div>
         </Container>
       </div>
@@ -179,14 +175,14 @@ function Profile() {
     return (
       <div className="relative overflow-hidden py-10 sm:py-14">
         <Container>
-          <section className="border border-[#ff453a]/35 bg-[#1a0f0d] px-6 py-10">
-            <p className="text-[11px] font-medium uppercase tracking-[0.28em] text-[#ff9d96]">
+          <section className="border border-error/30 bg-error/10 p-card rounded-card">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-error">
               Profile unavailable
             </p>
-            <h1 className="mt-3 text-3xl font-black tracking-[-0.05em] text-white">
+            <h1 className="mt-3 text-3xl font-black tracking-[-0.05em] text-on-surface">
               We couldn&apos;t load this profile.
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-[#c8b3af]">
+            <p className="mt-4 max-w-2xl text-base leading-8 text-on-surface-variant">
               {getApiErrorMessage(profileError)}
             </p>
           </section>
@@ -197,7 +193,8 @@ function Profile() {
 
   return (
     <div className="relative overflow-hidden py-10 sm:py-14">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,69,58,0.1),_transparent_38%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.06),_transparent_34%)]" />
+      {/* Fully dynamic brand accent glow gradient! */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_color-mix(in_srgb,_var(--primary)_10%,_transparent),_transparent_38%),radial-gradient(circle_at_bottom_right,_color-mix(in_srgb,_var(--primary)_6%,_transparent),_transparent_34%)]" />
 
       <Container className="relative space-y-8">
         <div
@@ -215,12 +212,12 @@ function Profile() {
           />
 
           {isViewingOwnProfile && currentProfile ? (
-            <section className="border border-white/10 bg-[#111111] p-6 sm:p-8">
+            <section className="border border-outline-variant bg-surface-container-low p-card rounded-card shadow-elevation-1">
               {isEditingProfile ? (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid gap-5 md:grid-cols-2">
                     <label className="space-y-2">
-                      <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#7d7d7d]">
+                      <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-on-surface-variant">
                         Display name
                       </span>
                       <Input
@@ -235,7 +232,7 @@ function Profile() {
                     </label>
 
                     <label className="space-y-2">
-                      <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#7d7d7d]">
+                      <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-on-surface-variant">
                         Email
                       </span>
                       <Input
@@ -251,7 +248,7 @@ function Profile() {
                   </div>
 
                   <label className="space-y-2">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#7d7d7d]">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-on-surface-variant">
                       Avatar URL
                     </span>
                     <Input
@@ -264,7 +261,7 @@ function Profile() {
                   </label>
 
                   <div className="flex flex-wrap gap-3">
-                    <label className="inline-flex cursor-pointer items-center justify-center rounded-none bg-[#ff453a] px-5 py-2.5 text-sm font-black uppercase tracking-[0.16em] text-white transition hover:bg-[#ff6258]">
+                    <label className="inline-flex cursor-pointer items-center justify-center rounded-control bg-primary px-5 h-control-h text-sm font-black uppercase tracking-[0.16em] text-on-primary transition hover:bg-primary/95">
                       {isUploadingAvatar ? 'Uploading...' : 'Upload avatar'}
                       <input
                         type="file"
@@ -277,16 +274,16 @@ function Profile() {
 
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="outline"
                       onClick={() => setFormValues((current) => ({ ...current, profilePic: '' }))}
-                      className="rounded-none border border-white/10 bg-transparent px-4 text-[#d4d4d4] hover:bg-white/[0.05] hover:text-white"
+                      className="px-4 text-on-surface-variant hover:text-on-surface"
                     >
                       Remove avatar
                     </Button>
                   </div>
 
                   <label className="space-y-2">
-                    <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#7d7d7d]">
+                    <span className="text-[11px] font-medium uppercase tracking-[0.24em] text-on-surface-variant">
                       Bio
                     </span>
                     <textarea
@@ -296,9 +293,9 @@ function Profile() {
                       placeholder="Tell readers what kind of theories you write."
                       maxLength={280}
                       rows={6}
-                      className="flex w-full rounded-none border border-white/10 bg-white/[0.02] px-4 py-3 text-sm text-[#e5e5e5] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition-colors placeholder:text-[#666666] focus:border-[#ff453a]/70 focus:bg-white/[0.04] focus-visible:ring-[3px] focus-visible:ring-[#ff453a]/20"
+                      className="flex w-full rounded-control border border-outline-variant bg-surface-container px-control-x py-control-y text-sm text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/45 focus:border-primary focus:bg-surface-container-high focus-visible:ring-[3px] focus-visible:ring-primary/20"
                     />
-                    <p className="text-right text-[11px] font-medium uppercase tracking-[0.22em] text-[#666666]">
+                    <p className="text-right text-[11px] font-medium uppercase tracking-[0.22em] text-on-surface-variant/50">
                       {formValues.bio.length}/280
                     </p>
                   </label>
@@ -312,16 +309,16 @@ function Profile() {
                         !formValues.name.trim() ||
                         !formValues.email.trim()
                       }
-                      className="rounded-none bg-[#ff453a] px-5 font-black uppercase tracking-[0.16em] text-white hover:bg-[#ff6258]"
+                      className="px-5 font-black uppercase tracking-[0.16em]"
                     >
                       {isUpdatingProfile ? 'Saving...' : 'Save profile'}
                     </Button>
 
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="outline"
                       onClick={handleReset}
-                      className="rounded-none border border-white/10 bg-transparent px-4 text-[#d4d4d4] hover:bg-white/[0.05] hover:text-white"
+                      className="px-4 text-on-surface-variant hover:text-on-surface"
                     >
                       Reset
                     </Button>

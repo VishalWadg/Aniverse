@@ -31,8 +31,8 @@ const UserProfile = ({
     const canShowEmail = isCurrentUser && "email" in profile
 
     return (
-        <section className="relative overflow-hidden border border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(255,69,58,0.24),_transparent_36%),linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-6 sm:p-8">
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#ff7a70]/50 to-transparent" />
+        <section className="relative overflow-hidden border border-outline-variant bg-[radial-gradient(circle_at_top_left,_color-mix(in_srgb,_var(--primary)_12%,_transparent),_transparent_38%),linear-gradient(160deg,var(--surface-container),var(--surface-container-low))] p-card rounded-card shadow-elevation-1">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
             <div className="flex justify-end">
                 {onToggleEdit ? (
@@ -41,10 +41,10 @@ const UserProfile = ({
                         onClick={onToggleEdit}
                         aria-label={isEditing ? "Close profile editor" : "Open profile editor"}
                         className={[
-                            "inline-flex size-11 items-center justify-center border transition",
+                            "inline-flex size-11 items-center justify-center border transition-colors rounded-control cursor-pointer",
                             isEditing
-                                ? "border-[#ff453a]/50 bg-[#ff453a]/10 text-[#ffb4ae] hover:bg-[#ff453a]/15"
-                                : "border-white/10 bg-transparent text-[#d4d4d4] hover:bg-white/[0.05] hover:text-white",
+                                ? "border-primary/50 bg-primary-container/20 text-primary hover:bg-primary-container/30"
+                                : "border-outline-variant bg-transparent text-on-surface-variant hover:bg-surface-container hover:text-on-surface",
                         ].join(" ")}
                     >
                         {isEditing ? <CloseIcon className="size-4" /> : <PencilIcon className="size-4" />}
@@ -66,42 +66,42 @@ const UserProfile = ({
                 <div className="min-w-0 flex-1 space-y-4">
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="inline-flex items-center border border-[#ff453a]/45 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.28em] text-[#ff9d96]">
+                                <span className="inline-flex items-center border border-primary/40 rounded-control px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.28em] text-primary">
                                     {profile.role}
                                 </span>
-                                <span className="text-[11px] font-medium uppercase tracking-[0.26em] text-[#8d8d8d]">
+                                <span className="text-[11px] font-medium uppercase tracking-[0.26em] text-on-surface-variant">
                                     Member since {formatJoinDate(profile.createdAt)}
                                 </span>
                             </div>
 
                             <div>
-                                <h1 className="text-3xl font-black tracking-[-0.05em] text-white sm:text-[2.6rem]">
+                                <h1 className="text-3xl font-black tracking-[-0.05em] text-on-surface sm:text-[2.6rem]">
                                     {profile.name}
                                 </h1>
-                                <p className="mt-1 text-sm font-semibold uppercase tracking-[0.22em] text-[#ff9d96]">
+                                <p className="mt-1 text-sm font-semibold uppercase tracking-[0.22em] text-primary">
                                     @{profile.username}
                                 </p>
                             </div>
                         </div>
 
-                        <p className="max-w-2xl text-base leading-8 text-[#bbbbbb]">
+                        <p className="max-w-2xl text-base leading-8 text-on-surface/90">
                             {profile.bio || "No bio yet. This profile is still waiting for its opening monologue."}
                         </p>
 
-                        <div className="flex flex-wrap gap-3 text-sm text-[#c7c7c7]">
-                            <div className="min-w-[10rem] border border-white/8 bg-black/25 px-4 py-3">
-                                <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#777777]">
+                        <div className="flex flex-wrap gap-3 text-sm text-on-surface-variant">
+                            <div className="min-w-[10rem] border border-outline-variant bg-surface-container-low/40 rounded-card px-4 py-3">
+                                <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-on-surface-variant/70">
                                     Published
                                 </p>
-                                <p className="mt-2 text-2xl font-black text-white">{profile.postCount}</p>
+                                <p className="mt-2 text-2xl font-black text-on-surface">{profile.postCount}</p>
                             </div>
 
                             {canShowEmail ? (
-                                <div className="min-w-[14rem] border border-white/8 bg-black/25 px-4 py-3">
-                                    <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-[#777777]">
+                                <div className="min-w-[14rem] border border-outline-variant bg-surface-container-low/40 rounded-card px-4 py-3">
+                                    <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-on-surface-variant/70">
                                         Contact
                                     </p>
-                                    <p className="mt-2 truncate text-sm text-[#e8e8e8]">{profile.email}</p>
+                                    <p className="mt-2 truncate text-sm text-on-surface">{profile.email}</p>
                                 </div>
                             ) : null}
                         </div>
