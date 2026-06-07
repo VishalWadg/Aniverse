@@ -170,4 +170,13 @@ public class PostServiceImpl implements PostService{
             return deletedCount;
     }
 
+    @Override
+    public Page<PostResponseDto> searchPosts(String query, Pageable pageable) {
+        if (query == null || query.trim().isEmpty()) {
+            return Page.empty(pageable);
+        }
+        Page<Post> posts = postRepository.searchActivePosts(query.trim(), pageable);
+        return posts.map(element -> postMapper.toPostResponseDto(element));
+    }
+
 }

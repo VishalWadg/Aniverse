@@ -24,5 +24,6 @@ public interface PostService {
     PostResponseDto restoreDeletedPost(UUID id);
     void purgeDeletedPost(UUID id);
     int purgeExpiredDeletedPosts();
+    Page<PostResponseDto> searchPosts(String query, Pageable pageable);
 
 }

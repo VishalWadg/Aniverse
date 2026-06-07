@@ -154,7 +154,37 @@ const postsApi = baseApi.injectEndpoints({
                         { type: 'Post' as const, id: `${username}-LIST` },
                     ]
                     : [{ type: 'Post' as const, id: `${username}-LIST` }]
-        })
+        }),
+        searchPosts: build.query<PostsResponse, { q: string, sort?: string, page: number, size?: number }>({
+            query: ({ q, sort = 'createdAt,desc', page = 0, size = DEFAULT_POSTS_PAGE_SIZE }) => ({
+                url: `/public/posts/search?q=${encodeURIComponent(q)}&sort=${sort}&page=${page}&size=${size}`,
+                method: 'GET',
+            }),
+            serializeQueryArgs: ({ endpointName, queryArgs }) => {
+                return `${endpointName}-${queryArgs.q}-${queryArgs.sort || 'createdAt,desc'}-${queryArgs.size || DEFAULT_POSTS_PAGE_SIZE}`;
+            },
+            merge: (currentCache, newItems, { arg }) => {
+                if (!newItems.content) return;
+                if (arg.page === 0) {
+                    Object.assign(currentCache, newItems);
+                    return;
+                }
+                const combined = [...currentCache.content, ...newItems.content];
+                const uniqueItemsMap = new Map(combined.map(item => [item.id, item]));
+                Object.assign(currentCache, newItems);
+                currentCache.content = Array.from(uniqueItemsMap.values());
+            },
+            forceRefetch({ currentArg, previousArg }) {
+                return currentArg?.page !== previousArg?.page || currentArg?.size !== previousArg?.size;
+            },
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.content.map((post) => ({ type: 'Post' as const, id: post.id })),
+                        { type: 'Post' as const, id: 'LIST' },
+                      ]
+                    : [{ type: 'Post' as const, id: 'LIST' }]
+        }),
     }),
     overrideExisting: false,
 })
@@ -165,5 +195,6 @@ export const {
     useCreatePostMutation,
     useUpdatePostMutation,
     useDeletePostMutation,
-    useGetPostsByUsernameQuery
+    useGetPostsByUsernameQuery,
+    useSearchPostsQuery
 } = postsApi
