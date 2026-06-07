@@ -150,9 +150,23 @@ public class PostServiceImpl implements PostService{
     @Transactional
     public int purgeExpiredDeletedPosts() {
            LocalDateTime cutoff = LocalDateTime.now().minusDays(postRetentionProperties.days());
-            // Deletes expired posts and returns the count in one step
+            long expectedCount = postRepository.countExpiredPosts(cutoff);
+    
+            if (expectedCount == 0) {
+                return 0;
+            }
+            
             int deletedCount = postRepository.purgeExpiredPosts(cutoff);
-            log.info("Expired post purge completed. Deleted {} posts", deletedCount);
+            
+            if (deletedCount != expectedCount) {
+                log.warn(
+                    "Expired post purge mismatch. Expected to delete {} posts, actually deleted {}",
+                    expectedCount,
+                    deletedCount
+                );
+            } else {
+                log.info("Expired post purge completed. Deleted {} posts", deletedCount);
+            }
             return deletedCount;
     }
 
