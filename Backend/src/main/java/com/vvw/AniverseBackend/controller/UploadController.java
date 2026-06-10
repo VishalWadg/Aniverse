@@ -34,7 +34,7 @@ public class UploadController {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", timestamp);
         response.put("signature", signature);
-        response.put("folder", "aniverse_posts");
+        response.put("folder", cloudinaryProperties.folderName());
 
         return ResponseEntity.ok(response);
     }
