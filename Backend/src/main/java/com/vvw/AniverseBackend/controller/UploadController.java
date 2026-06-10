@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cloudinary.Cloudinary;
+import com.vvw.AniverseBackend.config.properties.CloudinaryProperties;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UploadController {
     private final Cloudinary cloudinary;
+    private final CloudinaryProperties cloudinaryProperties;
 
     @GetMapping("/signature")
     public ResponseEntity<Map<String, Object>> getUploadSignature() {
@@ -25,7 +27,7 @@ public class UploadController {
 
         Map<String, Object> paramsToSign = new HashMap<>();
         paramsToSign.put("timestamp", timestamp);
-        paramsToSign.put("folder", "aniverse_posts");
+        paramsToSign.put("folder", cloudinaryProperties.folderName());
 
         String signature = cloudinary.apiSignRequest(paramsToSign, cloudinary.config.apiSecret);
 
