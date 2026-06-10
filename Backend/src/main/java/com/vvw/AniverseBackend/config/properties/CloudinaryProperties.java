@@ -6,5 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record CloudinaryProperties(
         String cloudName,
         String apiKey,
-        String apiSecret) {
+        String apiSecret,
+        String folderName) {
 }

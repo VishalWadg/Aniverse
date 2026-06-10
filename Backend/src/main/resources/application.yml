@@ -38,4 +38,5 @@ cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_KEY}
   api-secret: ${CLOUDINARY_SECRET}
+  folder-name: ${CLOUDINARY_FOLDER_NAME:aniverse_posts}
 
