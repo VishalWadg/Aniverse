@@ -2,6 +2,7 @@ package com.vvw.AniverseBackend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,10 +11,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequestDto {
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "Username is required")
     private String username;
-    @NotBlank
-    @NotNull
+
+    @NotBlank(message = "Password is required")
     private String password;
 }
