@@ -73,7 +73,7 @@ function Login() {
             required: 'Username is required',
             minLength: {
               value: 3,
-              message: 'Username must be at least 3 characters long',
+              message: 'Username should be 3-30 characters long',
             },
           })}
           error={errors.username?.message}
