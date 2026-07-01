@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: aniverse-postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    networks:
+      - aniverse-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: aniverse-redis
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - aniverse-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  aniverse-backend:
+    image: aniverse-backend:latest
+    container_name: aniverse-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}  # Set to 'prod' when deploying to Oracle Cloud VPS
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SPRING_DATA_REDIS_HOST: redis #Host is 'redis' inside Docker network
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET}
+      ALLOWED_ORIGINS: http://localhost,http://localhost:80
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_KEY: ${CLOUDINARY_KEY}
+      CLOUDINARY_SECRET: ${CLOUDINARY_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - aniverse-network
+    restart: unless-stopped
+
+  aniverse-frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: aniverse-frontend
+    ports:
+      - "80:80" # Maps standard HTTP port 80 on the host to port 80 in the container
+    depends_on:
+      - aniverse-backend
+    networks:
+      - aniverse-network
+    restart: unless-stopped
+
+networks:
+  aniverse-network:
+    driver: bridge
+volumes:
+  postgres_prod_data:
+  redis_prod_data:
