@@ -35,7 +35,7 @@ services:
     image: aniverse-backend:latest
     container_name: aniverse-backend
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}  # Set to 'prod' when deploying to Oracle Cloud VPS
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}  # Set to 'prod' when deploying to Oracle Cloud VPS
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
