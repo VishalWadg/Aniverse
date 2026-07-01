@@ -39,7 +39,8 @@ Older drafts of this README mentioned features such as watchlists, progress trac
 - Spring Boot 3.5
 - Spring Security with JWT-based authentication
 - Spring Data JPA and Hibernate
-- MySQL for local development
+- PostgreSQL for persistent data storage
+- Redis for caching
 - H2 for backend tests
 - Cloudinary for media uploads
 - Jsoup for URL metadata extraction
@@ -56,168 +57,143 @@ Aniverse/
 |-- Frontend/             # React + Vite client
 |   |-- public/
 |   `-- src/
+|-- docker-compose.dev.yml# Local database & Redis orchestrator
+|-- docker-compose.yml    # Master production container network
 |-- package.json          # Root convenience scripts
 `-- README.md
 ```
 
-## Local Development Setup
+## Local Run Configurations & Workflows
+
+Aniverse supports three primary workflows depending on whether you are coding locally, testing integration, or preparing to deploy.
 
 ### Prerequisites
 
-- JDK 21
-- Node.js 20+
-- npm
-- MySQL 8+
-- Git
-- Cloudinary account credentials
-- Maven 3.9+ if you prefer local Maven instead of the wrapper
+- **JDK 21**
+- **Node.js 20+** and **npm**
+- **Docker** and **Docker Compose** (for Docker-based database and production workflows)
+- **PostgreSQL 15+** (only if running a locally downloaded database without Docker)
+- **Git**
+- **Cloudinary account credentials**
 
-### 1. Clone the Repository
+---
 
+### Workflow 1: Local Development with Docker Database (Recommended)
+
+This workflow keeps your computer clean by running PostgreSQL and Redis in lightweight Docker containers, while you run the Java and React code locally on your host OS for instant hot-reloads and step-by-step debugging.
+
+#### 1. Clone the repository and install dependencies
 ```bash
 git clone https://github.com/VishalWadg/Aniverse.git
 cd Aniverse
+npm install
+cd Frontend && npm install && cd ..
 ```
 
-### 2. Install Dependencies
-
-The repo has root scripts for running both apps together, and the frontend has its own dependency set.
-
+#### 2. Start the Database and Cache Containers
+Run this command from the repository root:
 ```bash
-npm install
-cd Frontend
-npm install
-cd ..
+docker compose -f docker-compose.dev.yml up -d
 ```
 
-### 3. Create the Database
+#### 3. Configure the Environment Variables
+*   Copy `Backend/.env.example` to `Backend/.env`
+*   Copy `Frontend/.env.sample` to `Frontend/.env`
 
-Create a MySQL database that matches your backend connection string.
+Verify that `Backend/.env` points to the Docker database:
+```env
+SPRING_PROFILES_ACTIVE=dev
+DB_NAME=aniverse
+DB_URL=jdbc:postgresql://localhost:5432/aniverse
+DB_USERNAME=postgres
+DB_PASSWORD=Akadan10
+```
 
+#### 4. Run the applications
+*   **Backend**: Navigate to `Backend/` and run:
+    ```cmd
+    .\mvnw.cmd spring-boot:run
+    ```
+*   **Frontend**: Navigate to `Frontend/` and run:
+    ```bash
+    npm run dev
+    ```
+*   **Access the App**: Navigate to `http://localhost:5173` in your browser.
+
+---
+
+### Workflow 2: Local Development with Downloaded (Local) PostgreSQL
+
+Use this if you prefer running a locally downloaded PostgreSQL database on your host operating system.
+
+#### 1. Create your database
+Connect to your local PostgreSQL server and create a database:
 ```sql
 CREATE DATABASE aniverse;
 ```
 
-### 4. Configure Environment Files
-
-Create the two local env files below.
-
-- Copy `Backend/.env.example` to `Backend/.env`
-- Copy `Frontend/.env.sample` to `Frontend/.env`
-
-Backend env variables:
-
+#### 2. Configure the Environment Variables
+Open `Backend/.env` and update the connection details to match your local installation:
 ```env
 SPRING_PROFILES_ACTIVE=dev
-DB_URL=jdbc:mysql://localhost:3306/aniverse
-DB_USERNAME=your_mysql_username
-DB_PASSWORD=your_mysql_password
-JWT_SECRET=replace_with_a_long_random_secret
-ACCESS_TOKEN_EXPIRATION_MS=900000
-REFRESH_TOKEN_EXPIRATION_MS=604800000
-REFRESH_TOKEN_ABSOLUTE_EXPIRATION_MS=2592000000
-ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_KEY=your_cloudinary_api_key
-CLOUDINARY_SECRET=your_cloudinary_api_secret
+DB_NAME=aniverse
+DB_URL=jdbc:postgresql://localhost:<your_port>/aniverse
+DB_USERNAME=<your_postgres_username>
+DB_PASSWORD=<your_postgres_password>
 ```
 
-Frontend env variables:
+#### 3. Run the applications
+*   Start the backend (`.\mvnw.cmd spring-boot:run` in `Backend/`).
+*   Start the frontend (`npm run dev` in `Frontend/`).
+*   *Note: If you have Redis installed locally, it will connect; if not, Spring Boot will run with local memory fallback after displaying a connection timeout warning.*
 
-```env
-VITE_BACKEND_URL=http://localhost:8080/api/v1
-VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-VITE_CLOUDINARY_API_KEY=your_cloudinary_api_key
+---
+
+### Workflow 3: Full Production/Integration Stack (Full Containerization)
+
+This workflow matches your production deployment. It containerizes all four layers (PostgreSQL, Redis, Spring Boot backend via Jib, and React frontend served via Nginx) inside a single isolated Docker network.
+
+#### 1. Build the Backend Docker Image
+Jib packages your Spring Boot app into a secure J21 JRE Alpine image. Navigate to `Backend/` and run:
+```cmd
+.\mvnw.cmd compile jib:dockerBuild
 ```
 
-Notes:
-
-- The backend defaults to the `dev` profile.
-- The backend serves its API under `http://localhost:8080/api/v1`.
-- `VITE_BACKEND_URL` is optional in local development because the Vite dev server proxies `/api/v1`, but setting it explicitly keeps the editor link tool configuration consistent.
-- Cloudinary variables are required for the current backend startup path because upload signing is wired at application startup.
-
-### 5. Start the Project
-
-#### Option A: Root Convenience Script
-
-From the repository root:
-
+#### 2. Stop any running dev containers (to avoid port conflicts)
 ```bash
-npm run dev
+docker compose -f docker-compose.dev.yml down
 ```
 
-This starts:
-
-- the Vite frontend
-- the Spring Boot backend
-
-Important:
-
-- This root script is currently Windows-oriented because it calls `Backend/mvnw.cmd`.
-- It expects the backend env file at `Backend/.env`.
-
-#### Option B: Start Services Separately
-
-Backend from the repository root with the env file loaded through `dotenv-cli`:
-
-Windows:
-
+#### 3. Launch the complete containerized network
+From the repository root, run:
 ```bash
-npx dotenv -e Backend/.env -- ./Backend/mvnw.cmd spring-boot:run
+docker compose up --build -d
 ```
 
-macOS/Linux:
+#### 4. Access the Website
+Open your browser and navigate to `http://localhost`. 
+*   React is compiled and served on port `80` using Nginx.
+*   Nginx acts as a reverse proxy, routing `/api/v1` requests internally to the backend container, preventing CORS issues.
+*   *Note: To simulate production database security, the database port is not exposed to the public internet.*
 
-```bash
-npx dotenv -e Backend/.env -- ./Backend/mvnw spring-boot:run
-```
+---
 
-If you already provide the same environment variables through your shell or IDE, you can also run the backend directly from `Backend/` with Maven or the wrapper.
+## Useful CLI Commands
 
-Frontend:
-
+### Frontend Checks
 ```bash
 cd Frontend
-npm run dev
+npm run lint       # Run linter
+npm run typecheck  # Check TypeScript compiler
+npm run build      # Test compile production assets
 ```
 
-Local URLs:
-
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:8080/api/v1`
-
-## Useful Commands
-
-Frontend:
-
-```bash
-cd Frontend
-npm run lint
-npm run typecheck
-npm run build
-```
-
-Backend:
-
+### Backend Tests
 ```bash
 cd Backend
-mvn test
+./mvnw.cmd test    # Run backend tests (uses H2 in-memory DB)
 ```
 
-If you prefer the wrapper:
-
-```bash
-./mvnw.cmd test
-```
-
-or
-
-```bash
-./mvnw test
-```
-
-Backend tests use an in-memory H2 database, so they do not require a running MySQL instance.
 
 ## CI Workflows
 

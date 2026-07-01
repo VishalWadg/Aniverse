@@ -171,10 +171,20 @@
 				<artifactId>jib-maven-plugin</artifactId>
 				<version>3.4.0</version>
 				<configuration>
+					<!-- Configure Java 21 compatible base image -->
+					<from>
+						<image>eclipse-temurin:21-jre-alpine</image>
+					</from>
 					<to>
-						<!-- This is the name of the Docker image Jib will create -->
+						<!-- Name of the Docker image Jib will build locally -->
 						<image>aniverse-backend:latest</image>
 					</to>
+					<container>
+						<ports>
+							<port>8080</port>
+						</ports>
+						<creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+					</container>
 				</configuration>
 			</plugin>
 		</plugins>
