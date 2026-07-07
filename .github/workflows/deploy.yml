@@ -86,22 +86,22 @@ jobs:
           script: |
             cd ~/aniverse-production
 
-# Dynamically generate the .env file using GitHub Secrets
-            cat <<'EOF' > .env
-SPRING_PROFILES_ACTIVE=prod
-ALLOWED_ORIGINS=http://${{ secrets.VPS_PUBLIC_IP }}
-DB_NAME=${{ secrets.DB_NAME }}
-DB_URL=${{ secrets.DB_URL }}
-DB_USERNAME=${{ secrets.DB_USERNAME }}
-DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-REDIS_HOST=redis
-REDIS_PORT=6379
-JWT_SECRET="${{ secrets.JWT_SECRET }}"
-CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
-CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }}
-CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }}
-VITE_API_BASE_URL=http://${{ secrets.VPS_PUBLIC_IP }}/api
-EOF
+          # Dynamically generate the .env file and strip YAML indentation using sed
+            cat << 'EOF' | sed 's/^[ \t]*//' > .env
+            SPRING_PROFILES_ACTIVE=prod
+            ALLOWED_ORIGINS=http://${{ secrets.VPS_PUBLIC_IP }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            REDIS_HOST=redis
+            REDIS_PORT=6379
+            JWT_SECRET="${{ secrets.JWT_SECRET }}"
+            CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
+            CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }}
+            CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }}
+            VITE_API_BASE_URL=http://${{ secrets.VPS_PUBLIC_IP }}/api
+            EOF
             
             # Log in to GHCR using the permanent Personal Access Token
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
