@@ -85,8 +85,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/aniverse-production
-
-          # Dynamically generate the .env file and strip YAML indentation using sed
+            
+            # Dynamically generate the .env file and strip YAML indentation using sed
             cat << 'EOF' | sed 's/^[ \t]*//' > .env
             SPRING_PROFILES_ACTIVE=prod
             ALLOWED_ORIGINS=http://${{ secrets.VPS_PUBLIC_IP }}
