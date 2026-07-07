@@ -52,12 +52,12 @@ jobs:
           cd Frontend
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker buildx build \
-            --context . \
             --file Dockerfile \
             --tag ghcr.io/${REPO_LOWER}-frontend:latest \
             --push \
             --cache-from type=gha \
-            --cache-to type=gha,mode=max
+            --cache-to type=gha,mode=max \
+            .
 
   deploy:
     needs: build-and-push
@@ -85,7 +85,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/aniverse-production
-            
+
             # Dynamically generate the .env file and strip YAML indentation using sed
             cat << 'EOF' | sed 's/^[ \t]*//' > .env
             SPRING_PROFILES_ACTIVE=prod
