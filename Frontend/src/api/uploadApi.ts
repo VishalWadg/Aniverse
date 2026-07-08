@@ -10,10 +10,7 @@ export const uploadImageToCloudinary = async (file: File) => {
     try {
         // 1. Get the secure signature from Spring Boot
         const sigResponse = await axiosClient.get('/uploads/signature');
-        const { signature, timestamp, folder } = sigResponse.data;
-        const cloudName = conf.cloudinaryCloudName;
-        const apiKey = conf.cloudinaryApiKey;
-
+        const { signature, timestamp, folder, apiKey, cloudName } = sigResponse.data;
         // 2. Build the FormData payload
         const formData = new FormData();
         formData.append('file', file);
@@ -48,10 +45,7 @@ export const uploadImageToCloudinary = async (file: File) => {
 export const uploadImageUrlToCloudinary = async (imageUrl: string) => {
     try {
         const sigResponse = await axiosClient.get('/uploads/signature');
-        const { signature, timestamp, folder } = sigResponse.data;
-
-        const cloudName = conf.cloudinaryCloudName;
-        const apiKey = conf.cloudinaryApiKey;
+        const { signature, timestamp, folder, apiKey, cloudName } = sigResponse.data;
 
         const formData = new FormData();
         formData.append('file', imageUrl);

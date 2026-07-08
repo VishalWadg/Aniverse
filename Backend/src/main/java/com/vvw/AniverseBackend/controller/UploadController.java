@@ -35,6 +35,8 @@ public class UploadController {
         response.put("timestamp", timestamp);
         response.put("signature", signature);
         response.put("folder", cloudinaryProperties.folderName());
+        response.put("apiKey", cloudinaryProperties.apiKey());
+        response.put("cloudName", cloudinaryProperties.cloudName());
 
         return ResponseEntity.ok(response);
     }
