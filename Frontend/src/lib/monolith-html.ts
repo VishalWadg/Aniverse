@@ -33,6 +33,13 @@ const ALLOWED_TAGS = new Set([
   'strong',
   'sub',
   'sup',
+  'table',
+  'tbody',
+  'td',
+  'tfoot',
+  'th',
+  'thead',
+  'tr',
   'u',
   'ul',
 ])
@@ -267,6 +274,15 @@ function sanitizeAttributes(source: Element, target: HTMLElement) {
 
       if (Number.isInteger(numericValue) && numericValue > 0) {
         target.setAttribute('start', String(numericValue))
+      }
+      continue
+    }
+
+    if ((tagName === 'td' || tagName === 'th') && (attributeName === 'colspan' || attributeName === 'rowspan')) {
+      const numericValue = Number(attributeValue)
+
+      if (Number.isInteger(numericValue) && numericValue > 0) {
+        target.setAttribute(attributeName, String(numericValue))
       }
     }
   }

@@ -233,14 +233,14 @@ function Header() {
               <Button
                 asChild
                 variant="ghost"
-                className={`${navControlClass} rounded-none border border-outline-variant bg-transparent px-3 sm:px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
+                className={`${navControlClass} hidden sm:inline-flex rounded-none border border-outline-variant bg-transparent px-3 sm:px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
               >
                 <Link to="/">Home</Link>
               </Button>
 
               <Button
                 asChild
-                className={`${navControlClass} rounded-none px-3 sm:px-5 font-black uppercase tracking-[0.12em] sm:tracking-[0.18em]`}
+                className={`${navControlClass} rounded-none px-3 sm:px-5 text-[10px] sm:text-xs font-black uppercase tracking-[0.12em] sm:tracking-[0.18em]`}
               >
                 <Link to={location.pathname === '/login' ? '/signup' : '/login'}>
                   {location.pathname === '/login' ? 'Sign Up' : 'Log In'}
@@ -252,11 +252,11 @@ function Header() {
                 <button
                   type="button"
                   onClick={() => setIsSettingsOpen((open) => !open)}
-                  className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
+                  className="inline-flex size-9 sm:size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
                   aria-label="Theme settings"
                   aria-expanded={isSettingsOpen}
                 >
-                  <SettingsIcon className={`size-5 transition-transform duration-300 ${isSettingsOpen ? 'rotate-45' : ''}`} />
+                  <SettingsIcon className={`size-4 sm:size-5 transition-transform duration-300 ${isSettingsOpen ? 'rotate-45' : ''}`} />
                 </button>
                 {isSettingsOpen && renderSettingsPanel()}
               </div>
