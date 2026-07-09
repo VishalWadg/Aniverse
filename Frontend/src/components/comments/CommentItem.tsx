@@ -89,7 +89,7 @@ export const CommentItem = ({comment, postId} : commentItemProps) => {
                             )
                         }
                     </div>
-                    <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed mt-1">
+                    <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed mt-1 break-words">
                         {comment.content}
                     </div>
                 </div>
