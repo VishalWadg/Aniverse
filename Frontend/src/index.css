@@ -150,6 +150,8 @@
   color: var(--editor-text);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 #mono-preview > * {
@@ -365,6 +367,51 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+#mono-preview pre {
+  margin: 1.5rem 0 0;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--toolbar-bg) 92%, transparent);
+  border: 1px solid var(--toolbar-border);
+  border-radius: 12px;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+#mono-preview code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.88em;
+  background: color-mix(in srgb, var(--toolbar-bg) 92%, transparent);
+  padding: 0.2em 0.4em;
+  border-radius: 6px;
+  word-break: break-all;
+}
+
+#mono-preview pre code {
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 0.9em;
+  word-break: normal;
+  white-space: pre;
+}
+
+#mono-preview table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 1.5rem 0 0;
+}
+
+#mono-preview img {
+  max-width: 100%;
+  height: auto;
+}
+
+#mono-preview iframe {
+  max-width: 100%;
 }
 
 #mono-editorjs {
