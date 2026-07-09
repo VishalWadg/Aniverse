@@ -224,23 +224,23 @@ function Header() {
         transition={{type:"decay", duration: 0.3, ease: "easeInOut"}}
         className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
         <Container className="py-4">
-          <div className="flex min-h-10 items-center justify-between gap-6 shrink-0">
-            <Link to="/" className="shrink-0">
-              <Logo width="168px" />
+          <div className="flex min-h-10 items-center justify-between gap-3 sm:gap-6 shrink-0">
+            <Link to="/" className="w-32 sm:w-40 shrink-0">
+              <Logo width="100%" />
             </Link>
 
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3">
               <Button
                 asChild
                 variant="ghost"
-                className={`${navControlClass} rounded-none border border-outline-variant bg-transparent px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
+                className={`${navControlClass} rounded-none border border-outline-variant bg-transparent px-3 sm:px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
               >
                 <Link to="/">Home</Link>
               </Button>
 
               <Button
                 asChild
-                className={`${navControlClass} rounded-none px-5 font-black uppercase tracking-[0.18em]`}
+                className={`${navControlClass} rounded-none px-3 sm:px-5 font-black uppercase tracking-[0.12em] sm:tracking-[0.18em]`}
               >
                 <Link to={location.pathname === '/login' ? '/signup' : '/login'}>
                   {location.pathname === '/login' ? 'Sign Up' : 'Log In'}
@@ -275,15 +275,15 @@ function Header() {
       className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
       <Container className="py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center justify-between gap-6 shrink-0">
-            <Link to="/" className="shrink-0">
-              <Logo width="168px" />
+          <div className="flex items-center justify-between gap-3 sm:gap-6 shrink-0">
+            <Link to="/" className="w-32 sm:w-40 shrink-0">
+              <Logo width="100%" />
             </Link>
 
-            <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden">
               <Button
                 asChild
-                className="rounded-none px-5 font-black uppercase tracking-[0.18em]"
+                className="rounded-none px-3 sm:px-5 font-black uppercase tracking-[0.12em] sm:tracking-[0.18em]"
               >
                 <Link to={authStatus ? '/add-post' : '/signup'}>Write</Link>
               </Button>
