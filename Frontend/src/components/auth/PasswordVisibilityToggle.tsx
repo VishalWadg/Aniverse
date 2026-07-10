@@ -10,8 +10,8 @@ const PasswordVisibilityToggle = ({
   visible,
   onToggle,
 }: PasswordVisibilityToggleProps) => {
-  const openEye = OpenEyeIcon
-  const closedEye = ClosedEyeIcon
+  const openEye = <OpenEyeIcon />
+  const closedEye = <ClosedEyeIcon />
 
   return (
     <button
@@ -20,7 +20,7 @@ const PasswordVisibilityToggle = ({
       aria-pressed={visible}
       aria-label={visible ? "Hide password" : "Show password"}
     >
-      {visible ? closedEye() : openEye()}
+      {visible ? closedEye : openEye}
     </button>
   )
 }

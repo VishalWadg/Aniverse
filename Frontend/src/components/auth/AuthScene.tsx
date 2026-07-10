@@ -177,7 +177,8 @@ const AuthField = React.forwardRef(function AuthField(
           {...props}
         />
 
-        { // Toggle password visibility button if the field is a password field 
+        { 
+        /* Toggle password visibility button if the field is a password field */
         isPasswordField && (
           <div className="flex items-center">    
             <PasswordVisibilityToggle
