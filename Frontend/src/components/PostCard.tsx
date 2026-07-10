@@ -25,7 +25,7 @@ function PostCard({
   const displayName = getDisplayName(author)
   const category = inferCategory({ title, content })
   const isCompact = variant === 'compact'
-  const excerpt = getExcerpt(content, isCompact ? 140 : 200)
+  const excerpt = getExcerpt(content, isCompact ? 140 : 240)
   const readTime = estimateReadTime(content)
   const coverImage = extractImageSource(content)
   const authorHref = author?.username ? `/users/${author.username}` : null
@@ -55,7 +55,7 @@ function PostCard({
   }
 
   const authorMeta = (
-    <div className="min-w-0 flex-1">
+    <div className="min-w-0 flex-1 relative z-20">
       <div
         className={cn(
           'flex flex-wrap items-center gap-2 font-medium uppercase text-on-surface-variant/80',
@@ -82,147 +82,169 @@ function PostCard({
       </div>
     </div>
   )
-
+ 
   if (isCompact) {
     return (
-      <Link to={interactionHref}>
-        <article className="group flex h-full min-w-0 flex-col border border-outline-variant bg-surface-container p-card rounded-card transition-all duration-300 hover:border-outline hover:bg-surface-container-high shadow-sm">
-          <div className="flex items-start gap-3 text-sm text-on-surface-variant">
+      <article className="group m-3 relative flex h-full min-w-0 flex-col border border-outline-variant bg-surface-container p-card rounded-card transition-all duration-300 hover:border-outline hover:bg-surface-container-high shadow-sm">
+        {/* Absolute overlay link for card-wide navigation */}
+        <Link to={interactionHref} className="absolute inset-0 z-10 rounded-card" aria-label={`Read ${title}`} />
+ 
+        {/* Top Meta Section */}
+        <div className="flex items-start gap-3 text-sm text-on-surface-variant">
+          {authorHref ? (
+            <Link to={authorHref} className="relative z-20">
+              <UserAvatar
+                userName={displayName}
+                avatarSeed={author?.username || displayName}
+                profileUrl={author?.profilePic}
+                size="sm"
+                className="size-10 data-[size=sm]:size-10"
+              />
+            </Link>
+          ) : (
             <UserAvatar
               userName={displayName}
               avatarSeed={author?.username || displayName}
               profileUrl={author?.profilePic}
               size="sm"
-              className="size-10 data-[size=sm]:size-10"
+              className="size-10 data-[size=sm]:size-10 relative z-20"
             />
-
-            {authorMeta}
-
-            <span className="inline-flex shrink-0 items-center border border-primary/30 rounded-control px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-primary">
-              {category}
-            </span>
-          </div>
-
-          <div className="mt-card flex flex-1 flex-col gap-cluster">
-
-            <h2 className="text-xl font-black leading-tight text-on-surface transition-colors duration-200 group-hover:text-primary">
-              {title}
-            </h2>
-
-
-            {coverImage && (
-              <Link to={interactionHref} className="block overflow-hidden border border-outline-variant/60 bg-card rounded-card">
-                <img
-                  src={coverImage}
-                  alt={title}
-                  className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                />
-              </Link>
-            )}
-
-            <p className="text-sm leading-6 text-on-surface-variant">
-              {excerpt || 'Open the manuscript to read the full entry.'}
-            </p>
-          </div>
-
-          <div className="mt-card flex items-center justify-between gap-cluster border-t border-outline-variant/50 pt-card text-sm text-on-surface-variant/80">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-2">
-                <ClockIcon className="size-4" />
-                {readTime} min
-              </span>
-
-              <Link
-                to={interactionHref}
-                className="inline-flex items-center gap-2 text-on-surface-variant/90 transition-colors hover:text-primary"
-              >
-                <CommentIcon className="size-4" />
-                {'Read'}
-              </Link>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleShare}
-              className="inline-flex h-control-h w-control-h items-center justify-center border border-outline-variant/40 rounded-control text-on-surface-variant/80 transition-colors hover:border-outline-variant hover:bg-surface-container-high hover:text-primary cursor-pointer"
-              aria-label={`Share ${title}`}
-            >
-              <ShareIcon className="size-4" />
-            </button>
-          </div>
-        </article>
-      </Link>
-    )
-  }
-
-  return (
-    <Link to={interactionHref} >
-      <article className="group flex h-full min-w-0 flex-col border border-outline-variant/40 rounded-card bg-surface-container p-card transition-all duration-300 hover:border-outline-variant hover:bg-surface-container-high shadow-sm">
-        <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant">
-          <UserAvatar
-            userName={displayName}
-            avatarSeed={author?.username || displayName}
-            profileUrl={author?.profilePic}
-            size="default"
-            className="size-11 data-[size=default]:size-11"
-          />
-
+          )}
+ 
           {authorMeta}
-
-          <span className="inline-flex items-center border border-primary/40 rounded-control px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+ 
+          <span className="inline-flex shrink-0 items-center border border-primary/30 rounded-control px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-primary">
             {category}
           </span>
         </div>
-
-        <div className="mt-card flex flex-1 flex-col gap-card">
-
-          <h2 className="max-w-4xl text-2xl font-black leading-tight text-on-surface transition-colors duration-200 group-hover:text-primary sm:text-[2rem]">
+ 
+        {/* Title, Cover, and Excerpt Content */}
+        <div className="mt-card flex flex-1 flex-col gap-cluster">
+          <h2 className="text-xl font-black leading-tight text-on-surface transition-colors duration-200 group-hover:text-primary">
             {title}
           </h2>
-
-
+ 
           {coverImage && (
-            <Link to={interactionHref} className="block overflow-hidden border border-outline-variant/60 bg-card rounded-card">
+            <div className="block overflow-hidden border border-outline-variant/60 bg-card rounded-card">
               <img
                 src={coverImage}
                 alt={title}
-                className="max-h-[420px] w-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+                className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               />
-            </Link>
+            </div>
           )}
-
-          <p className="max-w-4xl text-base leading-8 text-on-surface-variant">
+ 
+          <p className="text-sm leading-6 text-on-surface-variant">
             {excerpt || 'Open the manuscript to read the full entry.'}
           </p>
         </div>
-
-        <div className="mt-card flex items-center justify-between gap-cluster border-t border-outline-variant/50 pt-card">
-          <div className="flex items-center gap-3 text-sm text-on-surface-variant/80 sm:gap-5">
+ 
+        {/* Footer Actions Section */}
+        <div className="mt-card flex items-center justify-between gap-cluster border-t border-outline-variant/50 pt-card text-sm text-on-surface-variant/80">
+          <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-2">
               <ClockIcon className="size-4" />
-              {readTime} min read
+              {readTime} min
             </span>
-
-            <Link
-              to={interactionHref}
-              className="inline-flex items-center gap-2 text-on-surface-variant/90 transition-colors hover:text-primary"
-            >
+ 
+            <span className="inline-flex items-center gap-2 text-on-surface-variant/90 transition-colors group-hover:text-primary">
               <CommentIcon className="size-4" />
-              {'Open thread'}
-            </Link>
+              {'Read'}
+            </span>
           </div>
-
+ 
           <button
             type="button"
             onClick={handleShare}
-            className="inline-flex h-control-h w-control-h items-center justify-center border border-outline-variant/40 rounded-control text-on-surface-variant/80 transition-colors hover:border-outline-variant hover:bg-surface-container-high hover:text-primary cursor-pointer"
+            className="relative z-20 inline-flex h-control-h w-control-h items-center justify-center border border-outline-variant/40 rounded-control text-on-surface-variant/80 transition-colors hover:border-outline-variant hover:bg-surface-container-high hover:text-primary cursor-pointer"
             aria-label={`Share ${title}`}
           >
             <ShareIcon className="size-4" />
           </button>
         </div>
       </article>
-    </Link>
+    )
+  }
+
+  return (
+    <article className="group my-5 relative flex h-full min-w-0 flex-col border border-outline-variant/40 rounded-card bg-surface-container p-card transition-all duration-300 hover:border-outline-variant hover:bg-surface-container-high shadow-sm">
+      {/* Absolute overlay link for card-wide navigation */}
+      <Link to={interactionHref} className="absolute inset-0 z-10 rounded-card" aria-label={`Read ${title}`} />
+
+      {/* Top Meta Section */}
+      <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant">
+        {authorHref ? (
+          <Link to={authorHref} className="relative z-20">
+            <UserAvatar
+              userName={displayName}
+              avatarSeed={author?.username || displayName}
+              profileUrl={author?.profilePic}
+              size="default"
+              className="size-11 data-[size=default]:size-11"
+            />
+          </Link>
+        ) : (
+          <UserAvatar
+            userName={displayName}
+            avatarSeed={author?.username || displayName}
+            profileUrl={author?.profilePic}
+            size="default"
+            className="size-11 data-[size=default]:size-11 relative z-20"
+          />
+        )}
+
+        {authorMeta}
+
+        <span className="inline-flex items-center border border-primary/40 rounded-control px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+          {category}
+        </span>
+      </div>
+
+      {/* Title, Cover, and Excerpt Content */}
+      <div className="mt-card flex flex-1 flex-col gap-card">
+        <h2 className="max-w-4xl text-2xl font-black leading-tight text-on-surface transition-colors duration-200 group-hover:text-primary sm:text-[2rem]">
+          {title}
+        </h2>
+
+        {coverImage && (
+          <div className="block overflow-hidden border border-outline-variant/60 bg-card rounded-card">
+            <img
+              src={coverImage}
+              alt={title}
+              className="max-h-[420px] w-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+            />
+          </div>
+        )}
+
+        <p className="max-w-4xl text-base leading-8 text-on-surface-variant">
+          {excerpt || 'Open the manuscript to read the full entry.'}
+        </p>
+      </div>
+
+      {/* Footer Actions Section */}
+      <div className="mt-card flex items-center justify-between gap-cluster border-t border-outline-variant/50 pt-card">
+        <div className="flex items-center gap-3 text-sm text-on-surface-variant/80 sm:gap-5">
+          <span className="inline-flex items-center gap-2">
+            <ClockIcon className="size-4" />
+            {readTime} min read
+          </span>
+
+          <span className="inline-flex items-center gap-2 text-on-surface-variant/90 transition-colors group-hover:text-primary">
+            <CommentIcon className="size-4" />
+            {'Open thread'}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleShare}
+          className="relative z-20 inline-flex h-control-h w-control-h items-center justify-center border border-outline-variant/40 rounded-control text-on-surface-variant/80 transition-colors hover:border-outline-variant hover:bg-surface-container-high hover:text-primary cursor-pointer"
+          aria-label={`Share ${title}`}
+        >
+          <ShareIcon className="size-4" />
+        </button>
+      </div>
+    </article>
   )
 }
 
