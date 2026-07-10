@@ -10,6 +10,7 @@ import {
 } from '@/lib/post-helpers'
 import Container from '../Container/Container'
 import PostCard from '../PostCard'
+import { cn } from '@/lib/utils'
 import { useGetPostsQuery, useSearchPostsQuery } from '@/api/postsApi'
 import { Virtuoso } from "react-virtuoso"
 
@@ -321,11 +322,20 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                       </div>
                     ),
                   }}
-                  itemContent={(index, post) => (
-                    <div className={`${index === 0 ? 'border-t border-outline-variant/30 pt-card mt-card' : index === visiblePosts.length - 1} ? border-b border-outline-variant/30 pb-card mb-card`}>
-                      <PostCard {...post} canInteract={canInteract} />
-                    </div>
-                  )}
+                  itemContent={(index, post) => {
+                    const isFirst = index === 0
+                    const isLast = index === visiblePosts.length - 1
+                    return (
+                      <div
+                        className={cn(
+                          isFirst && 'border-t border-outline-variant/30 pt-card mt-card',
+                          isLast && 'border-b border-outline-variant/30 pb-card mb-card'
+                        )}
+                      >
+                        <PostCard {...post} canInteract={canInteract} />
+                      </div>
+                    )
+                  }}
                 />
               </div>
             )}
