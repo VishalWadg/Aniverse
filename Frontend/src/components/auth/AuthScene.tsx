@@ -1,6 +1,7 @@
 import React, { useId } from 'react'
 import { Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
+import { PasswordVisibilityToggle } from './PasswordVisibilityToggle'
 
 type AuthSceneProps = {
   sectionLabel?: string
@@ -134,6 +135,7 @@ const AuthField = React.forwardRef(function AuthField(
     helperLabel,
     helperHref,
     className,
+    type,
     ...props
   }: React.InputHTMLAttributes<HTMLInputElement> & {
     label: string
@@ -145,6 +147,16 @@ const AuthField = React.forwardRef(function AuthField(
 ) {
   const id = useId()
 
+  const isPasswordField = type === 'password'
+  const [isPasswordVisible, setIsPasswordVisible] = React.useState(false)
+  const localRef = React.useRef<HTMLInputElement | null>(null)
+  const setRef = React.useCallback((el: HTMLInputElement | null) => {
+    localRef.current = el
+    if (typeof ref === 'function') ref(el)
+    else if (ref) (ref as React.MutableRefObject<HTMLInputElement | null>).current = el
+  }, [ref])
+  const resolvedType = isPasswordField ? (isPasswordVisible ? 'text' : 'password') : type
+
   return (
     <div className="space-y-1.5">
       <label
@@ -153,17 +165,32 @@ const AuthField = React.forwardRef(function AuthField(
       >
         {label}
       </label>
-
-      <div className="rounded-control bg-surface-container-low border border-outline-variant/60 px-control-x py-1 transition-colors hover:bg-surface-container focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
+      <div className="flex items-center rounded-control bg-surface-container-low border border-outline-variant/60 px-control-x py-1 transition-colors hover:bg-surface-container focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
         <input
           id={id}
-          ref={ref}
+          ref={setRef}
+          type={resolvedType}
           className={cn(
-            'h-control-h w-full border-0 bg-transparent text-sm text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/45',
+            'flex-1 h-control-h border-0 bg-transparent text-sm text-on-surface outline-none transition-colors placeholder:text-on-surface-variant/45',
             className
           )}
           {...props}
         />
+
+        { 
+        /* Toggle password visibility button if the field is a password field */
+        isPasswordField && (
+          <div className="flex items-center">    
+            <PasswordVisibilityToggle
+              visible={isPasswordVisible}
+              onToggle={() => {
+                setIsPasswordVisible((value) => !value)
+                localRef.current?.focus()
+              }}
+            />
+          </div>
+        )}
+
       </div>
 
       {helperLabel && helperHref ? (

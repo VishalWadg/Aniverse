@@ -10,6 +10,7 @@ import {
 } from '@/lib/post-helpers'
 import Container from '../Container/Container'
 import PostCard from '../PostCard'
+import { cn } from '@/lib/utils'
 import { useGetPostsQuery, useSearchPostsQuery } from '@/api/postsApi'
 import { Virtuoso } from "react-virtuoso"
 
@@ -102,7 +103,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
   const sortParam = activeTab === 'deep' ? 'wordCount,desc' : 'createdAt,desc';
 
   const isSearchActive = Boolean(searchQuery);
-  
+
 
   // 1. Reset page to 0 when search query changes
   React.useEffect(() => {
@@ -217,7 +218,7 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
               ))}
             </div>
 
-                        {isSearchActive && (
+            {isSearchActive && (
               <div className="mb-6 flex items-center justify-between gap-4 border border-outline-variant bg-surface-container-low p-4 rounded-card shadow-sm">
                 <div className="flex min-w-0 items-center gap-2">
                   <span className="text-sm font-bold text-on-surface shrink-0">
@@ -321,11 +322,13 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                       </div>
                     ),
                   }}
-                  itemContent={(index, post) => (
-                    <div className={`px-card ${index === 0 ? 'border-t border-outline-variant/30 pt-card mt-card' : index === visiblePosts.length-1} ? border-b border-outline-variant/30 pb-card mb-card`}>
-                      <PostCard {...post} canInteract={canInteract} />
-                    </div>
-                  )}
+                  itemContent={(index, post) => {
+                    return (
+                      <div className="pb-5">
+                        <PostCard {...post} canInteract={canInteract} />
+                      </div>
+                    )
+                  }}
                 />
               </div>
             )}
