@@ -153,7 +153,7 @@ const AuthField = React.forwardRef(function AuthField(
   const setRef = React.useCallback((el: HTMLInputElement | null) => {
     localRef.current = el
     if (typeof ref === 'function') ref(el)
-    else if (ref) (ref as React.RefObject<HTMLInputElement | null>).current = el
+    else if (ref) (ref as React.MutableRefObject<HTMLInputElement | null>).current = el
   }, [ref])
   const resolvedType = isPasswordField ? (isPasswordVisible ? 'text' : 'password') : type
 

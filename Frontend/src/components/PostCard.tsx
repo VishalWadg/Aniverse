@@ -85,7 +85,11 @@ function PostCard({
 
   if (isCompact) {
     return (
-      <article className="group flex h-full min-w-0 flex-col border border-outline-variant bg-surface-container p-card rounded-card transition-all duration-300 hover:border-outline hover:bg-surface-container-high shadow-sm">
+      <article className="group relative flex h-full min-w-0 flex-col border border-outline-variant bg-surface-container p-card rounded-card transition-all duration-300 hover:border-outline hover:bg-surface-container-high shadow-sm">
+        {/* Absolute overlay link for card-wide navigation */}
+        <Link to={interactionHref} className="absolute inset-0 z-10 rounded-card" aria-label={`Read ${title}`} />
+ 
+        {/* Top Meta Section */}
         <div className="flex items-start gap-3 text-sm text-on-surface-variant">
           <UserAvatar
             userName={displayName}
@@ -154,7 +158,11 @@ function PostCard({
   }
 
   return (
-    <article className="group flex h-full min-w-0 flex-col border border-outline-variant/40 rounded-card bg-surface-container p-card transition-all duration-300 hover:border-outline-variant hover:bg-surface-container-high shadow-sm">
+    <article className="group relative flex h-full min-w-0 flex-col border border-outline-variant/40 rounded-card bg-surface-container p-card transition-all duration-300 hover:border-outline-variant hover:bg-surface-container-high shadow-sm">
+      {/* Absolute overlay link for card-wide navigation */}
+      <Link to={interactionHref} className="absolute inset-0 z-10 rounded-card" aria-label={`Read ${title}`} />
+
+      {/* Top Meta Section */}
       <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant">
         <UserAvatar
           userName={displayName}
