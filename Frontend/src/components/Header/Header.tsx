@@ -36,7 +36,7 @@ function Header() {
   const [searchValue, setSearchValue] = useState('')
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const { ref: settingsPanelRef, ...clickOutsideHandlers } = useClickOutside<HTMLDivElement>(() => {
+  const settingsPanelRef = useClickOutside<HTMLDivElement>(() => {
     setIsSettingsOpen(false)
   }, isSettingsOpen)
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
@@ -153,8 +153,7 @@ function Header() {
       tabIndex={0}
       role="dialog"
       aria-label="Settings"
-      onClick={(event) => event.stopPropagation()}
-      {...clickOutsideHandlers}
+      onPointerDown={(event) => event.stopPropagation()}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
           setIsSettingsOpen(false);
@@ -276,11 +275,8 @@ function Header() {
                 <button
                   type="button"
                   data-settings-trigger="true"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setIsSettingsOpen((open) => !open);
-                  }}
-                  {...clickOutsideHandlers}
+                  data-click-outside-ignore="true"
+                  onClick={() => setIsSettingsOpen((open) => !open)}
                   className="inline-flex size-9 sm:size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
                   aria-label="Theme settings"
                   aria-expanded={isSettingsOpen}
@@ -322,11 +318,8 @@ function Header() {
                 <button
                   type="button"
                   data-settings-trigger="true"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setIsSettingsOpen((open) => !open);
-                  }}
-                  {...clickOutsideHandlers}
+                  data-click-outside-ignore="true"
+                  onClick={() => setIsSettingsOpen((open) => !open)}
                   className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
                   aria-label="Theme settings"
                   aria-expanded={isSettingsOpen}
@@ -433,11 +426,8 @@ function Header() {
                   <button
                     type="button"
                     data-settings-trigger="true"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setIsSettingsOpen((open) => !open);
-                    }}
-                    {...clickOutsideHandlers}
+                    data-click-outside-ignore="true"
+                    onClick={() => setIsSettingsOpen((open) => !open)}
                     className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
                     aria-label="Theme settings"
                     aria-expanded={isSettingsOpen}

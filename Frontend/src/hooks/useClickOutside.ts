@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, TouchEvent as ReactTouchEvent } from 'react'
 
 export function useClickOutside<T extends HTMLElement>(
   handler: () => void,
@@ -11,14 +10,19 @@ export function useClickOutside<T extends HTMLElement>(
   useEffect(() => {
     if (!enabled) return
 
-    const handlePointerDown = (event: Event) => {
+    const handlePointerDown = (event: PointerEvent) => {
       const target = event.target
 
       if (!(target instanceof Node)) return
 
-      const clickedInside = ref.current?.contains(target)
-      const clickedOnIgnoredElement =
-        target instanceof Element && target.closest(ignoreSelector)
+      const eventPath = event.composedPath?.() ?? []
+      const clickedInside =
+        eventPath.includes(ref.current as EventTarget) || ref.current?.contains(target)
+      const clickedOnIgnoredElement = eventPath.some((node) => {
+        if (!(node instanceof Element)) return false
+
+        return node.matches(ignoreSelector) || node.closest(ignoreSelector) !== null
+      })
 
       if (clickedInside || clickedOnIgnoredElement) {
         return
@@ -27,27 +31,12 @@ export function useClickOutside<T extends HTMLElement>(
       handler()
     }
 
-    document.addEventListener('mousedown', handlePointerDown)
-    document.addEventListener('touchend', handlePointerDown)
     document.addEventListener('pointerdown', handlePointerDown)
 
     return () => {
-      document.removeEventListener('mousedown', handlePointerDown)
-      document.removeEventListener('touchend', handlePointerDown)
       document.removeEventListener('pointerdown', handlePointerDown)
     }
   }, [enabled, handler, ignoreSelector])
 
-  const stopPropagation = (event: { stopPropagation: () => void }) => event.stopPropagation()
-
-  return {
-    ref,
-    onMouseDown: stopPropagation as (event: ReactMouseEvent<HTMLElement>) => void,
-    onMouseUp: stopPropagation as (event: ReactMouseEvent<HTMLElement>) => void,
-    onTouchStart: stopPropagation as (event: ReactTouchEvent<HTMLElement>) => void,
-    onTouchEnd: stopPropagation as (event: ReactTouchEvent<HTMLElement>) => void,
-    onTouchCancel: stopPropagation as (event: ReactTouchEvent<HTMLElement>) => void,
-    onPointerDown: stopPropagation as (event: ReactPointerEvent<HTMLElement>) => void,
-    onPointerUp: stopPropagation as (event: ReactPointerEvent<HTMLElement>) => void,
-  }
+  return ref
 }
