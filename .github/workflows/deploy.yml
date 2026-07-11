@@ -90,7 +90,7 @@ jobs:
             # Dynamically generate the .env file and strip leading indentation spaces using sed
             cat <<'EOF' | sed 's/^[ \t]*//' > .env
             SPRING_PROFILES_ACTIVE=prod
-            ALLOWED_ORIGINS=http://${{ secrets.VPS_PUBLIC_IP }}
+            ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
             DB_NAME=${{ secrets.DB_NAME }}
             DB_URL=${{ secrets.DB_URL }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
@@ -101,7 +101,19 @@ jobs:
             CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME }}
             CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }}
             CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }}
-            VITE_API_BASE_URL=http://${{ secrets.VPS_PUBLIC_IP }}/api
+            VITE_API_BASE_URL=https://${{ secrets.VPS_PUBLIC_DOMAIN }}/api/v1
+            EOF
+
+            # Generate Caddy SSL Routing Config
+            cat <<'EOF' | sed 's/^[ \t]*//' > Caddyfile
+            ${{ secrets.VPS_PUBLIC_DOMAIN }} {
+                handle /api/v1* {
+                    reverse_proxy aniverse-backend:8080
+                }
+                handle {
+                    reverse_proxy aniverse-frontend:8080
+                }
+            }
             EOF
             
             # Log in to GHCR using the permanent Personal Access Token
@@ -109,7 +121,36 @@ jobs:
             
             # Pull and restart the stack using merged files (ignores dev override)
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
             
             # Clean up disk space to prevent the 30GB EBS volume from filling up
             docker image prune -f
+
+  deploy-to-gh-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'Frontend/package-lock.json'
+      - name: Install dependencies
+        run: |
+          cd Frontend
+          npm ci
+      - name: Build Frontend
+        run: |
+          cd Frontend
+          export VITE_BACKEND_URL="https://${{ secrets.VPS_PUBLIC_DOMAIN }}/api/v1"
+          export VITE_BASE_PATH="/Aniverse/"
+          npm run build
+      - name: Create 404 fallback page
+        run: cp Frontend/dist/index.html Frontend/dist/404.html
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: Frontend/dist
+          branch: gh-pages

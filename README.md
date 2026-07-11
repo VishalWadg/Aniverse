@@ -45,42 +45,50 @@ Older drafts of this README mentioned features such as watchlists, progress trac
 - Cloudinary for media uploads
 - Jsoup for URL metadata extraction
 
-## Repository Structure
+### Repository Structure
 
 ```text
 Aniverse/
-|-- .github/workflows/    # Frontend and backend CI pipelines
-|-- Backend/              # Spring Boot API
+|-- .github/workflows/         # CI/CD and security scan pipelines
+|   |-- backend-ci.yml
+|   |-- deploy.yml             # Production deployment to AWS and GH Pages
+|   `-- frontend-ci.yml
+|-- Backend/                   # Spring Boot API
 |   |-- src/main/java/
 |   |-- src/main/resources/
+|   |-- Dockerfile             # Local compilation backend image
 |   `-- src/test/
-|-- Frontend/             # React + Vite client
-|   |-- public/
-|   `-- src/
-|-- docker-compose.dev.yml# Local database & Redis orchestrator
-|-- docker-compose.yml    # Master production container network
-|-- package.json          # Root convenience scripts
+|-- Frontend/                  # React + Vite client
+|   |-- src/
+|   |-- Dockerfile             # Local/production frontend image (non-root)
+|   |-- nginx.conf             # Production Nginx reverse proxy routing
+|   `-- vite.config.js         # Dynamic base path Vite configuration
+|-- docker-compose.override.yml# Local dev database & source compilation
+|-- docker-compose.prod.yml    # Production container config with Caddy
+|-- docker-compose.yml         # Shared base service definitions
+|-- package.json               # Root convenience scripts
 `-- README.md
 ```
 
 ## Local Run Configurations & Workflows
 
-Aniverse supports three primary workflows depending on whether you are coding locally, testing integration, or preparing to deploy.
+Aniverse supports three primary workflows depending on whether you are coding locally, running a fully containerized dev stack, or preparing to deploy.
 
 ### Prerequisites
 
 - **JDK 21**
 - **Node.js 20+** and **npm**
-- **Docker** and **Docker Compose** (for Docker-based database and production workflows)
+- **Docker** and **Docker Compose**
 - **PostgreSQL 15+** (only if running a locally downloaded database without Docker)
 - **Git**
 - **Cloudinary account credentials**
+- **DuckDNS account** (for production dynamic DNS and SSL)
 
 ---
 
 ### Workflow 1: Local Development with Docker Database (Recommended)
 
-This workflow keeps your computer clean by running PostgreSQL and Redis in lightweight Docker containers, while you run the Java and React code locally on your host OS for instant hot-reloads and step-by-step debugging.
+This workflow keeps your computer clean by running PostgreSQL 15 and Redis in lightweight Docker containers, while you run the Java and React code locally on your host OS for instant hot-reloads and step-by-step debugging.
 
 #### 1. Clone the repository and install dependencies
 ```bash
@@ -91,9 +99,9 @@ cd Frontend && npm install && cd ..
 ```
 
 #### 2. Start the Database and Cache Containers
-Run this command from the repository root:
+Run this command from the repository root to start only the backend infrastructure services:
 ```bash
-docker compose -f docker-compose.dev.yml up -d
+docker compose up -d postgres redis
 ```
 
 #### 3. Configure the Environment Variables
@@ -122,59 +130,60 @@ DB_PASSWORD=Akadan10
 
 ---
 
-### Workflow 2: Local Development with Downloaded (Local) PostgreSQL
+### Workflow 2: Full Local Containerized Stack
 
-Use this if you prefer running a locally downloaded PostgreSQL database on your host operating system.
+Use this workflow to test the entire application inside isolated Docker containers on your local machine using automatic override configurations.
 
-#### 1. Create your database
-Connect to your local PostgreSQL server and create a database:
-```sql
-CREATE DATABASE aniverse;
-```
+#### 1. Configure the Environment Variables
+*   Copy `Backend/.env.example` to `Backend/.env`
+*   Copy `Frontend/.env.sample` to `Frontend/.env`
+*   *Note: Ensure your Cloudinary and JWT settings are defined in Backend/.env.*
 
-#### 2. Configure the Environment Variables
-Open `Backend/.env` and update the connection details to match your local installation:
-```env
-SPRING_PROFILES_ACTIVE=dev
-DB_NAME=aniverse
-DB_URL=jdbc:postgresql://localhost:<your_port>/aniverse
-DB_USERNAME=<your_postgres_username>
-DB_PASSWORD=<your_postgres_password>
-```
-
-#### 3. Run the applications
-*   Start the backend (`.\mvnw.cmd spring-boot:run` in `Backend/`).
-*   Start the frontend (`npm run dev` in `Frontend/`).
-*   *Note: If you have Redis installed locally, it will connect; if not, Spring Boot will run with local memory fallback after displaying a connection timeout warning.*
-
----
-
-### Workflow 3: Full Production/Integration Stack (Full Containerization)
-
-This workflow matches your production deployment. It containerizes all four layers (PostgreSQL, Redis, Spring Boot backend via Jib, and React frontend served via Nginx) inside a single isolated Docker network.
-
-#### 1. Build the Backend Docker Image
-Jib packages your Spring Boot app into a secure J21 JRE Alpine image. Navigate to `Backend/` and run:
-```cmd
-.\mvnw.cmd compile jib:dockerBuild
-```
-
-#### 2. Stop any running dev containers (to avoid port conflicts)
-```bash
-docker compose -f docker-compose.dev.yml down
-```
-
-#### 3. Launch the complete containerized network
+#### 2. Launch the complete containerized network
 From the repository root, run:
 ```bash
 docker compose up --build -d
 ```
+*Note: Docker automatically merges `docker-compose.yml` with `docker-compose.override.yml`, compiling the Frontend and Backend images locally on demand and spinning up the dev Postgres container.*
 
-#### 4. Access the Website
-Open your browser and navigate to `http://localhost`. 
-*   React is compiled and served on port `80` using Nginx.
-*   Nginx acts as a reverse proxy, routing `/api/v1` requests internally to the backend container, preventing CORS issues.
-*   *Note: To simulate production database security, the database port is not exposed to the public internet.*
+#### 3. Access the Website
+Open your browser and navigate to `http://localhost`.
+*   The frontend is served from port `80` (mapping to Nginx port `8080` inside the container).
+*   The backend is served on port `8080`.
+*   Both containers are monitored by healthchecks pointing to backend actuator endpoints.
+
+---
+
+### Workflow 3: Full Production/Integration Stack (Dual Hosting Deployment)
+
+This workflow represents the production deployment architecture. The frontend is hosted statically on GitHub Pages for low-latency delivery, and serves as a secure client making HTTPS API requests to your AWS VPS. The VPS runs your backend and cache containers behind a Caddy reverse proxy.
+
+#### 1. AWS VPS Host Configuration (Caddy SSL Gateway)
+1.  Connect to your AWS VPS via SSH.
+2.  Install Caddy on the host system to automatically terminate SSL and renew certificates:
+    ```bash
+    sudo apt update
+    sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+    curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+    sudo apt update
+    sudo apt install caddy -y
+    ```
+3.  Ensure ports `80` and `443` are open in your AWS Security Group.
+
+#### 2. Configure GitHub Repository Secrets
+Under your GitHub repository settings, configure these Actions secrets:
+- `VPS_SSH_HOST`: Your AWS VPS public IP address.
+- `VPS_SSH_USERNAME`: Your SSH user (e.g. `ubuntu`).
+- `EC2_SSH_KEY`: The contents of your private SSH Key `.pem` file.
+- `VPS_PUBLIC_DOMAIN`: Your registered DuckDNS subdomain (e.g. `aniverse.duckdns.org`).
+- `ALLOWED_ORIGINS`: Comma-separated list containing your AWS domain and GitHub Pages domain:
+  `https://aniverse.duckdns.org,https://vishalwadg.github.io`
+- `GHCR_PAT`: A GitHub Personal Access Token with package write permissions.
+- `DB_NAME`, `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_KEY`, `CLOUDINARY_SECRET` (Supabase and production credentials).
+
+#### 3. Deploy
+Push your code changes to the `main` branch. The automated pipeline will build your backend and frontend, publish them to GHCR, copy configurations to the VPS, write the dynamic `.env` file, and deploy the frontend static files to the `gh-pages` branch.
 
 ---
 
@@ -194,15 +203,13 @@ cd Backend
 ./mvnw.cmd test    # Run backend tests (uses H2 in-memory DB)
 ```
 
+## CI/CD Workflows
 
-## CI Workflows
+This repository uses three GitHub Actions workflows:
 
-This repository currently has two GitHub Actions workflows:
-
-- `frontend-ci.yml`: installs frontend dependencies, runs `npm run build`, and runs Semgrep
-- `backend-ci.yml`: runs Maven verify, SonarCloud analysis, and Semgrep
-
-Both workflows trigger on pushes that touch the relevant app and on pull requests to `main`.
+- `frontend-ci.yml`: Installs frontend dependencies, runs tests, and runs Semgrep scans.
+- `backend-ci.yml`: Performs Maven validation, SonarCloud quality analysis, and Semgrep scans.
+- `deploy.yml`: Builds and pushes Docker images to GHCR, deploys the backend and Caddy containers to AWS, and publishes the static client to GitHub Pages.
 
 ## Contributing
 

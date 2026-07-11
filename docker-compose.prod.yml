@@ -1,4 +1,21 @@
 services:
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: aniverse-caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - aniverse-frontend
+      - aniverse-backend
+    networks:
+      - aniverse-network
   aniverse-backend:
     image: ghcr.io/vishalwadg/aniverse-backend:latest # Pulls pre-built image
     restart: always
@@ -24,5 +41,7 @@ services:
   aniverse-frontend:
     image: ghcr.io/vishalwadg/aniverse-frontend:latest # Pulls pre-built image
     restart: always
-    ports:
-      - "80:8080" # Maps host HTTP port 80 to container port 8080
+
+volumes:
+  caddy_data:
+  caddy_config:
