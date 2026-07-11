@@ -10,6 +10,7 @@ import LogoutBtn from './LogoutBtn'
 import UserAvatar from '../User/UserAvatar'
 import { normalizeBrandHex, useTheme } from '../ThemeProvider'
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
+import { useClickOutside } from '@/hooks/useClickOutside'
 
 const navItems = [
   { name: 'Home', slug: '/' },
@@ -35,6 +36,9 @@ function Header() {
   const [searchValue, setSearchValue] = useState('')
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const { ref: settingsPanelRef, ...clickOutsideHandlers } = useClickOutside<HTMLDivElement>(() => {
+    setIsSettingsOpen(false)
+  }, isSettingsOpen)
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
   const navControlClass = 'h-control-h'
   const userRole = useAppSelector((state) => state.auth.userData?.role);
@@ -82,6 +86,14 @@ function Header() {
     setColorInput(brandColor);
     setColorError('');
   }, [brandColor]);
+
+  useEffect(() => {
+    if (!isSettingsOpen) return;
+
+    requestAnimationFrame(() => {
+      settingsPanelRef.current?.focus();
+    });
+  }, [isSettingsOpen, settingsPanelRef]);
 
   const navRoutes = navItems.filter((item) => {
     if (item.slug === "/admin") {
@@ -136,7 +148,19 @@ function Header() {
 
   // Common Settings Dropdown Panel
   const renderSettingsPanel = () => (
-    <div className="absolute right-0 top-12 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest p-card shadow-elevation-2 animate-in fade-in slide-in-from-top-2 duration-200">
+    <div
+      ref={settingsPanelRef}
+      tabIndex={0}
+      role="dialog"
+      aria-label="Settings"
+      onClick={(event) => event.stopPropagation()}
+      {...clickOutsideHandlers}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          setIsSettingsOpen(false);
+        }
+      }}
+      className="absolute right-0 top-12 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest p-card shadow-elevation-2 animate-in fade-in slide-in-from-top-2 duration-200 ">
       <h3 className="text-xs font-black uppercase tracking-[0.16em] text-on-surface mb-3">Settings</h3>
       
       {/* Mode Selector */}
@@ -251,7 +275,12 @@ function Header() {
               <div className="relative shrink-0">
                 <button
                   type="button"
-                  onClick={() => setIsSettingsOpen((open) => !open)}
+                  data-settings-trigger="true"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setIsSettingsOpen((open) => !open);
+                  }}
+                  {...clickOutsideHandlers}
                   className="inline-flex size-9 sm:size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
                   aria-label="Theme settings"
                   aria-expanded={isSettingsOpen}
@@ -292,7 +321,12 @@ function Header() {
               <div className="relative shrink-0">
                 <button
                   type="button"
-                  onClick={() => setIsSettingsOpen((open) => !open)}
+                  data-settings-trigger="true"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setIsSettingsOpen((open) => !open);
+                  }}
+                  {...clickOutsideHandlers}
                   className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
                   aria-label="Theme settings"
                   aria-expanded={isSettingsOpen}
@@ -398,7 +432,12 @@ function Header() {
                 <div className="relative shrink-0 hidden lg:inline-block">
                   <button
                     type="button"
-                    onClick={() => setIsSettingsOpen((open) => !open)}
+                    data-settings-trigger="true"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setIsSettingsOpen((open) => !open);
+                    }}
+                    {...clickOutsideHandlers}
                     className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
                     aria-label="Theme settings"
                     aria-expanded={isSettingsOpen}
