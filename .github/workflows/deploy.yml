@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -113,7 +113,7 @@ jobs:
                 handle {
                     reverse_proxy aniverse-frontend:8080
                 }
-            }
+            } 
             EOF
             
             # Log in to GHCR using the permanent Personal Access Token
