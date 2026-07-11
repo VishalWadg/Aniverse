@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { useAppSelector } from '@/store/hooks'
 import Container from '../Container/Container'
@@ -10,7 +11,6 @@ import LogoutBtn from './LogoutBtn'
 import UserAvatar from '../User/UserAvatar'
 import { normalizeBrandHex, useTheme } from '../ThemeProvider'
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
-import { useClickOutside } from '@/hooks/useClickOutside'
 
 const navItems = [
   { name: 'Home', slug: '/' },
@@ -18,15 +18,120 @@ const navItems = [
 ]
 
 const headerVariants = {
-  hidden: { 
-    y: "-100%", 
-    opacity: 0 
+  hidden: {
+    y: "-100%",
+    opacity: 0
   },
-  visible: { 
-    y: 0, 
+  visible: {
+    y: 0,
   },
-
 };
+
+type ThemeMode = 'light' | 'dark' | 'system'
+
+// Extracted so we don't paste the same ~60 lines into 3 popovers.
+function SettingsPanelContent({
+  theme,
+  setTheme,
+  brandColor,
+  setBrandColor,
+  resetBrandColor,
+  colorInput,
+  setColorInput,
+  colorError,
+  setColorError,
+  commitBrandColor,
+}: {
+  theme: ThemeMode
+  setTheme: (mode: ThemeMode) => void
+  brandColor: string
+  setBrandColor: (color: string) => void
+  resetBrandColor: () => void
+  colorInput: string
+  setColorInput: (value: string) => void
+  colorError: string
+  setColorError: (value: string) => void
+  commitBrandColor: () => void
+}) {
+  return (
+    <>
+      <h3 className="text-xs font-black uppercase tracking-[0.16em] text-on-surface mb-3">Settings</h3>
+
+      {/* Mode Selector */}
+      <div className="mb-4">
+        <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant mb-2">Appearance</span>
+        <div className="grid grid-cols-3 gap-2">
+          {(['light', 'dark', 'system'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setTheme(m)}
+              className={`h-8 text-[10px] font-black uppercase tracking-[0.08em] rounded-control border transition-all cursor-pointer ${
+                theme === m
+                  ? 'bg-primary text-on-primary border-transparent shadow-sm'
+                  : 'border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+              }`}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Brand Color Selector */}
+      <div>
+        <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant mb-2">Accent Color</span>
+        <div className="flex items-center gap-3">
+          <div className="relative size-8 rounded-full border border-outline-variant shadow-inner transition-colors duration-300 shrink-0 overflow-hidden">
+            <input
+              type="color"
+              value={brandColor}
+              onChange={(e) => {
+                setColorInput(e.target.value);
+                setColorError('');
+                setBrandColor(e.target.value);
+              }}
+              className="absolute inset-0 size-full scale-150 cursor-pointer opacity-0"
+              aria-label="Accent color picker"
+            />
+            <div
+              className="size-full"
+              style={{ backgroundColor: brandColor }}
+            />
+          </div>
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={colorInput}
+              onChange={(e) => {
+                setColorInput(e.target.value);
+                setColorError('');
+              }}
+              onBlur={commitBrandColor}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  commitBrandColor();
+                }
+              }}
+              placeholder="#769CDF"
+              aria-invalid={Boolean(colorError)}
+              className="h-8 w-full rounded-control border border-outline-variant bg-surface-container px-3 text-xs font-mono text-on-surface outline-none focus:border-primary aria-invalid:border-error"
+            />
+          </div>
+        </div>
+        {colorError ? (
+          <p className="mt-2 text-xs font-medium text-error">{colorError}</p>
+        ) : null}
+        <button
+          type="button"
+          onClick={resetBrandColor}
+          className="mt-3 h-8 rounded-control border border-outline-variant px-control-x text-[10px] font-black uppercase tracking-[0.12em] text-on-surface-variant transition-colors hover:border-outline hover:bg-surface-container hover:text-on-surface"
+        >
+          Reset Accent
+        </button>
+      </div>
+    </>
+  )
+}
 
 function Header() {
   const authStatus = useAppSelector((state) => state.auth.status)
@@ -35,10 +140,13 @@ function Header() {
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const settingsPanelRef = useClickOutside<HTMLDivElement>(() => {
-    setIsSettingsOpen(false)
-  }, isSettingsOpen)
+
+  // Each trigger location owns its own popover state — no shared boolean,
+  // so there's no way for one instance's logic to react to another's DOM.
+  const [isAuthSettingsOpen, setIsAuthSettingsOpen] = useState(false)
+  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false)
+  const [isDesktopSettingsOpen, setIsDesktopSettingsOpen] = useState(false)
+
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
   const navControlClass = 'h-control-h'
   const userRole = useAppSelector((state) => state.auth.userData?.role);
@@ -53,11 +161,11 @@ function Header() {
   const { scrollY } = useScroll();
   const [headerHidden, setHeaderHidden] = useState(false);
 
-  const headerHiddenRef = useRef(false);
+  const headerHiddenRef = React.useRef(false);
 
-   useMotionValueEvent(scrollY, "change", (latest) => {
+  useMotionValueEvent(scrollY, "change", (latest) => {
     const previous = scrollY.getPrevious() ?? 0;
-    
+
     // 1. Guard `headerHidden` visibility (uses our unified threshold of 80px)
     if (latest < TOP_THRESHOLD) {
       if (headerHiddenRef.current) {
@@ -66,13 +174,15 @@ function Header() {
       }
       return;
     }
-    
+
     // 2. Hide on scroll down, show on scroll up (with a 10px buffer)
     if (latest > previous && latest > 120) {
       if (!headerHiddenRef.current) {
         headerHiddenRef.current = true;
         setHeaderHidden(true);
-        setIsSettingsOpen(false);
+        setIsAuthSettingsOpen(false);
+        setIsMobileSettingsOpen(false);
+        setIsDesktopSettingsOpen(false);
       }
     } else if (previous - latest > 10) {
       if (headerHiddenRef.current) {
@@ -86,14 +196,6 @@ function Header() {
     setColorInput(brandColor);
     setColorError('');
   }, [brandColor]);
-
-  useEffect(() => {
-    if (!isSettingsOpen) return;
-
-    requestAnimationFrame(() => {
-      settingsPanelRef.current?.focus();
-    });
-  }, [isSettingsOpen, settingsPanelRef]);
 
   const navRoutes = navItems.filter((item) => {
     if (item.slug === "/admin") {
@@ -146,105 +248,28 @@ function Header() {
     setBrandColor(normalizedColor);
   }
 
-  // Common Settings Dropdown Panel
-  const renderSettingsPanel = () => (
-    <div
-      ref={settingsPanelRef}
-      tabIndex={0}
-      role="dialog"
-      aria-label="Settings"
-      onPointerDown={(event) => event.stopPropagation()}
-      onKeyDown={(event) => {
-        if (event.key === 'Escape') {
-          setIsSettingsOpen(false);
-        }
-      }}
-      className="absolute right-0 top-12 z-50 w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest p-card shadow-elevation-2 animate-in fade-in slide-in-from-top-2 duration-200 ">
-      <h3 className="text-xs font-black uppercase tracking-[0.16em] text-on-surface mb-3">Settings</h3>
-      
-      {/* Mode Selector */}
-      <div className="mb-4">
-        <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant mb-2">Appearance</span>
-        <div className="grid grid-cols-3 gap-2">
-          {(['light', 'dark', 'system'] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => setTheme(m)}
-              className={`h-8 text-[10px] font-black uppercase tracking-[0.08em] rounded-control border transition-all cursor-pointer ${
-                theme === m
-                  ? 'bg-primary text-on-primary border-transparent shadow-sm'
-                  : 'border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
-              }`}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
-      </div>
+  const settingsPanelClassName =
+    "w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest p-card shadow-elevation-2"
 
-
-
-      {/* Brand Color Selector */}
-      <div>
-        <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-on-surface-variant mb-2">Accent Color</span>
-        <div className="flex items-center gap-3">
-          <div className="relative size-8 rounded-full border border-outline-variant shadow-inner transition-colors duration-300 shrink-0 overflow-hidden">
-            <input
-              type="color"
-              value={brandColor}
-              onChange={(e) => {
-                setColorInput(e.target.value);
-                setColorError('');
-                setBrandColor(e.target.value);
-              }}
-              className="absolute inset-0 size-full scale-150 cursor-pointer opacity-0"
-              aria-label="Accent color picker"
-            />
-            <div 
-              className="size-full"
-              style={{ backgroundColor: brandColor }}
-            />
-          </div>
-          <div className="relative flex-1">
-            <input
-              type="text"
-              value={colorInput}
-              onChange={(e) => {
-                setColorInput(e.target.value);
-                setColorError('');
-              }}
-              onBlur={commitBrandColor}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  commitBrandColor();
-                }
-              }}
-              placeholder="#769CDF"
-              aria-invalid={Boolean(colorError)}
-              className="h-8 w-full rounded-control border border-outline-variant bg-surface-container px-3 text-xs font-mono text-on-surface outline-none focus:border-primary aria-invalid:border-error"
-            />
-          </div>
-        </div>
-        {colorError ? (
-          <p className="mt-2 text-xs font-medium text-error">{colorError}</p>
-        ) : null}
-        <button
-          type="button"
-          onClick={resetBrandColor}
-          className="mt-3 h-8 rounded-control border border-outline-variant px-control-x text-[10px] font-black uppercase tracking-[0.12em] text-on-surface-variant transition-colors hover:border-outline hover:bg-surface-container hover:text-on-surface"
-        >
-          Reset Accent
-        </button>
-      </div>
-    </div>
-  )
+  const settingsPanelProps = {
+    theme,
+    setTheme,
+    brandColor,
+    setBrandColor,
+    resetBrandColor,
+    colorInput,
+    setColorInput,
+    colorError,
+    setColorError,
+    commitBrandColor,
+  }
 
   if (isAuthRoute) {
     return (
-      <motion.header 
+      <motion.header
         variants={headerVariants}
-        animate={headerHidden ? "hidden" :"visible"}
-        transition={{type:"decay", duration: 0.3, ease: "easeInOut"}}
+        animate={headerHidden ? "hidden" : "visible"}
+        transition={{ type: "decay", duration: 0.3, ease: "easeInOut" }}
         className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
         <Container className="py-4">
           <div className="flex min-h-10 items-center justify-between gap-3 sm:gap-6 shrink-0">
@@ -271,20 +296,20 @@ function Header() {
               </Button>
 
               {/* Theme Settings Control */}
-              <div className="relative shrink-0">
-                <button
-                  type="button"
-                  data-settings-trigger="true"
-                  data-click-outside-ignore="true"
-                  onClick={() => setIsSettingsOpen((open) => !open)}
-                  className="inline-flex size-9 sm:size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
-                  aria-label="Theme settings"
-                  aria-expanded={isSettingsOpen}
-                >
-                  <SettingsIcon className={`size-4 sm:size-5 transition-transform duration-300 ${isSettingsOpen ? 'rotate-45' : ''}`} />
-                </button>
-                {isSettingsOpen && renderSettingsPanel()}
-              </div>
+              <Popover open={isAuthSettingsOpen} onOpenChange={setIsAuthSettingsOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex size-9 sm:size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
+                    aria-label="Theme settings"
+                  >
+                    <SettingsIcon className={`size-4 sm:size-5 transition-transform duration-300 ${isAuthSettingsOpen ? 'rotate-45' : ''}`} />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
+                  <SettingsPanelContent {...settingsPanelProps} />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </Container>
@@ -295,8 +320,8 @@ function Header() {
   return (
     <motion.header
       variants={headerVariants}
-      animate={headerHidden ? "hidden" :"visible"}
-      transition={{type:"decay", duration: 0.3, ease: "easeInOut" }} 
+      animate={headerHidden ? "hidden" : "visible"}
+      transition={{ type: "decay", duration: 0.3, ease: "easeInOut" }}
       className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
       <Container className="py-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -314,20 +339,20 @@ function Header() {
               </Button>
 
               {/* Theme Settings Control Mobile */}
-              <div className="relative shrink-0">
-                <button
-                  type="button"
-                  data-settings-trigger="true"
-                  data-click-outside-ignore="true"
-                  onClick={() => setIsSettingsOpen((open) => !open)}
-                  className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
-                  aria-label="Theme settings"
-                  aria-expanded={isSettingsOpen}
-                >
-                  <SettingsIcon className={`size-5 transition-transform duration-300 ${isSettingsOpen ? 'rotate-45' : ''}`} />
-                </button>
-                {isSettingsOpen && renderSettingsPanel()}
-              </div>
+              <Popover open={isMobileSettingsOpen} onOpenChange={setIsMobileSettingsOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
+                    aria-label="Theme settings"
+                  >
+                    <SettingsIcon className={`size-5 transition-transform duration-300 ${isMobileSettingsOpen ? 'rotate-45' : ''}`} />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
+                  <SettingsPanelContent {...settingsPanelProps} />
+                </PopoverContent>
+              </Popover>
 
               <button
                 type="button"
@@ -422,20 +447,20 @@ function Header() {
                 {authStatus && <LogoutBtn />}
 
                 {/* Theme Settings Control Desktop */}
-                <div className="relative shrink-0 hidden lg:inline-block">
-                  <button
-                    type="button"
-                    data-settings-trigger="true"
-                    data-click-outside-ignore="true"
-                    onClick={() => setIsSettingsOpen((open) => !open)}
-                    className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
-                    aria-label="Theme settings"
-                    aria-expanded={isSettingsOpen}
-                  >
-                    <SettingsIcon className={`size-5 transition-transform duration-300 ${isSettingsOpen ? 'rotate-45' : ''}`} />
-                  </button>
-                  {isSettingsOpen && renderSettingsPanel()}
-                </div>
+                <Popover open={isDesktopSettingsOpen} onOpenChange={setIsDesktopSettingsOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="hidden lg:inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
+                      aria-label="Theme settings"
+                    >
+                      <SettingsIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
+                    <SettingsPanelContent {...settingsPanelProps} />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           </div>
@@ -527,16 +552,7 @@ function Header() {
 
 function SearchIcon({ className = '' }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <circle cx="11" cy="11" r="7" />
       <path d="m20 20-3.5-3.5" />
     </svg>
@@ -545,16 +561,7 @@ function SearchIcon({ className = '' }) {
 
 function MenuIcon({ className = '' }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <path d="M4 7h16" />
       <path d="M4 12h16" />
       <path d="M4 17h16" />
@@ -564,16 +571,7 @@ function MenuIcon({ className = '' }) {
 
 function CloseIcon({ className = '' }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <path d="m6 6 12 12" />
       <path d="M18 6 6 18" />
     </svg>
@@ -582,16 +580,7 @@ function CloseIcon({ className = '' }) {
 
 function SettingsIcon({ className = '' }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <circle cx="12" cy="12" r="3" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
