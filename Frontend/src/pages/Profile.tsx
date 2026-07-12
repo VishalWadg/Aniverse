@@ -61,10 +61,10 @@ function Profile() {
 
   const isDirty = Boolean(
     currentProfile &&
-      (formValues.name !== defaultValues.name ||
-        formValues.email !== defaultValues.email ||
+      (formValues.name.trim() !== defaultValues.name ||
+        formValues.email.trim() !== defaultValues.email ||
         formValues.bio !== defaultValues.bio ||
-        formValues.profilePic !== defaultValues.profilePic)
+        formValues.profilePic.trim() !== defaultValues.profilePic)
   );
 
   useEffect(() => {
