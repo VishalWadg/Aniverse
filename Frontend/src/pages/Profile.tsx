@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -52,18 +52,26 @@ function Profile() {
   const [isEditingProfile, setIsEditingProfile] = useState(false)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
 
-  useEffect(() => {
-    if (!currentProfile) {
-      return
-    }
+  const defaultValues = useMemo(() => ({
+    name: currentProfile?.name ?? '',
+    email: currentProfile?.email ?? '',
+    bio: currentProfile?.bio ?? '',
+    profilePic: currentProfile?.profilePic ?? '',
+  }), [currentProfile]);
 
-    setFormValues({
-      name: currentProfile.name ?? '',
-      email: currentProfile.email ?? '',
-      bio: currentProfile.bio ?? '',
-      profilePic: currentProfile.profilePic ?? '',
-    })
-  }, [currentProfile])
+  const isDirty = Boolean(
+    currentProfile &&
+      (formValues.name.trim() !== defaultValues.name ||
+        formValues.email.trim() !== defaultValues.email ||
+        formValues.bio !== defaultValues.bio ||
+        formValues.profilePic.trim() !== defaultValues.profilePic)
+  );
+
+  useEffect(() => {
+    if (currentProfile) {
+      setFormValues(defaultValues)
+    }
+  }, [currentProfile, defaultValues])
 
   useEffect(() => {
     if (!isViewingOwnProfile) {
@@ -84,16 +92,9 @@ function Profile() {
   }
 
   const handleReset = () => {
-    if (!currentProfile) {
-      return
+    if (currentProfile) {
+      setFormValues(defaultValues)
     }
-
-    setFormValues({
-      name: currentProfile.name ?? '',
-      email: currentProfile.email ?? '',
-      bio: currentProfile.bio ?? '',
-      profilePic: currentProfile.profilePic ?? '',
-    })
   }
 
   const handleAvatarUpload = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -128,6 +129,10 @@ function Profile() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+
+    if (!isDirty) {
+      return
+    }
 
     const updatedProfile = await toasts.promise(
       updateCurrentUserProfile({
@@ -307,7 +312,8 @@ function Profile() {
                         isUpdatingProfile ||
                         isUploadingAvatar ||
                         !formValues.name.trim() ||
-                        !formValues.email.trim()
+                        !formValues.email.trim() ||
+                        !isDirty
                       }
                       className="px-5 font-black uppercase tracking-[0.16em]"
                     >

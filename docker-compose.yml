@@ -31,6 +31,7 @@ services:
 networks:
   aniverse-network:
     driver: bridge
+    enable_ipv6: true
 
 volumes:
   redis_data:
