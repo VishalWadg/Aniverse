@@ -20,10 +20,13 @@ const navItems = [
 const headerVariants = {
   hidden: {
     y: "-100%",
-    opacity: 0
+    opacity: 0,
+    pointerEvents: "none",
   },
   visible: {
     y: 0,
+    opacity: 1, 
+    pointerEvents: "auto", 
   },
 };
 
