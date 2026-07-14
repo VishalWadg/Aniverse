@@ -31,10 +31,10 @@ public class AuthController {
         loginResponsDto.setRefToken(null);
         ResponseCookie cookie = ResponseCookie.from("refresh_token",refToken)
                 .httpOnly(true)
-                .secure(false)  // TODO: MAKE IT TRUE IN PROD
+                .secure(true)  // TODO: MAKE IT TRUE IN PROD
                 .path(COOKIE_PATH)
                 .maxAge(maxAgeSeconds)
-                .sameSite("Strict")
+                .sameSite("none")
                 .build();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(loginResponsDto);
     }
@@ -46,10 +46,10 @@ public class AuthController {
         response.setRefToken(null);
         ResponseCookie cookie = ResponseCookie.from("refresh_token", newToken)
                 .httpOnly(true)
-                .secure(false) // TODO: MAKE IT TRUE IN PROD
+                .secure(true) 
                 .path(COOKIE_PATH)
                 .maxAge(refreshTokenService.getRefreshTokenDurationSeconds())
-                .sameSite("Strict")
+                .sameSite("none")
                 .build();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(response);
     }
