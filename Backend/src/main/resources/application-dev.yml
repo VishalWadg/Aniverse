@@ -15,5 +15,8 @@ spring:
     baseline-on-migrate: true # Safe fallback to baseline if database already has tables
 
 app:
+  cookie:
+    secure: false
+    same-site: "Lax"
   cors:
     allowed-origins: ${ALLOWED_ORIGINS}

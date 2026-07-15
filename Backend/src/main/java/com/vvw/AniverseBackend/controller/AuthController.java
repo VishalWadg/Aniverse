@@ -2,6 +2,7 @@ package com.vvw.AniverseBackend.controller;
 
 import com.vvw.AniverseBackend.dto.CreateUserDto;
 import com.vvw.AniverseBackend.dto.LoginRequestDto;
+import com.vvw.AniverseBackend.config.properties.CookieProperties;
 import com.vvw.AniverseBackend.dto.AuthenticationResponseDto;
 import com.vvw.AniverseBackend.dto.UserResponseDto;
 import com.vvw.AniverseBackend.service.AuthService;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 
 @RestController
 @RequestMapping("/auth")
@@ -18,6 +20,8 @@ public class AuthController {
     private static final String COOKIE_PATH = "/api/v1/auth";
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
+    private final CookieProperties cookieProperties;
+
     @PostMapping("/signup")
     public ResponseEntity<UserResponseDto> signup(@Valid @RequestBody CreateUserDto createUserDto){
         return new ResponseEntity<>(authService.signup(createUserDto), HttpStatus.CREATED);
@@ -31,10 +35,10 @@ public class AuthController {
         loginResponsDto.setRefToken(null);
         ResponseCookie cookie = ResponseCookie.from("refresh_token",refToken)
                 .httpOnly(true)
-                .secure(false)  // TODO: MAKE IT TRUE IN PROD
+                .secure(cookieProperties.secure())
                 .path(COOKIE_PATH)
                 .maxAge(maxAgeSeconds)
-                .sameSite("Strict")
+                .sameSite(cookieProperties.sameSite())
                 .build();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(loginResponsDto);
     }
@@ -46,10 +50,10 @@ public class AuthController {
         response.setRefToken(null);
         ResponseCookie cookie = ResponseCookie.from("refresh_token", newToken)
                 .httpOnly(true)
-                .secure(false) // TODO: MAKE IT TRUE IN PROD
+                .secure(cookieProperties.secure())
                 .path(COOKIE_PATH)
                 .maxAge(refreshTokenService.getRefreshTokenDurationSeconds())
-                .sameSite("Strict")
+                .sameSite(cookieProperties.sameSite())
                 .build();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(response);
     }
