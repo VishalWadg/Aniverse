@@ -15,5 +15,8 @@ spring:
       mode: never # Never seed production with dev/test data
 
 app:
+  cookie:
+    secure: true
+    same-site: "None"
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:https://aniverse.com}
