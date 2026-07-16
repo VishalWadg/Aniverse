@@ -58,7 +58,7 @@ function PostCard({
     <div className="min-w-0 flex-1 relative z-20">
       <div
         className={cn(
-          'flex flex-wrap items-center gap-2 font-medium uppercase text-on-surface-variant/80',
+          'flex items-center gap-2 font-medium uppercase text-on-surface-variant/80',
           isCompact ? 'text-[10px] tracking-[0.2em]' : 'text-[11px] tracking-[0.24em]'
         )}
       >
@@ -66,33 +66,37 @@ function PostCard({
           <Link
             to={authorHref}
             className={cn(
-              'normal-case tracking-normal text-on-surface transition-colors hover:text-primary',
+              'truncate normal-case tracking-normal text-on-surface transition-colors hover:text-primary min-w-0',
               isCompact ? 'text-[13px]' : 'text-sm'
             )}
+            title={`u/${displayName}`}
           >
             u/{displayName}
           </Link>
         ) : (
-          <span className={cn('normal-case tracking-normal text-on-surface', isCompact ? 'text-[13px]' : 'text-sm')}>
+          <span 
+            className={cn('truncate normal-case tracking-normal text-on-surface min-w-0', isCompact ? 'text-[13px]' : 'text-sm')}
+            title={`u/${displayName}`}
+          >
             u/{displayName}
           </span>
         )}
-        <span className="text-on-surface-variant/40">/</span>
-        <span>{formatRelativeTime(createdAt)}</span>
+        <span className="shrink-0 text-on-surface-variant/40">/</span>
+        <span className="shrink-0">{formatRelativeTime(createdAt)}</span>
       </div>
     </div>
   )
  
   if (isCompact) {
     return (
-      <article className="group relative flex h-full min-w-0 flex-col border border-outline-variant bg-surface-container p-card rounded-card transition-all duration-300 hover:border-outline hover:bg-surface-container-high shadow-sm">
+      <article className="group relative flex h-full min-w-0 flex-col border border-outline-variant bg-surface-container p-4 sm:p-card rounded-card transition-all duration-300 hover:border-outline hover:bg-surface-container-high shadow-sm">
         {/* Absolute overlay link for card-wide navigation */}
         <Link to={interactionHref} className="absolute inset-0 z-10 rounded-card" aria-label={`Read ${title}`} />
  
         {/* Top Meta Section */}
-        <div className="flex items-start gap-3 text-sm text-on-surface-variant">
+        <div className="flex items-center sm:items-start gap-2 sm:gap-3 text-sm text-on-surface-variant">
           {authorHref ? (
-            <Link to={authorHref} className="relative z-20">
+            <Link to={authorHref} className="relative z-20 shrink-0">
               <UserAvatar
                 userName={displayName}
                 avatarSeed={author?.username || displayName}
@@ -102,13 +106,15 @@ function PostCard({
               />
             </Link>
           ) : (
-            <UserAvatar
-              userName={displayName}
-              avatarSeed={author?.username || displayName}
-              profileUrl={author?.profilePic}
-              size="sm"
-              className="size-10 data-[size=sm]:size-10 relative z-20"
-            />
+            <div className="relative z-20 shrink-0">
+              <UserAvatar
+                userName={displayName}
+                avatarSeed={author?.username || displayName}
+                profileUrl={author?.profilePic}
+                size="sm"
+                className="size-10 data-[size=sm]:size-10"
+              />
+            </div>
           )}
  
           {authorMeta}
@@ -119,7 +125,7 @@ function PostCard({
         </div>
  
         {/* Title, Cover, and Excerpt Content */}
-        <div className="mt-card flex flex-1 flex-col gap-cluster">
+        <div className="mt-4 sm:mt-card flex flex-1 flex-col gap-3 sm:gap-cluster">
           <h2 className="text-xl font-black leading-tight text-on-surface transition-colors duration-200 group-hover:text-primary">
             {title}
           </h2>
@@ -140,26 +146,26 @@ function PostCard({
         </div>
  
         {/* Footer Actions Section */}
-        <div className="mt-card flex items-center justify-between gap-cluster border-t border-outline-variant/50 pt-card text-sm text-on-surface-variant/80">
+        <div className="mt-4 sm:mt-card flex items-center justify-between gap-3 sm:gap-cluster border-t border-outline-variant/50 pt-4 sm:pt-card text-sm text-on-surface-variant/80">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center gap-2">
-              <ClockIcon className="size-4" />
-              {readTime} min
+            <span className="inline-flex items-center gap-1.5 sm:gap-2">
+              <ClockIcon className="size-4 shrink-0" />
+              <span className="whitespace-nowrap">{readTime} min<span className="hidden sm:inline"> read</span></span>
             </span>
  
-            <span className="inline-flex items-center gap-2 text-on-surface-variant/90 transition-colors group-hover:text-primary">
-              <CommentIcon className="size-4" />
-              {'Read'}
+            <span className="inline-flex items-center gap-1.5 sm:gap-2 text-on-surface-variant/90 transition-colors group-hover:text-primary">
+              <CommentIcon className="size-4 shrink-0" />
+              <span className="whitespace-nowrap"><span className="sm:hidden">Read</span><span className="hidden sm:inline">Open thread</span></span>
             </span>
           </div>
  
           <button
             type="button"
             onClick={handleShare}
-            className="relative z-20 inline-flex h-control-h w-control-h items-center justify-center border border-outline-variant/40 rounded-control text-on-surface-variant/80 transition-colors hover:border-outline-variant hover:bg-surface-container-high hover:text-primary cursor-pointer"
+            className="relative z-20 inline-flex items-center text-on-surface-variant/90 transition-colors hover:text-primary cursor-pointer"
             aria-label={`Share ${title}`}
           >
-            <ShareIcon className="size-4" />
+            <ShareIcon className="size-4 shrink-0" />
           </button>
         </div>
       </article>
@@ -167,14 +173,14 @@ function PostCard({
   }
 
   return (
-    <article className="group relative flex h-full min-w-0 flex-col border border-outline-variant/40 rounded-card bg-surface-container p-card transition-all duration-300 hover:border-outline-variant hover:bg-surface-container-high shadow-sm">
+    <article className="group relative flex h-full min-w-0 flex-col border border-outline-variant/40 rounded-card bg-surface-container p-4 sm:p-card transition-all duration-300 hover:border-outline-variant hover:bg-surface-container-high shadow-sm">
       {/* Absolute overlay link for card-wide navigation */}
       <Link to={interactionHref} className="absolute inset-0 z-10 rounded-card" aria-label={`Read ${title}`} />
 
       {/* Top Meta Section */}
-      <div className="flex flex-wrap items-center gap-3 text-sm text-on-surface-variant">
+      <div className="flex items-center gap-2 sm:gap-3 text-sm text-on-surface-variant">
         {authorHref ? (
-          <Link to={authorHref} className="relative z-20">
+          <Link to={authorHref} className="relative z-20 shrink-0">
             <UserAvatar
               userName={displayName}
               avatarSeed={author?.username || displayName}
@@ -184,24 +190,26 @@ function PostCard({
             />
           </Link>
         ) : (
-          <UserAvatar
-            userName={displayName}
-            avatarSeed={author?.username || displayName}
-            profileUrl={author?.profilePic}
-            size="default"
-            className="size-11 data-[size=default]:size-11 relative z-20"
-          />
+          <div className="relative z-20 shrink-0">
+            <UserAvatar
+              userName={displayName}
+              avatarSeed={author?.username || displayName}
+              profileUrl={author?.profilePic}
+              size="default"
+              className="size-11 data-[size=default]:size-11"
+            />
+          </div>
         )}
 
         {authorMeta}
 
-        <span className="inline-flex items-center border border-primary/40 rounded-control px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+        <span className="inline-flex shrink-0 items-center border border-primary/40 rounded-control px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
           {category}
         </span>
       </div>
 
       {/* Title, Cover, and Excerpt Content */}
-      <div className="mt-card flex flex-1 flex-col gap-card">
+      <div className="mt-4 sm:mt-card flex flex-1 flex-col gap-4 sm:gap-card">
         <h2 className="max-w-4xl text-2xl font-black leading-tight text-on-surface transition-colors duration-200 group-hover:text-primary sm:text-[2rem]">
           {title}
         </h2>
@@ -222,26 +230,26 @@ function PostCard({
       </div>
 
       {/* Footer Actions Section */}
-      <div className="mt-card flex items-center justify-between gap-cluster border-t border-outline-variant/50 pt-card">
-        <div className="flex items-center gap-3 text-sm text-on-surface-variant/80 sm:gap-5">
-          <span className="inline-flex items-center gap-2">
-            <ClockIcon className="size-4" />
-            {readTime} min read
+      <div className="mt-4 sm:mt-card flex items-center justify-between gap-3 sm:gap-cluster border-t border-outline-variant/50 pt-4 sm:pt-card text-sm text-on-surface-variant/80">
+        <div className="flex items-center gap-3 sm:gap-5">
+          <span className="inline-flex items-center gap-1.5 sm:gap-2">
+            <ClockIcon className="size-4 shrink-0" />
+            <span className="whitespace-nowrap">{readTime} min<span className="hidden sm:inline"> read</span></span>
           </span>
 
-          <span className="inline-flex items-center gap-2 text-on-surface-variant/90 transition-colors group-hover:text-primary">
-            <CommentIcon className="size-4" />
-            {'Open thread'}
+          <span className="inline-flex items-center gap-1.5 sm:gap-2 text-on-surface-variant/90 transition-colors group-hover:text-primary">
+            <CommentIcon className="size-4 shrink-0" />
+            <span className="whitespace-nowrap"><span className="sm:hidden">Read</span><span className="hidden sm:inline">Open thread</span></span>
           </span>
         </div>
 
         <button
           type="button"
           onClick={handleShare}
-          className="relative z-20 inline-flex h-control-h w-control-h items-center justify-center border border-outline-variant/40 rounded-control text-on-surface-variant/80 transition-colors hover:border-outline-variant hover:bg-surface-container-high hover:text-primary cursor-pointer"
+          className="relative z-20 inline-flex items-center text-on-surface-variant/90 transition-colors hover:text-primary cursor-pointer"
           aria-label={`Share ${title}`}
         >
-          <ShareIcon className="size-4" />
+          <ShareIcon className="size-4 shrink-0" />
         </button>
       </div>
     </article>
