@@ -13,8 +13,7 @@ import { normalizeBrandHex, useTheme } from '../ThemeProvider'
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 
 const navItems = [
-  { name: 'Home', slug: '/' },
-  { name: "Trash Bin", slug: "/admin" }
+  { name: 'Home', slug: '/' }
 ]
 
 const headerVariants = {
@@ -200,12 +199,7 @@ function Header() {
     setColorError('');
   }, [brandColor]);
 
-  const navRoutes = navItems.filter((item) => {
-    if (item.slug === "/admin") {
-      return userRole === "ADMIN"
-    }
-    return true;
-  })
+  const navRoutes = navItems;
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -281,13 +275,13 @@ function Header() {
             </Link>
 
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <Button
-                asChild
-                variant="ghost"
-                className={`${navControlClass} hidden sm:inline-flex rounded-none border border-outline-variant bg-transparent px-3 sm:px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
+              <Link
+                to="/"
+                className="hidden sm:inline-flex size-9 sm:size-10 items-center justify-center rounded-control border border-outline-variant text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+                aria-label="Home"
               >
-                <Link to="/">Home</Link>
-              </Button>
+                <HomeIcon className="size-4 sm:size-5" />
+              </Link>
 
               <Button
                 asChild
@@ -303,10 +297,10 @@ function Header() {
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex size-9 sm:size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
+                    className="inline-flex size-9 sm:size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
                     aria-label="Theme settings"
                   >
-                    <SettingsIcon className={`size-4 sm:size-5 transition-transform duration-300 ${isAuthSettingsOpen ? 'rotate-45' : ''}`} />
+                    <PaletteIcon className={`size-4 sm:size-5 transition-transform duration-300 ${isAuthSettingsOpen ? 'rotate-45' : ''}`} />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
@@ -334,35 +328,32 @@ function Header() {
             </Link>
 
             <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden">
-              <Button
-                asChild
-                className="rounded-none px-3 sm:px-5 font-black uppercase tracking-[0.12em] sm:tracking-[0.18em]"
-              >
-                <Link to={authStatus ? '/add-post' : '/signup'}>Write</Link>
-              </Button>
+              {authStatus && currentUser && (
+                <Link to={`/users/${currentUser.username}`}>
+                  <UserAvatar
+                    userName={currentUser.name || currentUser.username}
+                    avatarSeed={currentUser.username}
+                    profileUrl={currentUser.profilePic}
+                    size="sm"
+                    className="size-10 data-[size=sm]:size-10"
+                  />
+                </Link>
+              )}
 
-              {/* Theme Settings Control Mobile */}
-              <Popover open={isMobileSettingsOpen} onOpenChange={setIsMobileSettingsOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
-                    aria-label="Theme settings"
-                  >
-                    <SettingsIcon className={`size-5 transition-transform duration-300 ${isMobileSettingsOpen ? 'rotate-45' : ''}`} />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
-                  <SettingsPanelContent {...settingsPanelProps} />
-                </PopoverContent>
-              </Popover>
+              <Link
+                to={authStatus ? '/add-post' : '/signup'}
+                className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90"
+                aria-label="Write a theory"
+              >
+                <QuillIcon className="size-5" />
+              </Link>
 
               <button
                 type="button"
                 aria-label={isMobileNavOpen ? 'Close navigation menu' : 'Open navigation menu'}
                 aria-expanded={isMobileNavOpen}
                 onClick={() => setIsMobileNavOpen((open) => !open)}
-                className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface-variant transition hover:bg-surface-container hover:text-on-surface"
+                className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface-variant transition hover:bg-surface-container hover:text-on-surface rounded-control"
               >
                 {isMobileNavOpen ? <CloseIcon className="size-4" /> : <MenuIcon className="size-4" />}
               </button>
@@ -370,19 +361,21 @@ function Header() {
           </div>
 
           <div className="hidden flex-1 flex-col gap-4 lg:flex lg:flex-row lg:items-center lg:justify-end">
-            <nav className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <nav className="flex flex-wrap items-center gap-x-2">
               {navRoutes.map((item) => (
                 <Link
                   key={item.name}
                   to={item.slug}
+                  aria-label={item.name}
+                  title={item.name}
                   className={cn(
-                    'text-sm font-black uppercase tracking-[0.18em] transition-colors',
+                    'inline-flex size-10 items-center justify-center rounded-control transition-colors',
                     location.pathname === item.slug
-                      ? 'text-primary'
-                      : 'text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                   )}
                 >
-                  {item.name}
+                  {item.name === 'Home' ? <HomeIcon className="size-5" /> : <TrashIcon className="size-5" />}
                 </Link>
               ))}
             </nav>
@@ -414,74 +407,89 @@ function Header() {
                   </Button>
                 )}
 
-                <Button
-                  asChild
-                  className="hidden rounded-none px-5 font-black uppercase tracking-[0.18em] lg:inline-flex"
+                <Link
+                  to={authStatus ? '/add-post' : '/signup'}
+                  className="hidden lg:inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90"
+                  aria-label="Write a theory"
                 >
-                  <Link to={authStatus ? '/add-post' : '/signup'}>
-                    Write a Theory
-                  </Link>
-                </Button>
+                  <QuillIcon className="size-5" />
+                </Link>
 
                 {authStatus && currentUser && (
-                  <Link
-                    to={`/users/${currentUser.username}`}
-                    className="hidden items-center gap-3 border border-outline-variant bg-surface-container/50 px-3 py-2 transition hover:bg-surface-container md:inline-flex"
-                  >
-                    <UserAvatar
-                      userName={currentUser.name || currentUser.username}
-                      avatarSeed={currentUser.username}
-                      profileUrl={currentUser.profilePic}
-                      size="sm"
-                      className="size-9 data-[size=sm]:size-9"
-                    />
+                  <Popover open={isDesktopSettingsOpen} onOpenChange={setIsDesktopSettingsOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="hidden md:inline-flex items-center gap-2 rounded-control px-2 py-1 transition-colors hover:bg-surface-container cursor-pointer"
+                        aria-label="User menu"
+                      >
+                        <UserAvatar
+                          userName={currentUser.name || currentUser.username}
+                          avatarSeed={currentUser.username}
+                          profileUrl={currentUser.profilePic}
+                          size="sm"
+                          className="size-9 data-[size=sm]:size-9"
+                        />
+                        <span className="max-w-[8rem] truncate text-sm font-semibold text-on-surface">
+                          {currentUser.username}
+                        </span>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" sideOffset={8} className={`${settingsPanelClassName} p-0 overflow-hidden`}>
+                      <div className="flex flex-col">
+                        <div className="flex flex-col p-2 gap-1">
+                          <Link
+                            to={`/users/${currentUser.username}`}
+                            onClick={() => setIsDesktopSettingsOpen(false)}
+                            className="flex items-center px-3 py-2 rounded-control transition-colors text-sm font-bold uppercase tracking-[0.18em] text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                          >
+                            Profile
+                          </Link>
+                          {userRole === 'ADMIN' && (
+                            <Link
+                              to="/admin"
+                              onClick={() => setIsDesktopSettingsOpen(false)}
+                              className="flex items-center px-3 py-2 rounded-control transition-colors text-sm font-bold uppercase tracking-[0.18em] text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+                            >
+                              Trash Bin
+                            </Link>
+                          )}
+                        </div>
 
-                    <span className="min-w-0 text-left">
-                      <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-on-surface-variant">
-                        Profile
-                      </span>
-                      <span className="block max-w-[9rem] truncate text-sm font-semibold text-on-surface">
-                        {currentUser.username}
-                      </span>
-                    </span>
-                  </Link>
+                        <hr className="border-outline-variant" />
+
+                        <div className="p-card">
+                          <SettingsPanelContent {...settingsPanelProps} />
+                        </div>
+
+                        <hr className="border-outline-variant" />
+
+                        <div className="p-2">
+                          <LogoutBtn />
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 )}
-
-                {authStatus && <LogoutBtn />}
-
-                {/* Theme Settings Control Desktop */}
-                <Popover open={isDesktopSettingsOpen} onOpenChange={setIsDesktopSettingsOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="hidden lg:inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
-                      aria-label="Theme settings"
-                    >
-                      <SettingsIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
-                    <SettingsPanelContent {...settingsPanelProps} />
-                  </PopoverContent>
-                </Popover>
               </div>
             </div>
           </div>
 
           {isMobileNavOpen ? (
             <div className="border-t border-outline-variant pt-4 lg:hidden">
-              <nav className="flex flex-col gap-3">
+              <nav className="flex flex-col gap-2">
                 {navRoutes.map((item) => (
                   <Link
                     key={item.name}
                     to={item.slug}
                     className={cn(
-                      'text-sm font-black uppercase tracking-[0.18em] transition-colors',
+                      'flex items-center gap-3 px-4 py-3 rounded-control transition-colors text-sm font-bold uppercase tracking-[0.18em]',
                       location.pathname === item.slug
-                        ? 'text-primary'
-                        : 'text-on-surface-variant hover:text-on-surface'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                     )}
                   >
+                    {item.name === 'Home' ? <HomeIcon className="size-5" /> : <TrashIcon className="size-5" />}
                     {item.name}
                   </Link>
                 ))}
@@ -493,7 +501,7 @@ function Header() {
                   <Input
                     value={searchValue}
                     onChange={(event) => setSearchValue(event.target.value)}
-                    placeholder="Search the archives..."
+                    placeholder="Search theories..."
                     className={`${navControlClass} rounded-none pr-4 pl-11 text-[11px] font-medium uppercase tracking-[0.28em]`}
                   />
                 </div>
@@ -519,31 +527,33 @@ function Header() {
                   </Link>
                 </Button>
 
-                {authStatus && currentUser && (
+                {userRole === 'ADMIN' && (
                   <Link
-                    to={`/users/${currentUser.username}`}
-                    className="flex items-center gap-3 border border-outline-variant bg-surface-container/50 px-3 py-3 transition hover:bg-surface-container"
+                    to="/admin"
+                    onClick={() => setIsMobileNavOpen(false)}
+                    className="flex w-full items-center gap-3 px-4 py-3 rounded-control transition-colors text-sm font-bold uppercase tracking-[0.18em] text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
                   >
-                    <UserAvatar
-                      userName={currentUser.name || currentUser.username}
-                      avatarSeed={currentUser.username}
-                      profileUrl={currentUser.profilePic}
-                      size="sm"
-                      className="size-10 data-[size=sm]:size-10"
-                    />
-
-                    <span className="min-w-0 text-left">
-                      <span className="block text-[10px] font-medium uppercase tracking-[0.22em] text-on-surface-variant">
-                        Profile
-                      </span>
-                      <span className="block truncate text-sm font-semibold text-on-surface">
-                        {currentUser.username}
-                      </span>
-                    </span>
+                    <TrashIcon className="size-5" />
+                    Trash Bin
                   </Link>
                 )}
 
                 {authStatus && <LogoutBtn />}
+                
+                <Popover open={isMobileSettingsOpen} onOpenChange={setIsMobileSettingsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={`${navControlClass} w-full justify-start rounded-control bg-transparent px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface`}
+                    >
+                      <PaletteIcon className="mr-3 size-5" />
+                      Theme Settings
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="center" sideOffset={8} className={settingsPanelClassName}>
+                    <SettingsPanelContent {...settingsPanelProps} />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
           ) : null}
@@ -581,11 +591,43 @@ function CloseIcon({ className = '' }) {
   )
 }
 
-function SettingsIcon({ className = '' }) {
+function PaletteIcon({ className = '' }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>
+    </svg>
+  )
+}
+
+function QuillIcon({ className = '' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+      <line x1="16" y1="8" x2="2" y2="22" />
+      <line x1="17.5" y1="15" x2="9" y2="15" />
+    </svg>
+  )
+}
+
+function HomeIcon({ className = '' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+  )
+}
+
+function TrashIcon({ className = '' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M3 6h18"/>
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
     </svg>
   )
 }

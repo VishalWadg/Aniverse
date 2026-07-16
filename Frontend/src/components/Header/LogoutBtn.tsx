@@ -38,8 +38,8 @@ function LogoutBtn() {
   return (
     <Button
       type="button"
-      variant="outline"
-      className="border-outline-variant bg-transparent px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+      variant="ghost"
+      className="w-full justify-start rounded-control bg-transparent px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
       onClick={logoutHandler}
     >
       Logout
