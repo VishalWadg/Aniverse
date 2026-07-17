@@ -216,9 +216,8 @@ function Profile() {
             onToggleEdit={isViewingOwnProfile ? () => setIsEditingProfile((current) => !current) : undefined}
           />
 
-          {isViewingOwnProfile && currentProfile ? (
+          {isViewingOwnProfile && currentProfile && isEditingProfile ? (
             <section className="border border-outline-variant bg-surface-container-low p-card rounded-card shadow-elevation-1">
-              {isEditingProfile ? (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid gap-5 md:grid-cols-2">
                     <label className="space-y-2">
@@ -330,7 +329,6 @@ function Profile() {
                     </Button>
                   </div>
                 </form>
-              ) : null}
             </section>
           ) : null}
         </div>
