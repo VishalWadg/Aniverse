@@ -190,7 +190,7 @@ function Header() {
     setIsMobileNavOpen(false)
   }, [location.pathname, location.search])
 
-  const handleSearch = (event) => {
+  const handleSearch = (event : React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextQuery = searchValue.trim()
     const params = new URLSearchParams(location.search)
@@ -217,7 +217,7 @@ function Header() {
     setBrandColor(normalizedColor);
   }
 
-  const settingsPanelClassName = "w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest p-card shadow-elevation-2"
+  const settingsPanelClassName = "w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest shadow-elevation-2"
   const settingsPanelProps = { theme, setTheme, brandColor, setBrandColor, resetBrandColor, colorInput, setColorInput, colorError, setColorError, commitBrandColor }
 
   // --- Auth Route Header ---
@@ -234,13 +234,13 @@ function Header() {
               <Logo width="100%" />
             </Link>
             <div className="flex items-center gap-1.5 sm:gap-3">
-              <Link to="/" className="inline-flex size-9 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
-                <HomeIcon className="size-4 sm:size-5" />
+              <Link to="/" className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
+                <HomeIcon className="size-5" />
               </Link>
               <Popover open={isAuthSettingsOpen} onOpenChange={setIsAuthSettingsOpen}>
                 <PopoverTrigger asChild>
-                  <button type="button" className="inline-flex size-9 sm:size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
-                    <PaletteIcon className={`size-4 sm:size-5 transition-transform duration-300 ${isAuthSettingsOpen ? 'rotate-45' : ''}`} />
+                  <button type="button" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
+                    <PaletteIcon className={`size-5 transition-transform duration-300 ${isAuthSettingsOpen ? 'rotate-45' : ''}`} />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
@@ -249,7 +249,7 @@ function Header() {
               </Popover>
               <Button asChild className={`${navControlClass} rounded-control px-3 sm:px-5 text-xs sm:text-sm font-semibold`}>
                 <Link to={location.pathname === '/login' ? '/signup' : '/login'} className="flex items-center gap-2">
-                  {location.pathname === '/login' ? <><UserPlusIcon className="size-4" /> Sign Up</> : <><LogInIcon className="size-4" /> Log In</>}
+                  {location.pathname === '/login' ? <><UserPlusIcon className="size-5" /> Sign Up</> : <><LogInIcon className="size-5" /> Log In</>}
                 </Link>
               </Button>
             </div>
@@ -278,8 +278,8 @@ function Header() {
 
             {/* Mobile Top-Level Actions (Only shows on small screens) */}
             <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden">
-              <Link to="/" className="inline-flex size-9 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
-                <HomeIcon className="size-4 sm:size-5" />
+              <Link to="/" className="inline-flex size-10 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
+                <HomeIcon className="size-5 " />
               </Link>
               <Link to={authStatus ? '/add-post' : '/signup'} className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90">
                 <QuillIcon className="size-5" />
@@ -349,8 +349,8 @@ function Header() {
 
                   <Popover open={isDesktopSettingsOpen} onOpenChange={setIsDesktopSettingsOpen}>
                     <PopoverTrigger asChild>
-                      <button type="button" className="inline-flex size-9 sm:size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
-                        <PaletteIcon className={`size-4 sm:size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
+                      <button type="button" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
+                        <PaletteIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
                       </button>
                     </PopoverTrigger>
                     <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
@@ -359,10 +359,10 @@ function Header() {
                   </Popover>
 
                   <Button asChild variant="ghost" className="rounded-control text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface">
-                    <Link to="/login"><><LogInIcon className="size-4" /> Log In</></Link>
+                    <Link to="/login"><><LogInIcon className="size-5" /> Log In</></Link>
                   </Button>
                   <Button asChild className="rounded-control text-sm font-semibold">
-                    <Link to="/signup"><><UserPlusIcon className="size-4" /> Sign Up</></Link>
+                    <Link to="/signup"><><UserPlusIcon className="size-5" /> Sign Up</></Link>
                   </Button>
                 </div>
               ) : (
@@ -373,14 +373,14 @@ function Header() {
 
                   {/* Strictly a Link now */}
                   <Link to={`/users/${currentUser.username}`} title="Profile" className="inline-flex items-center justify-center transition hover:opacity-80">
-                    <UserAvatar
-                      userName={currentUser.name || currentUser.username}
-                      avatarSeed={currentUser.username}
-                      profileUrl={currentUser.profilePic}
-                      size="sm"
-                      className="size-10 border border-outline-variant"
-                    />
-                  </Link>
+                  <UserAvatar
+                    userName={currentUser.name || currentUser.username}
+                    avatarSeed={currentUser.username}
+                    profileUrl={currentUser.profilePic}
+                    size="sm"
+                    className="size-10 data-[size=sm]:size-10 border border-outline-variant"
+                  />
+                </Link>
 
                   {/* New Settings Popover Trigger */}
                   <Popover open={isDesktopSettingsOpen} onOpenChange={setIsDesktopSettingsOpen}>
@@ -390,17 +390,17 @@ function Header() {
                       </button>
                     </PopoverTrigger>
 
-                    <PopoverContent align="end" sideOffset={12} className={`${settingsPanelClassName} p-0 overflow-hidden`}>
+                    <PopoverContent align="end" sideOffset={12} className={`${settingsPanelClassName}`}>
                       <div className="flex flex-col">
 
                         {userRole === 'ADMIN' && (
                           <>
                             <div className="p-2">
                               <Link to="/admin" onClick={() => setIsDesktopSettingsOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-control transition-colors text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface">
-                                <TrashIcon className="size-4" /> Trash Bin
+                                <TrashIcon className="size-5" /> Trash Bin
                               </Link>
                             </div>
-                            <hr className="border-outline-variant" />
+                            
                           </>
                         )}
 
@@ -409,7 +409,7 @@ function Header() {
                             <AccordionItem value="theme" className="border-none">
                               <AccordionTrigger className="flex w-full items-center justify-between gap-3 px-3 py-2 rounded-control transition-colors text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:no-underline">
                                 <div className="flex items-center gap-2">
-                                  <PaletteIcon className="size-4" /> Theme Settings
+                                  <PaletteIcon className="size-5" /> Theme Settings
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent className="px-3 pb-3 pt-2">
@@ -418,9 +418,6 @@ function Header() {
                             </AccordionItem>
                           </Accordion>
                         </div>
-
-                        <hr className="border-outline-variant" />
-
                         <div className="p-2">
                           <LogoutBtn />
                         </div>
