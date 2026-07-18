@@ -66,8 +66,8 @@ function SettingsPanelContent({
               key={m}
               onClick={() => setTheme(m)}
               className={`h-8 text-[11px] font-bold uppercase tracking-wider rounded-control border transition-all cursor-pointer ${theme === m
-                  ? 'bg-primary text-on-primary border-transparent shadow-sm'
-                  : 'border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                ? 'bg-primary text-on-primary border-transparent shadow-sm'
+                : 'border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                 }`}
             >
               {m}
@@ -123,6 +123,30 @@ function SettingsPanelContent({
         </button>
       </div>
     </>
+  )
+}
+
+type ThemeSettingsPopoverProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  trigger: React.ReactNode   // the button that goes in PopoverTrigger
+  children: React.ReactNode  // whatever goes inside PopoverContent
+  sideOffset?: number
+  options?: string
+}
+
+const settingsPanelClassName = "w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest shadow-elevation-2"
+
+function ThemeSettingsPopover({ open, onOpenChange, trigger, children, sideOffset = 8, options}: ThemeSettingsPopoverProps) {
+  return (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
+        {trigger}
+      </PopoverTrigger>
+      <PopoverContent align="end" sideOffset={sideOffset} className={cn(settingsPanelClassName, options)}>
+        {children}
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -190,7 +214,7 @@ function Header() {
     setIsMobileNavOpen(false)
   }, [location.pathname, location.search])
 
-  const handleSearch = (event : React.FormEvent<HTMLFormElement>) => {
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const nextQuery = searchValue.trim()
     const params = new URLSearchParams(location.search)
@@ -217,7 +241,6 @@ function Header() {
     setBrandColor(normalizedColor);
   }
 
-  const settingsPanelClassName = "w-[min(18rem,calc(100vw-2rem))] rounded-card border border-outline-variant bg-surface-container-highest shadow-elevation-2"
   const settingsPanelProps = { theme, setTheme, brandColor, setBrandColor, resetBrandColor, colorInput, setColorInput, colorError, setColorError, commitBrandColor }
 
   // --- Auth Route Header ---
@@ -237,16 +260,18 @@ function Header() {
               <Link to="/" className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
                 <HomeIcon className="size-5" />
               </Link>
-              <Popover open={isAuthSettingsOpen} onOpenChange={setIsAuthSettingsOpen}>
-                <PopoverTrigger asChild>
+              <ThemeSettingsPopover
+                open={isAuthSettingsOpen}
+                onOpenChange={setIsAuthSettingsOpen}
+                trigger={
                   <button type="button" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
                     <PaletteIcon className={`size-5 transition-transform duration-300 ${isAuthSettingsOpen ? 'rotate-45' : ''}`} />
                   </button>
-                </PopoverTrigger>
-                <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
-                  <SettingsPanelContent {...settingsPanelProps} />
-                </PopoverContent>
-              </Popover>
+                }
+                options="p-card overflow-hidden"
+              >
+                <SettingsPanelContent {...settingsPanelProps} />
+              </ThemeSettingsPopover>
               <Button asChild className={`${navControlClass} rounded-control px-3 sm:px-5 text-xs sm:text-sm font-semibold`}>
                 <Link to={location.pathname === '/login' ? '/signup' : '/login'} className="flex items-center gap-2">
                   {location.pathname === '/login' ? <><UserPlusIcon className="size-5" /> Sign Up</> : <><LogInIcon className="size-5" /> Log In</>}
@@ -347,16 +372,18 @@ function Header() {
                     <QuillIcon className="size-5" />
                   </Link>
 
-                  <Popover open={isDesktopSettingsOpen} onOpenChange={setIsDesktopSettingsOpen}>
-                    <PopoverTrigger asChild>
+                  <ThemeSettingsPopover
+                    open={isDesktopSettingsOpen}
+                    onOpenChange={setIsDesktopSettingsOpen}
+                    trigger={
                       <button type="button" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
                         <PaletteIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
                       </button>
-                    </PopoverTrigger>
-                    <PopoverContent align="end" sideOffset={8} className={settingsPanelClassName}>
-                      <SettingsPanelContent {...settingsPanelProps} />
-                    </PopoverContent>
-                  </Popover>
+                    }
+                    options="p-card overflow-hidden"
+                  >
+                    <SettingsPanelContent {...settingsPanelProps} />
+                  </ThemeSettingsPopover>
 
                   <Button asChild variant="ghost" className="rounded-control text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface">
                     <Link to="/login"><><LogInIcon className="size-5" /> Log In</></Link>
@@ -373,25 +400,28 @@ function Header() {
 
                   {/* Strictly a Link now */}
                   <Link to={`/users/${currentUser.username}`} title="Profile" className="inline-flex items-center justify-center transition hover:opacity-80">
-                  <UserAvatar
-                    userName={currentUser.name || currentUser.username}
-                    avatarSeed={currentUser.username}
-                    profileUrl={currentUser.profilePic}
-                    size="sm"
-                    className="size-10 data-[size=sm]:size-10 border border-outline-variant"
-                  />
-                </Link>
+                    <UserAvatar
+                      userName={currentUser.name || currentUser.username}
+                      avatarSeed={currentUser.username}
+                      profileUrl={currentUser.profilePic}
+                      size="sm"
+                      className="size-10 data-[size=sm]:size-10 border border-outline-variant"
+                    />
+                  </Link>
 
                   {/* New Settings Popover Trigger */}
-                  <Popover open={isDesktopSettingsOpen} onOpenChange={setIsDesktopSettingsOpen}>
-                    <PopoverTrigger asChild>
+                  <ThemeSettingsPopover
+                    open={isDesktopSettingsOpen} 
+                    onOpenChange={setIsDesktopSettingsOpen}
+                    trigger={
                       <button type="button" className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">
                         <SettingsGearIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
                       </button>
-                    </PopoverTrigger>
-
-                    <PopoverContent align="end" sideOffset={12} className={`${settingsPanelClassName}`}>
-                      <div className="flex flex-col">
+                    }
+                    sideOffset={12}
+                    options="p-0 overflow-hidden"
+                  >
+                    <div className="flex flex-col">
 
                         {userRole === 'ADMIN' && (
                           <>
@@ -400,7 +430,7 @@ function Header() {
                                 <TrashIcon className="size-5" /> Trash Bin
                               </Link>
                             </div>
-                            
+
                           </>
                         )}
 
@@ -422,8 +452,7 @@ function Header() {
                           <LogoutBtn />
                         </div>
                       </div>
-                    </PopoverContent>
-                  </Popover>
+                  </ThemeSettingsPopover>
                 </div>
               )}
             </div>
