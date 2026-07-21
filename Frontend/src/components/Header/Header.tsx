@@ -102,7 +102,6 @@ function Header() {
     setColorError('');
   }, [brandColor]);
   
-  const navRoutes = navItems;
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -152,8 +151,8 @@ function Header() {
         className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
         <Container className="py-4">
           <div className="flex min-h-10 items-center justify-between gap-3 sm:gap-6 shrink-0">
-            <Link to="/" className="w-32 sm:w-40 shrink-0">
-              <Logo width="100%" />
+            <Link to="/" className="h-10 shrink-0 flex items-center" aria-label="Aniverse Home">
+              <Logo width="auto" showText={true} hideTextOnMobile={true} />
             </Link>
             <div className="flex items-center gap-1.5 sm:gap-3">
               <Link to="/" className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
@@ -196,8 +195,8 @@ function Header() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
           <div className="flex items-center justify-between gap-3 sm:gap-6 shrink-0 lg:w-auto w-full">
-            <Link to="/" className="w-32 sm:w-40 shrink-0">
-              <Logo width="100%" />
+            <Link to="/" className="h-10 shrink-0 flex items-center" aria-label="Aniverse Home">
+              <Logo width="auto" showText={true} hideTextOnMobile={true} />
             </Link>
 
             {/* Mobile Top-Level Actions (Only shows on small screens) */}
@@ -248,7 +247,7 @@ function Header() {
             <div className="flex items-center gap-2">
               {/* 2. Primary Navigation */}
               <nav className="flex items-center gap-1">
-                {navRoutes.map((item) => (
+                {navItems.map((item) => (
                   <Link
                     key={item.name}
                     to={item.slug}
@@ -365,7 +364,7 @@ function Header() {
 
 
             <nav className="flex flex-col gap-2">
-              {navRoutes.map((item) => (
+              {navItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.slug}

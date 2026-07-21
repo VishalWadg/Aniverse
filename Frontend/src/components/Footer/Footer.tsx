@@ -30,7 +30,12 @@ function Footer() {
     <footer className="border-t border-outline-variant/60 bg-surface-container-low">
       <Container className="flex flex-col gap-4 py-section md:flex-row md:items-center md:justify-between">
         <div className="flex flex-col gap-3">
-          <Logo width="132px" />
+          <Logo 
+            width="auto" 
+            iconContainerClassName="h-14 w-14 sm:h-16 sm:w-16" 
+            iconClassName="h-14 w-14 sm:h-16 sm:w-16 scale-140 sm:scale-180" 
+            textClassName="text-2xl sm:text-3xl"
+          />
           <p className="max-w-md text-sm leading-6 text-on-surface-variant">
             Long-form theories, editorial takes, and archive notes built for late-night reading.
           </p>
