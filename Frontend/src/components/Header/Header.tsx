@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -93,23 +93,25 @@ function Header() {
     setIsMobileNavOpen(false)
   }, [location.pathname, location.search])
   
-  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const nextQuery = searchValue.trim()
-    const params = new URLSearchParams(location.search)
-    if (nextQuery) params.set('q', nextQuery)
-      else params.delete('q')
-    
-    const pathname = location.pathname === '/' || location.pathname === '/all-posts'
-    ? location.pathname : '/all-posts'
-    
-    navigate({
-      pathname,
-      search: params.toString() ? `?${params.toString()}` : '',
-    })
-  }
+  const handleSearch = useCallback((event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      const nextQuery = searchValue.trim()
+      const params = new URLSearchParams(location.search)
+      if (nextQuery) params.set('q', nextQuery)
+        else params.delete('q')
+      
+      const pathname = location.pathname === '/' || location.pathname === '/all-posts'
+      ? location.pathname : '/all-posts'
+      
+      navigate({
+        pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+      })
+    }, 
+    [searchValue, location.search, location.pathname, navigate]
+  );
   
-  const commitBrandColor = () => {
+  const commitBrandColor = useCallback(() => {
     const normalizedColor = normalizeBrandHex(colorInput);
     if (!normalizedColor) {
       setColorError('Use a valid hex color.');
@@ -118,9 +120,33 @@ function Header() {
     setColorInput(normalizedColor);
     setColorError('');
     setBrandColor(normalizedColor);
-  }
+  }, [colorInput, setBrandColor])
   
-  const settingsPanelProps = { theme, setTheme, brandColor, setBrandColor, resetBrandColor, colorInput, setColorInput, colorError, setColorError, commitBrandColor }
+  const settingsPanelProps = useMemo(() => (
+    { 
+      theme,
+      setTheme,
+      brandColor, 
+      setBrandColor, 
+      resetBrandColor, 
+      colorInput, 
+      setColorInput, 
+      colorError, 
+      setColorError, 
+      commitBrandColor 
+    }
+    ), [
+      theme,
+      setTheme,
+      brandColor, 
+      setBrandColor, 
+      resetBrandColor, 
+      colorInput, 
+      setColorInput, 
+      colorError, 
+      setColorError, 
+      commitBrandColor 
+    ]);
 
   // --- Auth Route Header ---
   if (isAuthRoute) {
