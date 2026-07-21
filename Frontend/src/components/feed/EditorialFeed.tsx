@@ -300,7 +300,6 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
             )}
 
             {!hasSearchMiss && visiblePosts.length > 0 && (
-              <div className="rounded-card border border-outline-variant/60 bg-surface-container-low p-card">
                 <Virtuoso
                   useWindowScroll
                   data={visiblePosts}
@@ -330,7 +329,6 @@ function EditorialFeed({ authStatus = true, mode = 'home' }) {
                     )
                   }}
                 />
-              </div>
             )}
           </div>
 
