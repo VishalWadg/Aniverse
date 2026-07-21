@@ -13,6 +13,7 @@ import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import ThemeSettingsPopover from '@/components/Theme/ThemeSettingsPopover'
 import SettingsPanelContent from '@/components/Theme/SettingsPanelContent'
+import { useHeaderScrollHide } from '@/hooks/useHeaderScrollHide';
 import {
   HomeIcon,
   QuillIcon,
@@ -63,38 +64,18 @@ function Header() {
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
   const navControlClass = 'h-control-h'
   const userRole = useAppSelector((state) => state.auth.userData?.role);
-  const TOP_THRESHOLD = 80;
   
   const { theme, setTheme, brandColor, setBrandColor, resetBrandColor } = useTheme();
   const [colorInput, setColorInput] = useState(brandColor);
   const [colorError, setColorError] = useState('');
   
-  const { scrollY } = useScroll();
-  const [headerHidden, setHeaderHidden] = useState(false);
-  const headerHiddenRef = React.useRef(false);
-  
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() ?? 0;
-    if (latest < TOP_THRESHOLD) {
-      if (headerHiddenRef.current) {
-        headerHiddenRef.current = false;
-        setHeaderHidden(false);
-      }
-      return;
-    }
-    if (latest > previous && latest > 120) {
-      if (!headerHiddenRef.current) {
-        headerHiddenRef.current = true;
-        setHeaderHidden(true);
-        setIsAuthSettingsOpen(false);
-        setIsDesktopSettingsOpen(false);
-      }
-    } else if (previous - latest > 10) {
-      if (headerHiddenRef.current) {
-        headerHiddenRef.current = false;
-        setHeaderHidden(false);
-      }
-    }
+ 
+  const headerHidden = useHeaderScrollHide({
+    topThreshold: 80,
+    onHide: () => {
+      setIsAuthSettingsOpen(false);
+      setIsDesktopSettingsOpen(false);
+    },
   });
   
   useEffect(() => {
@@ -362,8 +343,6 @@ function Header() {
         {/* Mobile Nav Drawer */}
         {isMobileNavOpen ? (
           <div className="absolute top-full left-0 w-full bg-surface-container backdrop-blur-xl border-b border-outline-variant px-4 pb-4 pt-2 lg:hidden shadow-elevation-2">
-
-
 
             <nav className="flex flex-col gap-2">
               {navItems.map((item) => (
