@@ -162,7 +162,7 @@ function Header() {
                 open={isAuthSettingsOpen}
                 onOpenChange={setIsAuthSettingsOpen}
                 trigger={
-                  <button type="button" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
+                  <button type="button" aria-label="Open theme settings" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
                     <PaletteIcon className={`size-5 transition-transform duration-300 ${isAuthSettingsOpen ? 'rotate-45' : ''}`} />
                   </button>
                 }
@@ -204,11 +204,11 @@ function Header() {
               <Link to="/" className="inline-flex size-10 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
                 <HomeIcon className="size-5 " />
               </Link>
-              <Link to={authStatus ? '/add-post' : '/signup'} className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90">
+              <Link to={authStatus ? '/add-post' : '/signup'} aria-label="Write a theory" className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90">
                 <QuillIcon className="size-5" />
               </Link>
               {authStatus && currentUser && (
-                <Link to={`/users/${currentUser.username}`}>
+                <Link to={`/users/${currentUser.username}`} aria-label="Profile">
                   <UserAvatar
                     userName={currentUser.name || currentUser.username}
                     avatarSeed={currentUser.username}
@@ -220,6 +220,7 @@ function Header() {
               )}
               <button
                 type="button"
+                aria-label={isMobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
                 onClick={() => setIsMobileNavOpen((open) => !open)}
                 className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface-variant transition hover:bg-surface-container hover:text-on-surface rounded-control"
               >
@@ -252,6 +253,7 @@ function Header() {
                     key={item.name}
                     to={item.slug}
                     title={item.name}
+                    aria-label={item.name}
                     className={cn(
                       'inline-flex size-10 items-center justify-center rounded-control transition-colors',
                       location.pathname === item.slug ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
@@ -266,7 +268,7 @@ function Header() {
               {!authStatus ? (
 
                 <div className="flex items-center gap-2 pl-1">
-                  <Link to="/add-post" className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90" title="Write a theory">
+                  <Link to="/add-post" className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90" title="Write a theory" aria-label="Write a theory">
                     <QuillIcon className="size-5" />
                   </Link>
 
@@ -274,7 +276,7 @@ function Header() {
                     open={isDesktopSettingsOpen}
                     onOpenChange={setIsDesktopSettingsOpen}
                     trigger={
-                      <button type="button" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
+                      <button type="button" aria-label="Open theme settings" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
                         <PaletteIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
                       </button>
                     }
@@ -292,12 +294,12 @@ function Header() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2 pl-1">
-                  <Link to="/add-post" className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90" title="Write a theory">
+                  <Link to="/add-post" className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90" title="Write a theory" aria-label="Write a theory">
                     <QuillIcon className="size-5" />
                   </Link>
 
                   {/* Strictly a Link now */}
-                  <Link to={`/users/${currentUser.username}`} title="Profile" className="inline-flex items-center justify-center transition hover:opacity-80">
+                  <Link to={`/users/${currentUser.username}`} title="Profile" aria-label="Profile" className="inline-flex items-center justify-center transition hover:opacity-80">
                     <UserAvatar
                       userName={currentUser.name || currentUser.username}
                       avatarSeed={currentUser.username}
@@ -312,7 +314,7 @@ function Header() {
                     open={isDesktopSettingsOpen} 
                     onOpenChange={setIsDesktopSettingsOpen}
                     trigger={
-                      <button type="button" className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">
+                      <button type="button" aria-label="Open settings menu" className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">
                         <SettingsGearIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
                       </button>
                     }
