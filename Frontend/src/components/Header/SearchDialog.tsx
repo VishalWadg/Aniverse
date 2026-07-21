@@ -53,7 +53,7 @@ export default function SearchDialog({
 
     const handleSelectPost = (postId: string) => {
         onOpenChange(false)
-        navigate(`/posts/${postId}`)
+        navigate(`/post/${postId}`)
     }
 
     const handleFullSearchSubmit = (e: React.FormEvent) => {
@@ -61,21 +61,21 @@ export default function SearchDialog({
         const trimmed = query.trim()
         if (!trimmed) return
         onOpenChange(false)
-        navigate(`/all-posts?q=${encodeURIComponent(trimmed)}`)
+        navigate(`/?q=${encodeURIComponent(trimmed)}`)
     }
 
     const isSearching = isFetching || (query.trim() !== '' && query.trim() !== debouncedQuery)
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl p-0 overflow-hidden border border-outline-variant bg-surface-container">
+            <DialogContent className="w-[calc(100%-2rem)] max-w-2xl h-[75vh] sm:h-[520px] flex flex-col p-0 overflow-hidden border border-outline-variant bg-surface-container rounded-card">
                 {/* Accessible Dialog Title */}
                 <DialogHeader className="sr-only">
                     <DialogTitle>Search Manuscripts & Theories</DialogTitle>
                 </DialogHeader>
 
-                {/* Search Input Bar inside Modal */}
-                <form onSubmit={handleFullSearchSubmit} className="relative border-b border-outline-variant p-4">
+                {/* Search Input Bar inside Modal (Fixed Top Header) */}
+                <form onSubmit={handleFullSearchSubmit} className="relative border-b border-outline-variant p-4 shrink-0">
                     <SearchIcon className="pointer-events-none absolute left-7 top-1/2 size-5 -translate-y-1/2 text-on-surface-variant" />
                     <Input
                         autoFocus
@@ -98,8 +98,8 @@ export default function SearchDialog({
                     )}
                 </form>
 
-                {/* Results Container */}
-                <div className="max-h-[60vh] overflow-y-auto p-4 custom-scrollbar">
+                {/* Results Container (Fixed Scroll Region - Fills remaining height) */}
+                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                     {!query.trim() ? (
                         <div className="py-12 text-center text-on-surface-variant/70">
                             <SearchIcon className="mx-auto size-8 mb-2 opacity-50" />
