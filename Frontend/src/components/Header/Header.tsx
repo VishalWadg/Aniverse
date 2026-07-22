@@ -9,7 +9,7 @@ import Logo from '../Logo'
 import LogoutBtn from './LogoutBtn'
 import UserAvatar from '../User/UserAvatar'
 import { normalizeBrandHex, useTheme } from '../ThemeProvider'
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
+import { motion} from 'framer-motion'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import ThemeSettingsPopover from '@/components/Theme/ThemeSettingsPopover'
 import SettingsPanelContent from '@/components/Theme/SettingsPanelContent'
@@ -94,23 +94,6 @@ function Header() {
     setIsMobileNavOpen(false)
   }, [location.pathname, location.search])
 
-  const handleSearch = useCallback((event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const nextQuery = searchValue.trim()
-    const params = new URLSearchParams(location.search)
-    if (nextQuery) params.set('q', nextQuery)
-    else params.delete('q')
-
-    const pathname = location.pathname === '/' || location.pathname === '/all-posts'
-      ? location.pathname : '/all-posts'
-
-    navigate({
-      pathname,
-      search: params.toString() ? `?${params.toString()}` : '',
-    })
-  },
-    [searchValue, location.search, location.pathname, navigate]
-  );
 
   const commitBrandColor = useCallback(() => {
     const normalizedColor = normalizeBrandHex(colorInput);
@@ -202,32 +185,27 @@ function Header() {
         {/* Desktop Container */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
-          <div className="flex items-center justify-between gap-2 sm:gap-4 shrink-0 lg:w-auto w-full">
+          <div className="flex items-center justify-between gap-3 sm:gap-6 shrink-0 lg:w-auto w-full">
             <Link to="/" className="h-10 shrink-0 flex items-center" aria-label="Aniverse Home">
               <Logo width="auto" showText={true} hideTextOnMobile={true} />
             </Link>
 
-            {/* Mobile/Tablet Search Bar Trigger */}
-            <div
-              onClick={() => setIsSearchOpen(true)}
-              className="flex flex-1 max-w-[150px] xs:max-w-[220px] sm:max-w-xs lg:hidden items-center cursor-pointer mx-1 sm:mx-2"
-            >
-              <div className="relative w-full">
-                <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-on-surface-variant" />
-                <Input
-                  readOnly
-                  value={searchValue}
-                  placeholder="Search..."
-                  className={`${navControlClass} w-full rounded-control pr-2 pl-8 text-xs font-semibold cursor-pointer bg-surface-container-high/60 hover:bg-surface-container-high transition-colors`}
-                />
-              </div>
-            </div>
-
-            {/* Mobile Top-Level Actions (Only shows on small screens) */}
+            {/* Mobile Top-Level Actions (Shows on screens < 1024px) */}
             <div className="flex items-center gap-1 sm:gap-2 lg:hidden shrink-0">
               <Link to="/" className="inline-flex size-8.5 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
                 <HomeIcon className="size-4 sm:size-5" />
               </Link>
+              
+              {/* Minimalist Mobile Search Trigger Icon Button */}
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(true)}
+                className="inline-flex size-8.5 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface cursor-pointer"
+                aria-label="Open search"
+              >
+                <SearchIcon className="size-4 sm:size-5" />
+              </button>
+
               <Link to={authStatus ? '/add-post' : '/signup'} aria-label="Write a theory" className="inline-flex size-8.5 sm:size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90">
                 <QuillIcon className="size-4 sm:size-5" />
               </Link>

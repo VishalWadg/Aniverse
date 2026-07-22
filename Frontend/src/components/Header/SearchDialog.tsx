@@ -25,12 +25,18 @@ export default function SearchDialog({
 }: SearchDialogProps) {
     const [query, setQuery] = useState(initialQuery)
     const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
+    const inputRef = React.useRef<HTMLInputElement>(null)
     const navigate = useNavigate()
 
     useEffect(() => {
         if (open) {
             setQuery(initialQuery)
             setDebouncedQuery(initialQuery)
+            // Programmatically focus input once Radix portal animation mounts
+            const timer = setTimeout(() => {
+                inputRef.current?.focus()
+            }, 50)
+            return () => clearTimeout(timer)
         }
     }, [open, initialQuery])
 
@@ -75,27 +81,40 @@ export default function SearchDialog({
                 </DialogHeader>
 
                 {/* Search Input Bar inside Modal (Fixed Top Header) */}
-                <form onSubmit={handleFullSearchSubmit} className="relative border-b border-outline-variant p-4 shrink-0">
-                    <SearchIcon className="pointer-events-none absolute left-7 top-1/2 size-5 -translate-y-1/2 text-on-surface-variant" />
-                    <Input
-                        autoFocus
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search theories, manuscripts, authors..."
-                        className="h-12 w-full rounded-control border-none bg-surface-container-high pl-12 pr-10 text-sm font-semibold text-on-surface focus-visible:ring-1 focus-visible:ring-primary"
-                    />
-                    {query && (
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setQuery('');
-                                setDebouncedQuery(''); // Force clear immediately
-                            }}
-                            className="absolute right-7 top-1/2 -translate-y-1/2 text-xs font-bold uppercase tracking-wider text-on-surface-variant/70 hover:text-on-surface"
-                        >
-                            Clear
-                        </button>
-                    )}
+                <form onSubmit={handleFullSearchSubmit} className="relative border-b border-outline-variant p-4 shrink-0 flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-on-surface-variant" />
+                        <Input
+                            ref={inputRef}
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search theories, manuscripts, authors..."
+                            className="h-12 w-full rounded-control border border-outline-variant/40 bg-surface-container-high pl-10 pr-14 text-sm font-semibold text-on-surface transition-colors focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                        />
+                        {query && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setQuery('');
+                                    setDebouncedQuery(''); // Force clear immediately
+                                }}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold uppercase tracking-wider text-on-surface-variant/70 hover:text-on-surface"
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
+                    {/* ✖ Close Modal Button */}
+                    <button
+                        type="button"
+                        onClick={() => onOpenChange(false)}
+                        className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors cursor-pointer shrink-0"
+                        aria-label="Close search"
+                    >
+                        <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </form>
 
                 {/* Results Container (Fixed Scroll Region - Fills remaining height) */}
