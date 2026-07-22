@@ -6,24 +6,19 @@ import { cn } from '@/lib/utils'
 import { useAppSelector } from '@/store/hooks'
 import Container from '../Container/Container'
 import Logo from '../Logo'
-import LogoutBtn from './LogoutBtn'
 import UserAvatar from '../User/UserAvatar'
 import { normalizeBrandHex, useTheme } from '../ThemeProvider'
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion'
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
-import ThemeSettingsPopover from '@/components/Theme/ThemeSettingsPopover'
-import SettingsPanelContent from '@/components/Theme/SettingsPanelContent'
+import { motion } from 'framer-motion'
 import { useHeaderScrollHide } from '@/hooks/useHeaderScrollHide';
+import SearchDialog from './SearchDialog'
+import SettingsDrawer from './SettingsDrawer'
 import {
   HomeIcon,
   QuillIcon,
   SettingsGearIcon,
   SearchIcon,
-  TrashIcon,
-  PaletteIcon,
-  UserPlusIcon,
   LogInIcon,
-  UserIcon
+  UserPlusIcon,
 } from '@/components/ui/Icons';
 
 const navItems = [
@@ -43,74 +38,41 @@ const headerVariants = {
   },
 };
 
-
-
-
-
-
-
-
 function Header() {
   const authStatus = useAppSelector((state) => state.auth.status)
   const currentUser = useAppSelector((state) => state.auth.userData)
   const location = useLocation()
   const navigate = useNavigate()
   const [searchValue, setSearchValue] = useState('')
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  
-  const [isAuthSettingsOpen, setIsAuthSettingsOpen] = useState(false)
-  const [isDesktopSettingsOpen, setIsDesktopSettingsOpen] = useState(false)
-  
+  const [isSettingsDrawerOpen, setIsSettingsDrawerOpen] = useState(false)
+
   const isAuthRoute = location.pathname === '/login' || location.pathname === '/signup'
   const navControlClass = 'h-control-h'
   const userRole = useAppSelector((state) => state.auth.userData?.role);
-  
+
   const { theme, setTheme, brandColor, setBrandColor, resetBrandColor } = useTheme();
   const [colorInput, setColorInput] = useState(brandColor);
   const [colorError, setColorError] = useState('');
-  
- 
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+
   const headerHidden = useHeaderScrollHide({
     topThreshold: 80,
     onHide: () => {
-      setIsAuthSettingsOpen(false);
-      setIsDesktopSettingsOpen(false);
+      setIsSettingsDrawerOpen(false);
     },
   });
-  
+
   useEffect(() => {
     setColorInput(brandColor);
     setColorError('');
   }, [brandColor]);
-  
+
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     setSearchValue(params.get('q') ?? '')
   }, [location.search])
-  
-  useEffect(() => {
-    setIsMobileNavOpen(false)
-  }, [location.pathname, location.search])
-  
-  const handleSearch = useCallback((event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault()
-      const nextQuery = searchValue.trim()
-      const params = new URLSearchParams(location.search)
-      if (nextQuery) params.set('q', nextQuery)
-        else params.delete('q')
-      
-      const pathname = location.pathname === '/' || location.pathname === '/all-posts'
-      ? location.pathname : '/all-posts'
-      
-      navigate({
-        pathname,
-        search: params.toString() ? `?${params.toString()}` : '',
-      })
-    }, 
-    [searchValue, location.search, location.pathname, navigate]
-  );
-  
+
   const commitBrandColor = useCallback(() => {
     const normalizedColor = normalizeBrandHex(colorInput);
     if (!normalizedColor) {
@@ -121,34 +83,34 @@ function Header() {
     setColorError('');
     setBrandColor(normalizedColor);
   }, [colorInput, setBrandColor])
-  
-  const settingsPanelProps = useMemo(() => (
-    { 
-      theme,
-      setTheme,
-      brandColor, 
-      setBrandColor, 
-      resetBrandColor, 
-      colorInput, 
-      setColorInput, 
-      colorError, 
-      setColorError, 
-      commitBrandColor 
-    }
-    ), [
-      theme,
-      setTheme,
-      brandColor, 
-      setBrandColor, 
-      resetBrandColor, 
-      colorInput, 
-      setColorInput, 
-      colorError, 
-      setColorError, 
-      commitBrandColor 
-    ]);
 
-  // --- Auth Route Header ---
+  const settingsPanelProps = useMemo(() => (
+    {
+      theme,
+      setTheme,
+      brandColor,
+      setBrandColor,
+      resetBrandColor,
+      colorInput,
+      setColorInput,
+      colorError,
+      setColorError,
+      commitBrandColor
+    }
+  ), [
+    theme,
+    setTheme,
+    brandColor,
+    setBrandColor,
+    resetBrandColor,
+    colorInput,
+    setColorInput,
+    colorError,
+    setColorError,
+    commitBrandColor
+  ]);
+
+  // --- Auth Route Header (/login or /signup) ---
   if (isAuthRoute) {
     return (
       <motion.header
@@ -165,18 +127,17 @@ function Header() {
               <Link to="/" className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
                 <HomeIcon className="size-5" />
               </Link>
-              <ThemeSettingsPopover
-                open={isAuthSettingsOpen}
-                onOpenChange={setIsAuthSettingsOpen}
-                trigger={
-                  <button type="button" aria-label="Open theme settings" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
-                    <PaletteIcon className={`size-5 transition-transform duration-300 ${isAuthSettingsOpen ? 'rotate-45' : ''}`} />
-                  </button>
-                }
-                options="p-card overflow-hidden"
+              
+              {/* Settings Gear Button triggers Side Drawer */}
+              <button
+                type="button"
+                aria-label="Open settings menu"
+                onClick={() => setIsSettingsDrawerOpen(true)}
+                className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer"
               >
-                <SettingsPanelContent {...settingsPanelProps} />
-              </ThemeSettingsPopover>
+                <SettingsGearIcon className={`size-5 transition-transform duration-300 ${isSettingsDrawerOpen ? 'rotate-45' : ''}`} />
+              </button>
+
               <Button asChild className={`${navControlClass} rounded-control px-3 sm:px-5 text-xs sm:text-sm font-semibold`}>
                 <Link to={location.pathname === '/login' ? '/signup' : '/login'} className="flex items-center gap-2">
                   {location.pathname === '/login' ? <><UserPlusIcon className="size-5" /> Sign Up</> : <><LogInIcon className="size-5" /> Log In</>}
@@ -185,6 +146,15 @@ function Header() {
             </div>
           </div>
         </Container>
+
+        <SettingsDrawer
+          open={isSettingsDrawerOpen}
+          onOpenChange={setIsSettingsDrawerOpen}
+          authStatus={authStatus}
+          currentUser={currentUser}
+          userRole={userRole}
+          settingsPanelProps={settingsPanelProps}
+        />
       </motion.header>
     )
   }
@@ -198,22 +168,36 @@ function Header() {
       className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container/90 backdrop-blur-xl">
       <Container className="py-4">
 
-        {/* Desktop Container */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
+          {/* Top Bar Container */}
           <div className="flex items-center justify-between gap-3 sm:gap-6 shrink-0 lg:w-auto w-full">
             <Link to="/" className="h-10 shrink-0 flex items-center" aria-label="Aniverse Home">
               <Logo width="auto" showText={true} hideTextOnMobile={true} />
             </Link>
 
-            {/* Mobile Top-Level Actions (Only shows on small screens) */}
-            <div className="flex items-center gap-1.5 sm:gap-2 lg:hidden">
-              <Link to="/" className="inline-flex size-10 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
-                <HomeIcon className="size-5 " />
+            {/* Mobile Actions (< 1024px) */}
+            <div className="flex items-center gap-1 sm:gap-2 lg:hidden shrink-0">
+              <Link to="/" className="inline-flex size-8.5 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface" aria-label="Home">
+                <HomeIcon className="size-4 sm:size-5" />
               </Link>
-              <Link to={authStatus ? '/add-post' : '/signup'} aria-label="Write a theory" className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90">
-                <QuillIcon className="size-5" />
-              </Link>
+              
+              {/* Search Trigger */}
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(true)}
+                className="inline-flex size-8.5 sm:size-10 items-center justify-center rounded-control text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface cursor-pointer"
+                aria-label="Open search"
+              >
+                <SearchIcon className="size-4 sm:size-5" />
+              </button>
+
+              {authStatus && (
+                <Link to="/add-post" aria-label="Write a theory" className="inline-flex size-8.5 sm:size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90">
+                  <QuillIcon className="size-4 sm:size-5" />
+                </Link>
+              )}
+
               {authStatus && currentUser && (
                 <Link to={`/users/${currentUser.username}`} aria-label="Profile">
                   <UserAvatar
@@ -221,39 +205,43 @@ function Header() {
                     avatarSeed={currentUser.username}
                     profileUrl={currentUser.profilePic}
                     size="sm"
-                    className="size-10 data-[size=sm]:size-10 border border-outline-variant"
+                    className="size-8.5 sm:size-10 data-[size=sm]:size-8.5 sm:data-[size=sm]:size-10 border border-outline-variant"
                   />
                 </Link>
               )}
+
+              {/* Universal Side Drawer Trigger */}
               <button
                 type="button"
-                aria-label={isMobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
-                onClick={() => setIsMobileNavOpen((open) => !open)}
-                className="inline-flex size-10 items-center justify-center border border-outline-variant text-on-surface-variant transition hover:bg-surface-container hover:text-on-surface rounded-control"
+                aria-label={isSettingsDrawerOpen ? "Close menu" : "Open menu"}
+                onClick={() => setIsSettingsDrawerOpen(true)}
+                className="inline-flex size-8.5 sm:size-10 items-center justify-center border border-outline-variant text-on-surface-variant transition hover:bg-surface-container hover:text-on-surface rounded-control"
               >
-                <SettingsGearIcon className={`size-5 transition-transform duration-300 ${isMobileNavOpen ? 'rotate-45' : ''}`} />
+                <SettingsGearIcon className={`size-4 sm:size-5 transition-transform duration-300 ${isSettingsDrawerOpen ? 'rotate-45' : ''}`} />
               </button>
             </div>
           </div>
 
-          {/* Desktop Nav Items & Actions */}
-          {/*logged in user desktop header  */}
+          {/* Desktop Nav Items & Actions (≥ 1024px) */}
           <div className="hidden lg:flex flex-1 items-center gap-6 justify-between ml-6">
 
-            {/* 1. Search Bar - Pushed to the left */}
-            <form onSubmit={handleSearch} className="flex flex-1 max-w-md items-center">
+            {/* Desktop Search Bar Trigger */}
+            <div
+              onClick={() => setIsSearchOpen(true)}
+              className="flex flex-1 max-w-[160px] xs:max-w-[220px] sm:max-w-md items-center cursor-pointer"
+            >
               <div className="relative w-full">
-                <SearchIcon className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-on-surface-variant" />
+                <SearchIcon className="pointer-events-none absolute top-1/2 left-3 sm:left-4 size-4 -translate-y-1/2 text-on-surface-variant" />
                 <Input
+                  readOnly
                   value={searchValue}
-                  onChange={(event) => setSearchValue(event.target.value)}
                   placeholder="Search theories..."
-                  className={`${navControlClass} w-full rounded-control pr-4 pl-11 text-xs font-semibold`}
+                  className={`${navControlClass} w-full rounded-control pr-3 pl-9 sm:pl-11 text-xs font-semibold cursor-pointer bg-surface-container-high/60 hover:bg-surface-container-high transition-colors`}
                 />
               </div>
-            </form>
+            </div>
+
             <div className="flex items-center gap-2">
-              {/* 2. Primary Navigation */}
               <nav className="flex items-center gap-1">
                 {navItems.map((item) => (
                   <Link
@@ -266,38 +254,28 @@ function Header() {
                       location.pathname === item.slug ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                     )}
                   >
-                    {item.name === 'Home' ? <HomeIcon className="size-5" /> : <TrashIcon className="size-5" />}
+                    <HomeIcon className="size-5" />
                   </Link>
                 ))}
               </nav>
 
-              {/* 3. User Actions */}
+              {/* Desktop User Actions */}
               {!authStatus ? (
-
                 <div className="flex items-center gap-2 pl-1">
-                  <Link to="/add-post" className="inline-flex size-10 items-center justify-center rounded-control bg-primary text-on-primary transition hover:opacity-90" title="Write a theory" aria-label="Write a theory">
-                    <QuillIcon className="size-5" />
-                  </Link>
-
-                  <ThemeSettingsPopover
-                    open={isDesktopSettingsOpen}
-                    onOpenChange={setIsDesktopSettingsOpen}
-                    trigger={
-                      <button type="button" aria-label="Open theme settings" className="inline-flex size-10 items-center justify-center text-on-surface hover:bg-surface-container transition-colors rounded-control cursor-pointer">
-                        <PaletteIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
-                      </button>
-                    }
-                    options="p-card overflow-hidden"
-                  >
-                    <SettingsPanelContent {...settingsPanelProps} />
-                  </ThemeSettingsPopover>
-
-                  <Button asChild variant="ghost" className="rounded-control text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface">
+                  {/* Single Log In CTA on Header when Logged Out */}
+                  <Button asChild className="rounded-control text-sm font-semibold">
                     <Link to="/login"><><LogInIcon className="size-5" /> Log In</></Link>
                   </Button>
-                  <Button asChild className="rounded-control text-sm font-semibold">
-                    <Link to="/signup"><><UserPlusIcon className="size-5" /> Sign Up</></Link>
-                  </Button>
+
+                  {/* Gear icon opens universal Side Drawer */}
+                  <button
+                    type="button"
+                    aria-label="Open settings menu"
+                    onClick={() => setIsSettingsDrawerOpen(true)}
+                    className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                  >
+                    <SettingsGearIcon className={`size-5 transition-transform duration-300 ${isSettingsDrawerOpen ? 'rotate-45' : ''}`} />
+                  </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 pl-1">
@@ -305,7 +283,6 @@ function Header() {
                     <QuillIcon className="size-5" />
                   </Link>
 
-                  {/* Strictly a Link now */}
                   <Link to={`/users/${currentUser.username}`} title="Profile" aria-label="Profile" className="inline-flex items-center justify-center transition hover:opacity-80">
                     <UserAvatar
                       userName={currentUser.name || currentUser.username}
@@ -316,131 +293,38 @@ function Header() {
                     />
                   </Link>
 
-                  {/* New Settings Popover Trigger */}
-                  <ThemeSettingsPopover
-                    open={isDesktopSettingsOpen} 
-                    onOpenChange={setIsDesktopSettingsOpen}
-                    trigger={
-                      <button type="button" aria-label="Open settings menu" className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">
-                        <SettingsGearIcon className={`size-5 transition-transform duration-300 ${isDesktopSettingsOpen ? 'rotate-45' : ''}`} />
-                      </button>
-                    }
-                    sideOffset={12}
-                    options="p-0 overflow-hidden"
+                  {/* Universal Side Drawer Trigger */}
+                  <button
+                    type="button"
+                    aria-label="Open settings menu"
+                    onClick={() => setIsSettingsDrawerOpen(true)}
+                    className="inline-flex size-10 items-center justify-center rounded-control text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
                   >
-                    <div className="flex flex-col">
-
-                        {userRole === 'ADMIN' && (
-                          <>
-                            <div className="p-2">
-                              <Link to="/admin" onClick={() => setIsDesktopSettingsOpen(false)} className="flex items-center gap-2 px-3 py-2 rounded-control transition-colors text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface">
-                                <TrashIcon className="size-5" /> Trash Bin
-                              </Link>
-                            </div>
-
-                          </>
-                        )}
-
-                        <div className="p-2">
-                          <Accordion type="single" collapsible className="w-full">
-                            <AccordionItem value="theme" className="border-none">
-                              <AccordionTrigger className="flex w-full items-center justify-between gap-3 px-3 py-2 rounded-control transition-colors text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:no-underline">
-                                <div className="flex items-center gap-2">
-                                  <PaletteIcon className="size-5" /> Theme Settings
-                                </div>
-                              </AccordionTrigger>
-                              <AccordionContent className="px-3 pb-3 pt-2">
-                                <SettingsPanelContent {...settingsPanelProps} />
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
-                        </div>
-                        <div className="p-2">
-                          <LogoutBtn />
-                        </div>
-                      </div>
-                  </ThemeSettingsPopover>
+                    <SettingsGearIcon className={`size-5 transition-transform duration-300 ${isSettingsDrawerOpen ? 'rotate-45' : ''}`} />
+                  </button>
                 </div>
               )}
             </div>
           </div>
         </div>
-
-        {/* Mobile Nav Drawer */}
-        {isMobileNavOpen ? (
-          <div className="absolute top-full left-0 w-full bg-surface-container backdrop-blur-xl border-b border-outline-variant px-4 pb-4 pt-2 lg:hidden shadow-elevation-2">
-
-            <nav className="flex flex-col gap-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.slug}
-                  onClick={() => setIsMobileNavOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-control transition-colors text-sm font-semibold',
-                    location.pathname === item.slug ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
-                  )}
-                >
-                  {item.name === 'Home' ? <HomeIcon className="size-5" /> : <TrashIcon className="size-5" />}
-                  {item.name}
-                </Link>
-              ))}
-
-              {/* Profile Link inside mobile menu */}
-              {authStatus && currentUser && (
-                <Link
-                  to={`/users/${currentUser.username}`}
-                  onClick={() => setIsMobileNavOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-control transition-colors text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
-                >
-                  <UserIcon className="size-5" /> Profile
-                </Link>
-              )}
-            </nav>
-
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="theme" className="border-none">
-                <AccordionTrigger className="flex w-full items-center justify-between gap-3 px-4 py-3 rounded-control transition-colors text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface hover:no-underline">
-                  <div className="flex items-center gap-3">
-                    <PaletteIcon className="size-5" /> Theme Settings
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-4 pb-3 pt-2">
-                  <SettingsPanelContent {...settingsPanelProps} />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
-            <div className="mt-2 flex flex-col gap-2">
-              {!authStatus ? (
-                <>
-                  <Button asChild variant="ghost" className="flex items-center gap-3 w-full justify-start rounded-control bg-transparent px-4 py-3 text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">
-                    <Link to="/login" onClick={() => setIsMobileNavOpen(false)}>
-                      <LogInIcon className="size-5" /> Log In
-                    </Link>
-                  </Button>
-                  <Button asChild variant="ghost" className="flex items-center gap-3 w-full justify-start rounded-control bg-transparent px-4 py-3 text-sm font-semibold text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors">
-                    <Link to="/signup" onClick={() => setIsMobileNavOpen(false)}>
-                      <UserPlusIcon className="size-5" /> Sign Up
-                    </Link>
-                  </Button>
-                </>
-              ) : (
-                <>
-                  {/* Theme Settings injected into Mobile Menu */}
-
-                  <div className="mt-2">
-                    <LogoutBtn />
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        ) : null}
       </Container>
+
+      <SearchDialog
+        open={isSearchOpen}
+        onOpenChange={setIsSearchOpen}
+        initialQuery={searchValue}
+      />
+
+      <SettingsDrawer
+        open={isSettingsDrawerOpen}
+        onOpenChange={setIsSettingsDrawerOpen}
+        authStatus={authStatus}
+        currentUser={currentUser}
+        userRole={userRole}
+        settingsPanelProps={settingsPanelProps}
+      />
     </motion.header>
   )
 }
-
 
 export default Header

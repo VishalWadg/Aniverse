@@ -58,8 +58,8 @@ function PostCard({
     <div className="min-w-0 flex-1 relative z-20">
       <div
         className={cn(
-          'flex items-center gap-2 font-medium uppercase text-on-surface-variant/80',
-          isCompact ? 'text-[10px] tracking-[0.2em]' : 'text-[11px] tracking-[0.24em]'
+          'flex items-center min-w-0 gap-1.5 sm:gap-2 font-medium uppercase text-on-surface-variant/80',
+          isCompact ? 'text-[10px] tracking-[0.2em]' : 'text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.24em]'
         )}
       >
         {authorHref ? (
@@ -67,7 +67,7 @@ function PostCard({
             to={authorHref}
             className={cn(
               'truncate normal-case tracking-normal text-on-surface transition-colors hover:text-primary min-w-0',
-              isCompact ? 'text-[13px]' : 'text-sm'
+              isCompact ? 'text-xs sm:text-[13px]' : 'text-xs sm:text-sm'
             )}
             title={`u/${displayName}`}
           >
@@ -75,7 +75,7 @@ function PostCard({
           </Link>
         ) : (
           <span 
-            className={cn('truncate normal-case tracking-normal text-on-surface min-w-0', isCompact ? 'text-[13px]' : 'text-sm')}
+            className={cn('truncate normal-case tracking-normal text-on-surface min-w-0', isCompact ? 'text-xs sm:text-[13px]' : 'text-xs sm:text-sm')}
             title={`u/${displayName}`}
           >
             u/{displayName}
@@ -94,7 +94,7 @@ function PostCard({
         <Link to={interactionHref} className="absolute inset-0 z-10 rounded-card" aria-label={`Read ${title}`} />
  
         {/* Top Meta Section */}
-        <div className="flex items-center sm:items-start gap-2 sm:gap-3 text-sm text-on-surface-variant">
+        <div className="flex items-center sm:items-start gap-2 sm:gap-3 text-sm text-on-surface-variant min-w-0">
           {authorHref ? (
             <Link to={authorHref} className="relative z-20 shrink-0">
               <UserAvatar
@@ -102,7 +102,7 @@ function PostCard({
                 avatarSeed={author?.username || displayName}
                 profileUrl={author?.profilePic}
                 size="sm"
-                className="size-10 data-[size=sm]:size-10"
+                className="size-8 sm:size-10 data-[size=sm]:size-8 sm:data-[size=sm]:size-10"
               />
             </Link>
           ) : (
@@ -112,14 +112,14 @@ function PostCard({
                 avatarSeed={author?.username || displayName}
                 profileUrl={author?.profilePic}
                 size="sm"
-                className="size-10 data-[size=sm]:size-10"
+                className="size-8 sm:size-10 data-[size=sm]:size-8 sm:data-[size=sm]:size-10"
               />
             </div>
           )}
  
           {authorMeta}
  
-          <span className="inline-flex shrink-0 items-center border border-primary/30 rounded-control px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.24em] text-primary">
+          <span className="inline-flex shrink-0 items-center border border-primary/30 rounded-control px-1.5 py-0.5 sm:px-2 sm:py-1 text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.24em] text-primary">
             {category}
           </span>
         </div>
@@ -178,7 +178,7 @@ function PostCard({
       <Link to={interactionHref} className="absolute inset-0 z-10 rounded-card" aria-label={`Read ${title}`} />
 
       {/* Top Meta Section */}
-      <div className="flex items-center gap-2 sm:gap-3 text-sm text-on-surface-variant">
+      <div className="flex items-center gap-2 sm:gap-3 text-sm text-on-surface-variant min-w-0">
         {authorHref ? (
           <Link to={authorHref} className="relative z-20 shrink-0">
             <UserAvatar
@@ -186,7 +186,7 @@ function PostCard({
               avatarSeed={author?.username || displayName}
               profileUrl={author?.profilePic}
               size="default"
-              className="size-11 data-[size=default]:size-11"
+              className="size-9 sm:size-11 data-[size=default]:size-9 sm:data-[size=default]:size-11"
             />
           </Link>
         ) : (
@@ -196,14 +196,14 @@ function PostCard({
               avatarSeed={author?.username || displayName}
               profileUrl={author?.profilePic}
               size="default"
-              className="size-11 data-[size=default]:size-11"
+              className="size-9 sm:size-11 data-[size=default]:size-9 sm:data-[size=default]:size-11"
             />
           </div>
         )}
 
         {authorMeta}
 
-        <span className="inline-flex shrink-0 items-center border border-primary/40 rounded-control px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
+        <span className="inline-flex shrink-0 items-center border border-primary/40 rounded-control px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.28em] text-primary">
           {category}
         </span>
       </div>
