@@ -947,3 +947,49 @@
     line-height: 1.7;
   }
 }
+
+/* ==========================================================================
+   Floating Overlay Theme Scrollbar (Floats on Top of Content, Zero Space)
+   ========================================================================== */
+html, body {
+  overflow-y: overlay;
+}
+
+/* Prevent Radix Dialog scroll-lock from injecting padding-right layout shift */
+body[data-scroll-locked],
+[data-radix-scroll-lock-affected] {
+  padding-right: 0px !important;
+  margin-right: 0px !important;
+}
+
+/* Custom Scrollbar Dimensions for WebKit Browsers (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Completely remove top/bottom scrollbar stepper arrow buttons */
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Transparent track so scrollbar floats directly on top of page content */
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* Sleek Theme Pill Thumb */
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--outline-variant) 45%, transparent);
+  border-radius: 9999px;
+  transition: background-color 0.25s ease;
+}
+
+/* Hover & Active states match active Material 3 primary brand color */
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background: var(--primary);
+}
