@@ -41,7 +41,7 @@ export default function SettingsDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed inset-y-0 left-0 right-auto top-0 z-50 h-full w-[85vw] max-w-xs sm:max-w-sm translate-x-0 translate-y-0 rounded-none border-r border-outline-variant bg-surface-container p-5 shadow-elevation-2 flex flex-col justify-between overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left duration-300">
+      <DialogContent className="fixed inset-y-0 left-0 right-auto top-0 z-50 h-full w-[85vw] max-w-xs sm:max-w-sm translate-x-0 translate-y-0 rounded-none border-r border-outline-variant bg-surface-container p-5 shadow-elevation-2 flex flex-col justify-between overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left duration-300 will-change-transform">
         
         {/* Drawer Top Header */}
         <div>
