@@ -115,16 +115,16 @@ jobs:
                 }
             } 
             EOF
-            
             # Log in to GHCR using the permanent Personal Access Token
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Clean up expired images BEFORE the pull phase to optimize disk sector availability
+            docker image prune -af
             
             # Pull and restart the stack using merged files (ignores dev override)
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
             
-            # Clean up disk space to prevent the 30GB EBS volume from filling up
-            docker image prune -f
 
   deploy-to-gh-pages:
     runs-on: ubuntu-latest

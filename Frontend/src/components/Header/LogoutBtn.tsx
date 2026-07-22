@@ -6,6 +6,16 @@ import useToasts from '../../hooks/useToasts'
 import { useAppDispatch } from '@/store/hooks'
 import { logout } from '../../store/' // Import from authSlice only
 
+function LogOutIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  )
+}
+
 function LogoutBtn() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -38,11 +48,12 @@ function LogoutBtn() {
   return (
     <Button
       type="button"
-      variant="outline"
-      className="border-outline-variant bg-transparent px-4 text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+      variant="ghost"
+      className="flex items-center gap-2 w-full justify-start rounded-control bg-transparent px-3 py-2 text-sm font-semibold text-error hover:bg-error/10 transition-colors"
       onClick={logoutHandler}
     >
-      Logout
+      <LogOutIcon className="size-4" />
+      Log Out
     </Button>
   )
 }
