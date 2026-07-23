@@ -17,7 +17,7 @@ services:
     networks:
       - aniverse-network
   aniverse-backend:
-    image: ghcr.io/vishalwadg/aniverse-backend:latest # Pulls pre-built image
+    image: ghcr.io/vishalwadg/aniverse-backend:${IMAGE_TAG:-latest} # Pulls pre-built image
     restart: always
     environment:
       # Explicitly cap Java memory so it doesn't crash the free-tier AWS VPS
@@ -39,7 +39,7 @@ services:
       timeout: 5s
       retries: 5
   aniverse-frontend:
-    image: ghcr.io/vishalwadg/aniverse-frontend:latest # Pulls pre-built image
+    image: ghcr.io/vishalwadg/aniverse-frontend:${IMAGE_TAG:-latest} # Pulls pre-built image
     restart: always
 
 volumes:
