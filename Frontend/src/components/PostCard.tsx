@@ -10,7 +10,7 @@ import {
   getExcerpt,
   inferCategory,
 } from '@/lib/post-helpers'
-
+import { TimeAgo } from './ui/TimeAgo'
 function PostCard({
   id,
   title,
@@ -82,7 +82,9 @@ function PostCard({
           </span>
         )}
         <span className="shrink-0 text-on-surface-variant/40">/</span>
-        <span className="shrink-0">{formatRelativeTime(createdAt)}</span>
+        <TimeAgo 
+          timestamp={createdAt} 
+        />
       </div>
     </div>
   )
