@@ -23,6 +23,7 @@ services:
       # Explicitly cap Java memory so it doesn't crash the free-tier AWS VPS
       JAVA_TOOL_OPTIONS: -Xmx512m
       SPRING_PROFILES_ACTIVE: prod
+      APP_VERSION: ${APP_VERSION}
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
