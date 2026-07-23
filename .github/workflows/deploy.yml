@@ -36,7 +36,9 @@ jobs:
 
       - name: Compute short SHA
         id: sha
-        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
 
       # 3. Build & Push Backend Jib Image directly to GHCR
       - name: Build and Push Backend Jib Image
