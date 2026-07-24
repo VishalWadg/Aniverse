@@ -44,8 +44,8 @@ function Logo({
               )}
               style={{
                 backgroundColor: 'var(--primary)',
-                maskImage: 'url(/AniverseLogo.svg)',
-                WebkitMaskImage: 'url(/AniverseLogo.svg)',
+                maskImage: `url(${import.meta.env.BASE_URL}AniverseLogo.svg)`,
+                WebkitMaskImage: `url(${import.meta.env.BASE_URL}AniverseLogo.svg)`,
                 maskRepeat: 'no-repeat',
                 WebkitMaskRepeat: 'no-repeat',
                 maskPosition: 'center',
@@ -59,7 +59,7 @@ function Logo({
           </>
         ) : (
           <img 
-            src="/AniverseLogo.svg" 
+            src={`${import.meta.env.BASE_URL}AniverseLogo.svg`}
             alt="Aniverse Logo" 
             className={cn("object-contain transition-transform duration-300 group-hover:scale-135 sm:group-hover:scale-140", iconClassName)} 
           />

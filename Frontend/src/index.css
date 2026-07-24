@@ -949,26 +949,8 @@
 }
 
 /* ==========================================================================
-   Custom Theme Scrollbar (Zero Layout Shift)
+   Custom Theme Scrollbar
    ========================================================================== */
-
-/* 
-  To make the scrollbar "float" on top of the content without layout shifts:
-  1. We force the body to always be 100vw (viewport width, including scrollbar).
-  2. We prevent horizontal scrolling caused by the 100vw pushing past the scrollbar.
-  3. We disable Radix UI's automatic padding compensation because the body width never changes.
-*/
-body {
-  width: 100vw;
-  overflow-x: hidden;
-}
-
-/* Prevent Radix from injecting right padding, as our body width is locked to 100vw */
-body[data-scroll-locked],
-[data-radix-scroll-lock-affected] {
-  padding-right: 0px !important;
-  margin-right: 0px !important;
-}
 
 /* Custom Scrollbar Dimensions for WebKit Browsers (Chrome, Edge, Safari) */
 ::-webkit-scrollbar {

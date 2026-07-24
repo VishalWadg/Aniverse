@@ -10,6 +10,8 @@ RUN npm ci
 COPY . .
 # Set the backend URL as relative so Nginx intercepts it
 ENV VITE_BACKEND_URL=/api/v1
+ARG VITE_APP_VERSION
+ENV VITE_APP_VERSION=$VITE_APP_VERSION
 RUN npm run build
 
 # Step 2: Serve using Nginx (Non-Root)
