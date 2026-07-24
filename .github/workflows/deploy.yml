@@ -159,6 +159,7 @@ jobs:
           cd Frontend
           export VITE_BACKEND_URL="https://${{ secrets.VPS_PUBLIC_DOMAIN }}/api/v1"
           export VITE_BASE_PATH="/Aniverse/"
+          export VITE_APP_VERSION="${GITHUB_SHA::7}"
           npm run build
       - name: Create 404 fallback page
         run: cp Frontend/dist/index.html Frontend/dist/404.html
