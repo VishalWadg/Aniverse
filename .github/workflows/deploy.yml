@@ -1,4 +1,4 @@
-name: CI/CD Pipeline & Deploy to AWS
+name: CI/CD Pipeline & Automatic Release
 
 on:
   push:
@@ -10,15 +10,37 @@ permissions:
   packages: write
 
 jobs:
-  build-and-push:
+  # -------------------------------------------------------------
+  # JOB 1: Calculate Version, Build Artifacts, & Push to GHCR
+  # -------------------------------------------------------------
+  build-and-tag:
     runs-on: ubuntu-latest
     outputs:
       short_sha: ${{ steps.sha.outputs.SHORT_SHA }}
+      new_tag: ${{ steps.tagger.outputs.new_tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full depth required for commit log tag calculation
 
-      # 1. Set up Java Environment
+      # 1. Compute Short SHA
+      - name: Compute short SHA
+        id: sha
+        run: |
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      # 2. Automatically Calculate & Create SemVer Tag using Conventional Commits
+      - name: Bump version and push tag
+        id: tagger
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          create_annotated_tag: true
+
+      # 3. Set up Java Environment
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -26,7 +48,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      # 2. Log in to GitHub Container Registry (GHCR)
+      # 4. Log in to GitHub Container Registry (GHCR)
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -34,29 +56,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute short SHA
-        id: sha
-        run: |
-          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-
-      # 3. Build & Push Backend Jib Image directly to GHCR
+      # 5. Build & Push Backend Jib Image (Tagged with SHA AND SemVer Tag)
       - name: Build and Push Backend Jib Image
         run: |
           cd Backend
           chmod +x mvnw
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          
+          # Multi-tag in ONE build step: latest, SHORT_SHA, and SemVer tag
           ./mvnw compile jib:build \
             -Dimage=ghcr.io/${REPO_LOWER}-backend:latest \
-            -Djib.to.tags=${{ env.SHORT_SHA }} \
+            -Djib.to.tags=${{ env.SHORT_SHA }},${{ steps.tagger.outputs.new_tag }} \
             -Djib.to.auth.username=${{ github.actor }} \
             -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }}
 
-      # 4. Set up Docker Buildx for Frontend Build
+      # 6. Set up Docker Buildx for Frontend Build
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 5. Build & Push Frontend Docker Image to GHCR
+      # 7. Build & Push Frontend Docker Image (Multi-tagged in ONE step)
       - name: Build and Push Frontend Image
         run: |
           cd Frontend
@@ -65,30 +83,40 @@ jobs:
             --file Dockerfile \
             --tag ghcr.io/${REPO_LOWER}-frontend:latest \
             --tag ghcr.io/${REPO_LOWER}-frontend:${{ env.SHORT_SHA }} \
-            --build-arg VITE_APP_VERSION=${{ env.SHORT_SHA }} \
+            --tag ghcr.io/${REPO_LOWER}-frontend:${{ steps.tagger.outputs.new_tag }} \
+            --build-arg VITE_APP_VERSION=${{ steps.tagger.outputs.new_tag }} \
             --push \
             --cache-from type=gha \
             --cache-to type=gha,mode=max \
             .
 
+      # 8. Auto-create GitHub Release notes
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tagger.outputs.new_tag }}
+          name: Release ${{ steps.tagger.outputs.new_tag }}
+          body: ${{ steps.tagger.outputs.changelog }}
+
+  # -------------------------------------------------------------
+  # JOB 2: Deploy to Production AWS VPS ONCE
+  # -------------------------------------------------------------
   deploy:
-    needs: build-and-push
+    needs: build-and-tag
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code (needed to access docker-compose.yml and docker-compose.prod.yml)
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 1. Securely copy both the docker-compose.yml and docker-compose.prod.yml files to the server first
       - name: Copy compose files to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_SSH_HOST }}
           username: ${{ secrets.VPS_SSH_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml,docker-compose.prod.yml" # <-- Copies both files
+          source: "docker-compose.yml,docker-compose.prod.yml"
           target: "~/aniverse-production"
 
-      # 2. Run the SSH commands to start the containers
       - name: SSH and deploy to AWS VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -98,10 +126,10 @@ jobs:
           script: |
             cd ~/aniverse-production
             
-            # Dynamically generate the .env file and strip leading indentation spaces using sed
+            # Use the clean SemVer tag for deployment & app version
             cat <<'EOF' | sed 's/^[ \t]*//' > .env
-            IMAGE_TAG=${{ needs.build-and-push.outputs.short_sha }}
-            APP_VERSION=${{ needs.build-and-push.outputs.short_sha }}
+            IMAGE_TAG=${{ needs.build-and-tag.outputs.new_tag }}
+            APP_VERSION=${{ needs.build-and-tag.outputs.new_tag }}
             SPRING_PROFILES_ACTIVE=prod
             ALLOWED_ORIGINS=${{ secrets.ALLOWED_ORIGINS }}
             DB_NAME=${{ secrets.DB_NAME }}
@@ -117,7 +145,6 @@ jobs:
             VITE_API_BASE_URL=https://${{ secrets.VPS_PUBLIC_DOMAIN }}/api/v1
             EOF
 
-            # Generate Caddy SSL Routing Config
             cat <<'EOF' | sed 's/^[ \t]*//' > Caddyfile
             ${{ secrets.VPS_PUBLIC_DOMAIN }} {
                 handle /api/v1* {
@@ -128,18 +155,17 @@ jobs:
                 }
             } 
             EOF
-            # Log in to GHCR using the permanent Personal Access Token
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Clean up expired images BEFORE the pull phase to optimize disk sector availability
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker image prune -af
-            
-            # Pull and restart the stack using merged files (ignores dev override)
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans
-            
 
+  # -------------------------------------------------------------
+  # JOB 3: Deploy Static Site to GitHub Pages
+  # -------------------------------------------------------------
   deploy-to-gh-pages:
+    needs: build-and-tag
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -159,7 +185,7 @@ jobs:
           cd Frontend
           export VITE_BACKEND_URL="https://${{ secrets.VPS_PUBLIC_DOMAIN }}/api/v1"
           export VITE_BASE_PATH="/Aniverse/"
-          export VITE_APP_VERSION="${GITHUB_SHA::7}"
+          export VITE_APP_VERSION="${{ needs.build-and-tag.outputs.new_tag }}"
           npm run build
       - name: Create 404 fallback page
         run: cp Frontend/dist/index.html Frontend/dist/404.html
