@@ -41,3 +41,7 @@ cloudinary:
   api-secret: ${CLOUDINARY_SECRET}
   folder-name: ${CLOUDINARY_FOLDER_NAME:aniverse_posts}
 
+google:
+  ai:
+    api-key: ${GOOGLE_AI_API_KEY}
+
