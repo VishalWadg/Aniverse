@@ -21,7 +21,7 @@ export const uploadImageToCloudinary = async (file: File) => {
 
         // 3. Upload directly to Cloudinary
 
-        const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+        const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
         const uploadReponse = await fetch(uploadUrl, {
             method: 'POST',
             body: formData,
@@ -54,7 +54,7 @@ export const uploadImageUrlToCloudinary = async (imageUrl: string) => {
         formData.append('signature', signature);
         formData.append('folder', folder);
 
-        const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+        const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
         const uploadResponse = await fetch(uploadUrl, {
             method: 'POST',
             body: formData,

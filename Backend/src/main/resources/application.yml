@@ -45,3 +45,9 @@ google:
   ai:
     api-key: ${GOOGLE_AI_API_KEY}
 
+github:
+  token: ${GITHUB_TOKEN}
+  repo: ${GITHUB_REPO}
+  webhook-secrete: ${GITHUB_WEBHOOK_SECRET}
+
+

@@ -61,6 +61,8 @@
     --color-accent-foreground: var(--on-surface);
     --color-destructive: var(--error);
     --color-destructive-foreground: var(--on-error);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary-foreground: var(--secondary-foreground);
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);

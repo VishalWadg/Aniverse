@@ -9,6 +9,7 @@ CREATE TABLE feedbacks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     content TEXT NOT NULL,
     embedding vector(768), 
+    attachments TEXT[], -- stores Cloudinary URLs for both images and videos
     impact_count INT NOT NULL DEFAULT 1,
     status feedback_status NOT NULL DEFAULT 'NEW',
     github_issue_id INT,
@@ -18,7 +19,9 @@ CREATE TABLE feedbacks (
 -- 3. Create tags Catalog Table (with its own vector column for semantic tag suggestions)
 CREATE TABLE tags (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    github_label_id BIGINT UNIQUE, -- Matches exactly with GitHub's label ID
     name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT, -- Stores GitHub label description for richer vector embeddings
     embedding vector(768),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
