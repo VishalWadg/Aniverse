@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner'; // or whatever you use for toasts
 import { uploadImageToCloudinary } from '@/api/uploadApi';
 import { TagSelector } from './TagSelector';
-import { Tag } from '@/api/feedbackApi';
 import { useCreateFeedbackMutation } from '@/api/feedbackApi';
+import {Tag, useSuggestTagsMutation, useGetAllTagsQuery} from '@/api/tagApi'; 
 
 
 function FeedbackReport(): React.ReactNode {
@@ -13,9 +13,28 @@ function FeedbackReport(): React.ReactNode {
     const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
     const [attachments, setAttachments] = useState<string[]>([]);
     const [isUploading, setIsUploading] = useState(false);
-    
+
     // Replace raw isSubmitting with RTK Query
     const [createFeedback, { isLoading: isSubmitting }] = useCreateFeedbackMutation();
+    const [suggestTags, { data: suggestedTags = [], reset: resetSuggestedTags},  ] = useSuggestTagsMutation();
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (content.trim().length >= 10) {
+                suggestTags({ query: content.trim() });
+            } else if (content.trim().length === 0) {
+                resetSuggestedTags(); // Clear suggested tags if content is empty
+            }
+        }, 350); // 350ms debounce so we don't spam the API on every keypress
+        return () => clearTimeout(timer);
+    }, [content, suggestTags]);
+
+
+    const handleAddSuggestedTag = (tag: Tag) => {
+        if (!selectedTags.some(t => t.id === tag.id)) {
+            setSelectedTags([...selectedTags, tag]);
+        }
+    };
 
     // attachment upload
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,14 +62,14 @@ function FeedbackReport(): React.ReactNode {
             toast.error("Description is required");
             return;
         }
-         try {
+        try {
             // Send to your backend using RTK Query
             await createFeedback({
                 content,
                 tagIds: selectedTags.map(tag => tag.id),
                 attachments
             }).unwrap(); // .unwrap() throws an error if the request fails
-            
+
             toast.success("Feedback submitted!");
             setContent('');
             setAttachments([]);
@@ -76,10 +95,28 @@ function FeedbackReport(): React.ReactNode {
                     className="min-h-[200px] resize-y"
                 />
             </div>
+            {/* AI Suggested Tags Bar */}
+            {suggestedTags.length > 0 && (
+                <div className="space-y-1">
+                    <div className="flex flex-wrap gap-2">
+                        {suggestedTags.map((tag) => (
+                            <button
+                                key={tag.id}
+                                type="button"
+                                onClick={() => handleAddSuggestedTag(tag)}
+                                className="text-xs bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-full px-2.5 py-0.5 transition-colors flex items-center gap-1"
+                            >
+                                + {tag.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* 2. Tag Combobox */}
-            <TagSelector 
-                selectedTags={selectedTags} 
-                onTagsChange={setSelectedTags} 
+            <TagSelector
+                selectedTags={selectedTags}
+                onTagsChange={setSelectedTags}
             />
             {/* 3. File Upload & Previews */}
             <div className="space-y-2">

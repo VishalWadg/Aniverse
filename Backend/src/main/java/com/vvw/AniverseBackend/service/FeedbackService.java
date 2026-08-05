@@ -2,19 +2,17 @@ package com.vvw.AniverseBackend.service;
 
 import com.vvw.AniverseBackend.dto.FeedbackRequestDto;
 import com.vvw.AniverseBackend.dto.FeedbackResponseDto;
-import com.vvw.AniverseBackend.dto.TagDto;
 import com.vvw.AniverseBackend.entity.Feedback;
 import com.vvw.AniverseBackend.entity.Tag;
 import com.vvw.AniverseBackend.mapper.FeedbackMapper;
 import com.vvw.AniverseBackend.repository.FeedbackRepository;
-import com.vvw.AniverseBackend.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.vvw.AniverseBackend.mapper.TagMapper;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,8 +20,9 @@ import java.util.stream.Collectors;
 public class FeedbackService {
 
     private final FeedbackRepository feedbackRepository;
-    private final TagRepository tagRepository;
+    private final TagService tagService;
     private final FeedbackMapper feedbackMapper;
+    private final TagMapper tagMapper;
 
     @Transactional
     public FeedbackResponseDto createFeedback(FeedbackRequestDto dto) {
@@ -32,8 +31,11 @@ public class FeedbackService {
         feedback.setAttachments(dto.getAttachments());
 
         // Process Tags: Only allow pre-populated tags based on exact name match
-        if (dto.getTags() != null && !dto.getTags().isEmpty()) {
-            List<Tag> existingTags = tagRepository.findByNameIn(dto.getTags());
+        if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
+            List<Tag> existingTags = tagService.getTagsByIds(dto.getTagIds())
+                                    .stream()
+                                    .map(tagMapper::toTagEntity)
+                                    .collect(Collectors.toList());
             feedback.setTags(new HashSet<>(existingTags));
         } else {
             feedback.setTags(new HashSet<>());
@@ -43,10 +45,5 @@ public class FeedbackService {
         return feedbackMapper.toFeedbackResponseDto(savedFeedback);
     }
 
-    @Transactional(readOnly = true)
-    public List<TagDto> getAllAvailableTags() {
-        return tagRepository.findAll().stream()
-                .map(feedbackMapper::toTagDto)
-                .collect(Collectors.toList());
-    }
+    
 }

@@ -9,6 +9,18 @@ spring:
     deserialization:
       fail-on-unknown-properties: true
 
+  ai:
+    google:
+      genai:
+        api-key: ${GOOGLE_AI_API_KEY} # Your Google AI Studio Key (AIzaSy...)
+        embedding:
+          api-key: ${GOOGLE_AI_API_KEY}
+          text:
+            enabled: true
+            options:
+              model: gemini-embedding-001
+              dimensions: 768
+
 # spring.sql.init.data-locations=classpath:data.sql
 server:
   servlet:
@@ -41,13 +53,9 @@ cloudinary:
   api-secret: ${CLOUDINARY_SECRET}
   folder-name: ${CLOUDINARY_FOLDER_NAME:aniverse_posts}
 
-google:
-  ai:
-    api-key: ${GOOGLE_AI_API_KEY}
-
 github:
   token: ${GITHUB_TOKEN}
   repo: ${GITHUB_REPO}
-  webhook-secrete: ${GITHUB_WEBHOOK_SECRET}
+  webhook-secret: ${GITHUB_WEBHOOK_SECRET}
 
 

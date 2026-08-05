@@ -1,15 +1,10 @@
 import { baseApi } from './baseApi';
-
+import { Tag } from './tagApi';
 // ==========================================
 // TYPES & INTERFACES
 // ==========================================
 
-export interface Tag {
-    id: string; // UUID in backend
-    name: string;
-    description?: string;
-    githubLabelId?: number;
-}
+
 
 export interface Feedback {
     id: string; // UUID
@@ -35,15 +30,6 @@ export interface CreateFeedbackPayload {
 export const feedbackApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         
-        // 1. Fetch tags (for the Combobox)
-        getTags: builder.query<Tag[], void>({
-            query: () => ({
-                url: '/tags',
-                method: 'GET',
-            }),
-            providesTags: ['Tag'],
-        }),
-
         // 2. Submit new feedback
         createFeedback: builder.mutation<Feedback, CreateFeedbackPayload>({
             query: (payload) => ({
@@ -54,20 +40,11 @@ export const feedbackApi = baseApi.injectEndpoints({
             invalidatesTags: ['Feedback'],
         }),
 
-        // 3. (Epic 2.4 Placeholder) Get Tag Suggestions by text similarity
-        suggestTags: builder.query<Tag[], string>({
-            query: (text) => ({
-                url: '/tags/suggest',
-                method: 'GET',
-                params: { text }
-            }),
-        })
+        
 
     }),
 });
 
 export const {
-    useGetTagsQuery,
     useCreateFeedbackMutation,
-    useSuggestTagsQuery // For later!
 } = feedbackApi;

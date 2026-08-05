@@ -52,44 +52,55 @@ public class GithubSyncService {
      * In-Memory Diff & Batch Builder
      */
     private void synchronizeLabels(List<GithubLabelDto> remoteLabels) {
-        // Fetch existing DB tags
-        List<Tag> existingTags = tagRepository.findAll();
+    // 1. Fetch existing DB tags
+    List<Tag> existingTags = tagRepository.findAll();
 
-        // Index existing tags by GitHub ID and Name for O(1) fast lookup
-        Map<Long, Tag> dbTagsByGithubId = existingTags.stream()
-                .filter(t -> t.getGithubLabelId() != null)
-                .collect(Collectors.toMap(Tag::getGithubLabelId, Function.identity(), (t1, t2) -> t1));
+    // Index existing tags by GitHub ID and Name for O(1) fast lookup
+    Map<Long, Tag> dbTagsByGithubId = existingTags.stream()
+            .filter(t -> t.getGithubLabelId() != null)
+            .collect(Collectors.toMap(Tag::getGithubLabelId, Function.identity(), (t1, t2) -> t1));
 
-        Map<String, Tag> dbTagsByName = existingTags.stream()
-                .collect(Collectors.toMap(Tag::getName, Function.identity(), (t1, t2) -> t1));
+    Map<String, Tag> dbTagsByName = existingTags.stream()
+            .collect(Collectors.toMap(Tag::getName, Function.identity(), (t1, t2) -> t1));
 
-        List<Tag> tagsToSave = new ArrayList<>();
-        Set<Long> processedRemoteIds = new HashSet<>();
+    List<Tag> tagsToSave = new ArrayList<>();
+    Set<Long> processedRemoteIds = new HashSet<>();
 
-        // A. Match and build batch update/insert list
-        for (GithubLabelDto remote : remoteLabels) {
-            processedRemoteIds.add(remote.id());
+    for (GithubLabelDto remote : remoteLabels) {
+        processedRemoteIds.add(remote.id());
 
-            // Match by ID first; fallback to Name
-            Tag tag = dbTagsByGithubId.get(remote.id());
-            if (tag == null) {
-                tag = dbTagsByName.getOrDefault(remote.name(), new Tag());
-            }
-
-            tag.setGithubLabelId(remote.id());
-            tag.setName(remote.name());
-            tag.setDescription(remote.description());
-
-            tagsToSave.add(tag);
+        // Match by ID first; fallback to Name
+        Tag tag = dbTagsByGithubId.get(remote.id());
+        if (tag == null) {
+            tag = dbTagsByName.getOrDefault(remote.name(), new Tag());
         }
 
-        // B. Identify stale tags (tags in DB with GitHub ID that no longer exist on GitHub)
-        Set<Long> staleGithubIds = dbTagsByGithubId.keySet().stream()
-                .filter(id -> !processedRemoteIds.contains(id))
-                .collect(Collectors.toSet());
+        // A. CHECK DIFF BEFORE MUTATING FIELDS!
+        boolean isNew = (tag.getId() == null);
+        boolean nameChanged = !Objects.equals(tag.getName(), remote.name());
+        boolean descChanged = !Objects.equals(tag.getDescription(), remote.description());
+        boolean needsEmbedding = isNew || nameChanged || descChanged || tag.getEmbedding() == null;
 
-        // C. Delegate DB Operations to Transactional Command Service
-        tagCommandService.saveAllTags(tagsToSave);
-        tagCommandService.deleteTagsByGithubIds(staleGithubIds);
+        // B. MUTATE FIELDS AFTER DIFFING
+        tag.setGithubLabelId(remote.id());
+        tag.setName(remote.name());
+        tag.setDescription(remote.description());
+
+        // C. CRITICAL STEP: Clear old embedding so saveAllTags knows to re-embed it!
+        if (needsEmbedding) {
+            tag.setEmbedding(null);
+        }
+
+        tagsToSave.add(tag);
     }
+
+    // Identify stale tags deleted from GitHub
+    Set<Long> staleGithubIds = dbTagsByGithubId.keySet().stream()
+            .filter(id -> !processedRemoteIds.contains(id))
+            .collect(Collectors.toSet());
+
+    // Delegate DB operations
+    tagCommandService.saveAllTags(tagsToSave);
+    tagCommandService.deleteTagsByGithubIds(staleGithubIds);
+}
 }

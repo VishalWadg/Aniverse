@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 public class FeedbackRequestDto {
@@ -15,6 +16,6 @@ public class FeedbackRequestDto {
 
     private List<String> attachments;
 
-    private List<String> tags; // Expecting tag names to map to existing labels
+    private List<UUID> tagIds; // Expecting tag names to map to existing labels
 
 }
