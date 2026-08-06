@@ -25,7 +25,7 @@ export interface Attachment {
 export interface CreateFeedbackPayload {
     content: string;
     tagIds: string[]; // UUIDs of the selected tags
-    attachments: Attachment[]; // Array of attachment objects
+    attachments: string[]; // Array of attachment URLs
 }
 
 // ==========================================

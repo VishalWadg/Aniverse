@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/feedbacks")
 @RequiredArgsConstructor
@@ -25,14 +23,5 @@ public class FeedbackController {
         FeedbackResponseDto response = feedbackService.createFeedback(requestDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-
-    @GetMapping("/tags")
-    public ResponseEntity<List<TagDto>> getAvailableTags() {
-        return ResponseEntity.ok(feedbackService.getAllAvailableTags());
-    }
-
-    @PostMapping("/tags/suggest")
-    public ResponseEntity<List<TagDto>> getSuggestedTags(@Valid @RequestBody TagSuggestionRequest request) {
-        return ResponseEntity.ok(feedbackService.getSuggestedTags(request.getQuery()));
-    }
+    
 }

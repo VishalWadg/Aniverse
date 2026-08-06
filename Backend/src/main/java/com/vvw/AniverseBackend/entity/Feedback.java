@@ -36,7 +36,7 @@ public class Feedback {
     @Builder.Default
     private int impactCount = 1;
 
-    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     @Builder.Default
     private FeedbackStatus status = FeedbackStatus.NEW;

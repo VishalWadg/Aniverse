@@ -79,7 +79,7 @@ function FeedbackReport(): React.ReactNode {
             await createFeedback({
                 content,
                 tagIds: selectedTags.map(tag => tag.id),
-                attachments
+                attachments: attachments.map(attachment => attachment.url) 
             }).unwrap(); // .unwrap() throws an error if the request fails
 
             toast.success("Feedback submitted!");
@@ -87,7 +87,7 @@ function FeedbackReport(): React.ReactNode {
             setAttachments([]);
             setSelectedTags([]);
         } catch (error) {
-            toast.error("Failed to submit feedback");
+            toast.error("Failed to submit feedback");   
         }
     };
 
