@@ -34,9 +34,9 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
             <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Labels</label>
                 {selectedTags.length > 0 && (
-                    <Button 
-                        variant="ghost" 
-                        size="sm" 
+                    <Button
+                        variant="ghost"
+                        size="sm"
                         className="h-auto p-0 text-xs text-muted-foreground hover:text-destructive"
                         onClick={() => onTagsChange([])}
                     >
@@ -60,8 +60,8 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
                         </Button>
                     </PopoverTrigger>
 
-                    <PopoverContent 
-                        className="w-[var(--radix-popover-trigger-width)] p-0" 
+                    <PopoverContent
+                        className="w-[var(--radix-popover-trigger-width)] p-0"
                         align="start"
                     >
                         <Command>
@@ -94,16 +94,28 @@ export function TagSelector({ selectedTags, onTagsChange }: TagSelectorProps) {
 
                 {/* 2. Render selected tags as Badges */}
                 {selectedTags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-1">
+                    <div className="flex flex-wrap gap-2 pt-1" role="list" aria-label="Selected tags">
                         {selectedTags.map((tag) => (
-                            <Badge key={tag.id} variant="secondary" className="px-2 py-1">
-                                {tag.name}
+                            <Badge
+                                key={tag.id}
+                                variant="secondary"
+                                className="flex items-center gap-1 rounded-md px-2.5 py-0.5 font-normal transition-colors"
+                                role="listitem"
+                            >
+                                <span className="truncate max-w-[150px]">{tag.name}</span>
+
                                 <button
                                     type="button"
-                                    className="ml-1.5 inline-flex items-center justify-center rounded-full"
-                                    onClick={() => handleRemoveTag(tag.id)}
+                                    // 1. Base state: text-foreground/60 keeps it visible but slightly dimmed
+                                    // 2. Hover state: hover:bg-destructive hover:text-destructive-foreground creates a sharp, clear red contrast
+                                    className="ml-1 -mr-1 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-foreground transition-all hover:bg-destructive hover:text-destructive-foreground focus:bg-destructive focus:text-destructive-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveTag(tag.id);
+                                    }}
+                                    aria-label={`Remove ${tag.name} tag`}
                                 >
-                                    <X className="h-3 w-3" />
+                                    <X className="h-3 w-3" strokeWidth={2.5} />
                                 </button>
                             </Badge>
                         ))}

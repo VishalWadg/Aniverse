@@ -2,16 +2,18 @@ import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner'; // or whatever you use for toasts
-import { uploadImageToCloudinary } from '@/api/uploadApi';
+import { deleteImageFromCloudinary, uploadImageToCloudinary } from '@/api/uploadApi';
 import { TagSelector } from './TagSelector';
-import { useCreateFeedbackMutation } from '@/api/feedbackApi';
+import { Attachment, useCreateFeedbackMutation } from '@/api/feedbackApi';
 import {Tag, useSuggestTagsMutation, useGetAllTagsQuery} from '@/api/tagApi'; 
+import { X, Trash } from "lucide-react"
+import { IconButton } from '../ui/IconButton';
 
 
 function FeedbackReport(): React.ReactNode {
     const [content, setContent] = useState('');
     const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-    const [attachments, setAttachments] = useState<string[]>([]);
+    const [attachments, setAttachments] = useState<Attachment[]>([]);
     const [isUploading, setIsUploading] = useState(false);
 
     // Replace raw isSubmitting with RTK Query
@@ -20,10 +22,11 @@ function FeedbackReport(): React.ReactNode {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (content.trim().length >= 10) {
-                suggestTags({ query: content.trim() });
-            } else if (content.trim().length === 0) {
-                resetSuggestedTags(); // Clear suggested tags if content is empty
+            const trimmed = content.trim();
+            if (trimmed.length >= 10) {
+                suggestTags({ query: trimmed });
+            } else {
+                resetSuggestedTags(); 
             }
         }, 350); // 350ms debounce so we don't spam the API on every keypress
         return () => clearTimeout(timer);
@@ -42,17 +45,26 @@ function FeedbackReport(): React.ReactNode {
         if (!files || files.length === 0) return;
 
         setIsUploading(true);
-        const uploadedUrls: string[] = [];
 
-        for (let i = 0; i < files.length; i++) {
+        // Map files to an array of Promises
+        const uploadPromises = Array.from(files).map(async (file) => {
             try {
-                const res = await uploadImageToCloudinary(files[i]);
-                uploadedUrls.push(res.secure_url);
+                const res = await uploadImageToCloudinary(file);
+                // Ensure your uploadApi returns the full Cloudinary response so we can grab public_id
+                return { url: res.secure_url, publicId: res.public_id } as Attachment;
             } catch (error) {
-                toast.error("Failed to upload a file");
+                toast.error(`Failed to upload ${file.name}`);
+                return null;
             }
-        }
-        setAttachments((prev) => [...prev, ...uploadedUrls]);
+        });
+
+        // Await all uploads simultaneously (Parallel Execution)
+        const results = await Promise.all(uploadPromises);
+        
+        // Filter out any that failed (returned null)
+        const successfulUploads = results.filter((attachment): attachment is Attachment => attachment !== null);
+        
+        setAttachments((prev) => [...prev, ...successfulUploads]);
         setIsUploading(false);
     }
 
@@ -79,6 +91,19 @@ function FeedbackReport(): React.ReactNode {
         }
     };
 
+    const availableSuggestions = suggestedTags.filter(
+        (suggested) => !selectedTags.some((selected) => selected.id === suggested.id)
+    );
+
+    const handleRemoveAttachment = (index: number) => {
+        try {
+            deleteImageFromCloudinary(attachments[index].publicId); 
+            setAttachments(prev => prev.filter((_, i) => i !== index));
+        }catch (error) {
+            toast.error("Failed to remove attachment");
+        }
+    }
+
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -96,10 +121,10 @@ function FeedbackReport(): React.ReactNode {
                 />
             </div>
             {/* AI Suggested Tags Bar */}
-            {suggestedTags.length > 0 && (
+            {availableSuggestions.length > 0 && (
                 <div className="space-y-1">
                     <div className="flex flex-wrap gap-2">
-                        {suggestedTags.map((tag) => (
+                        {availableSuggestions.map((tag) => (
                             <button
                                 key={tag.id}
                                 type="button"
@@ -123,8 +148,18 @@ function FeedbackReport(): React.ReactNode {
                 <label className="text-sm font-medium">Attachments</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                     {/* Render uploaded images here */}
-                    {attachments.map((url, i) => (
-                        <img key={i} src={url} alt="attachment" className="h-20 w-20 object-cover rounded border" />
+                    {attachments.map((attachment, i) => (
+                        <div key={i} className="relative">
+                            <img key={i} src={attachment.url} alt="attachment" className="h-20 w-20 object-cover rounded border" />
+                            <IconButton
+                                variant="destructive" 
+                                size="icon-xs"
+                                icon={<X className="h-3 w-3" />}
+                                onClick={() => handleRemoveAttachment(i)}
+                                className="absolute top-0 right-0 bg-white rounded-full p-1 shadow"
+                                ariaLabel="Remove attachment"
+                            />
+                        </div>
                     ))}
                 </div>
 

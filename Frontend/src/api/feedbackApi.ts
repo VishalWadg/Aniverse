@@ -17,10 +17,15 @@ export interface Feedback {
     tags: Tag[];
 }
 
+export interface Attachment {
+    url: string;
+    publicId: string; // Cloudinary public ID
+}
+
 export interface CreateFeedbackPayload {
     content: string;
     tagIds: string[]; // UUIDs of the selected tags
-    attachments: string[]; // Cloudinary URLs
+    attachments: Attachment[]; // Array of attachment objects
 }
 
 // ==========================================
