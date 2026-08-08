@@ -216,16 +216,22 @@ function parseFigure(element: HTMLElement) {
       return createRawBlock(element.outerHTML)
     }
 
+    const alignClass = Array.from(element.classList).find((c) => c.startsWith('monolith-image--align-'))
+    const imgStyle = image.getAttribute('style') ?? ''
+    const bgMatch = imgStyle.match(/background-color:\s*([^;]+)/i)
+
     return {
-      type: 'simple-image',
+      type: 'image',
       data: {
-        url: image.getAttribute('src'),
+        file: { url: image.getAttribute('src') },
         caption: trimHtml(
           element.querySelector('figcaption')?.innerHTML ?? image.getAttribute('alt') ?? ''
         ),
-        withBorder: false,
-        withBackground: false,
-        stretched: false,
+        withBorder: element.classList.contains('monolith-image--bordered'),
+        withBackground: element.classList.contains('monolith-image--with-bg'),
+        stretched: element.classList.contains('monolith-image--stretched'),
+        alignment: alignClass ? alignClass.replace('monolith-image--align-', '') : 'center',
+        bgColor: bgMatch ? bgMatch[1].trim() : '',
       },
     } satisfies EditorJsBlock
   }
@@ -512,8 +518,20 @@ function renderBlock(block: EditorJsBlock) {
         return ''
       }
 
+      const alignment = block.tunes?.ImageAlignTune?.alignment ?? data.alignment ?? 'center'
+      const customBgColor = block.tunes?.ImageBgColorTune?.bgColor ?? data.bgColor ?? ''
+
+      const classes = [
+        'monolith-image',
+        data.withBorder ? 'monolith-image--bordered' : '',
+        data.withBackground ? 'monolith-image--with-bg' : '',
+        alignment ? `monolith-image--align-${alignment}` : '',
+        data.stretched ? 'monolith-image--stretched' : '',
+      ].filter(Boolean).join(' ')
+
+      const imgStyleAttr = customBgColor && data.withBackground ? ` style="background-color:${escapeAttribute(customBgColor)}"` : ''
       const caption = data.caption ? `<figcaption>${data.caption}</figcaption>` : ''
-      return `<figure class="monolith-image"><img src="${escapeAttribute(url)}" alt="${escapeAttribute(data.caption ?? '')}" />${caption}</figure>`
+      return `<figure class="${classes}"><img src="${escapeAttribute(url)}" alt="${escapeAttribute(data.caption ?? '')}"${imgStyleAttr} />${caption}</figure>`
     }
 
     case 'linkTool': {

@@ -70,23 +70,20 @@ function PostForm({ post }: PostFormProps) {
     }
 
     return (
-        <form onSubmit={handleSubmit(submit)} className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px] lg:items-start">
-            <div className="min-w-0 text-start">
+        <form onSubmit={handleSubmit(submit)} className="w-full max-w-full min-h-screen bg-[var(--editor-bg)] text-[var(--editor-text)] transition-colors duration-200">
+            {/* Full Width Editor Container with Integrated Submit Toolbar */}
+            <div className="w-full min-w-0 text-start">
                 <RTE 
                     titleName="title"
                     name="content" 
                     control={control} 
                     titleDefaultValue={post?.title || ''}
                     defaultValue={post?.content || ''} 
+                    onSubmit={handleSubmit(submit)}
+                    submitLabel={post ? "Update Post" : "Publish Post"}
+                    isEditing={Boolean(post)}
                 />
             </div>
-            
-                <Button
-                    type="submit"
-                    className="w-full"
-                >
-                    {post ? "Update Post" : "Submit Post"}
-                </Button>
         </form>
     )
 }

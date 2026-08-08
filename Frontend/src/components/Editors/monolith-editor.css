@@ -1,0 +1,431 @@
+/* Monolith Editor Base Typography & Dynamic Material Theme */
+
+:root {
+  --editor-block-spacing: 0rem;
+  --editor-line-height: 1.45;
+}
+
+#mono-editorjs .codex-editor {
+  color: var(--on-surface);
+  line-height: var(--editor-line-height);
+}
+
+#mono-editorjs .codex-editor__redactor {
+  min-height: 60vh;
+  padding-bottom: 6rem;
+}
+
+/* Outer Block (.ce-block): Min 40px height with 6px padding on all sides & Highlight Background */
+#mono-editorjs .ce-block {
+  height: auto !important;
+  min-height: 40px !important;
+  padding: 6px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  border-radius: 6px !important;
+  position: relative !important;
+  transition: background-color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+/* Outer Block Highlight States (Hover, Focus-Within, Selected) */
+#mono-editorjs .ce-block:hover {
+  background-color: var(--block-hover-bg) !important;
+}
+
+#mono-editorjs .ce-block:focus-within {
+  background-color: var(--block-active-bg) !important;
+}
+
+#mono-editorjs .ce-block--selected {
+  background-color: var(--block-selected-bg) !important;
+  box-shadow: inset 0 0 0 1px var(--block-selected-outline) !important;
+}
+
+/* Inner Block (.ce-block__content): Main text content block inside */
+#mono-editorjs .ce-block__content {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  background-color: transparent !important;
+}
+
+/* Disable inner .ce-block__content::before pseudo-element highlight */
+#mono-editorjs .ce-block__content::before {
+  display: none !important;
+}
+
+/* Reset inner editable text elements */
+#mono-editorjs .cdx-block,
+#mono-editorjs .ce-paragraph,
+#mono-editorjs [contenteditable],
+#mono-editorjs h1,
+#mono-editorjs h2,
+#mono-editorjs h3,
+#mono-editorjs h4,
+#mono-editorjs ul,
+#mono-editorjs ol,
+#mono-editorjs blockquote {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  line-height: var(--editor-line-height) !important;
+}
+
+/* Fix Toolbar (Add + & Tune ⋮ Buttons) Alignment */
+#mono-editorjs .ce-toolbar {
+  /* Allow Editor.js JS to freely move .ce-toolbar to whichever block is focused/hovered */
+}
+
+#mono-editorjs .ce-toolbar__content {
+  max-width: none !important;
+}
+
+#mono-editorjs .ce-toolbar__actions {
+  left: -54px !important;
+  right: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0px !important;
+  margin-top: -2px !important;
+}
+
+/* Add (+) and Tune (⋮) Buttons: Exact 20px x 20px, Icon takes 100% (20px x 20px) space */
+#mono-editorjs .ce-toolbar__actions > button,
+#mono-editorjs .ce-toolbar__plus,
+#mono-editorjs .ce-toolbar__settings-btn,
+#mono-editorjs .ce-settings-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 4px !important;
+}
+
+/* Hide default heavy Editor.js SVGs */
+#mono-editorjs .ce-toolbar__plus svg,
+#mono-editorjs .ce-toolbar__settings-btn svg,
+#mono-editorjs .ce-settings-btn svg {
+  display: none !important;
+}
+
+/* Lucide Plus (+) Icon for Add Button: 20px x 20px (100% fill) */
+#mono-editorjs .ce-toolbar__plus::after {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E") no-repeat center / contain;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14'/%3E%3Cpath d='M12 5v14'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+/* Drag Indicator Icon for Tune Button: 20px x 20px (100% fill) */
+#mono-editorjs .ce-toolbar__settings-btn::after,
+#mono-editorjs .ce-settings-btn::after {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor;
+  mask: url("/icons/dragIndicator.svg") no-repeat center / contain;
+  -webkit-mask: url("/icons/dragIndicator.svg") no-repeat center / contain;
+}
+
+/* Heading Sizes */
+#mono-editorjs h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+#mono-editorjs h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+#mono-editorjs h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+#mono-editorjs h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Paragraph & Lists */
+#mono-editorjs .ce-paragraph {
+  font-size: 1rem;
+}
+
+#mono-editorjs ul {
+  list-style-type: disc;
+  padding-left: 1.5rem !important;
+}
+
+#mono-editorjs ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem !important;
+}
+
+#mono-editorjs li,
+#mono-editorjs .cdx-list__item {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  min-height: 0 !important;
+  line-height: 1.15 !important;
+}
+
+#mono-editorjs li + li,
+#mono-editorjs .cdx-list__item + .cdx-list__item {
+  margin-top: -0.05rem !important;
+  margin-bottom: 0 !important;
+}
+
+/* Space out the bullet/number indicator from text content */
+#mono-editorjs .cdx-list__item::before,
+#mono-editorjs li::before {
+  margin-right: 0.35rem !important;
+}
+
+#mono-editorjs .cdx-list__item-content {
+  margin-left: 0.25rem !important;
+}
+
+#mono-editorjs a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* Dynamic Material Theme Popovers, Toolbars & Menus */
+.ce-popover,
+.ce-inline-toolbar,
+.tc-popover,
+.ce-conversion-toolbar {
+  background-color: var(--surface-container-high) !important;
+  color: var(--on-surface) !important;
+  border: 1px solid var(--outline-variant) !important;
+  box-shadow: var(--shadow) !important;
+  border-radius: 0.75rem !important;
+}
+
+.ce-popover__item:hover,
+.ce-inline-toolbar__dropdown:hover,
+.ce-popover__item--active {
+  background-color: var(--surface-container-highest) !important;
+  color: var(--primary) !important;
+}
+
+.ce-popover__item-icon {
+  background-color: var(--surface-container) !important;
+  color: var(--on-surface-variant) !important;
+}
+
+/* Image Block Responsiveness & Containment */
+#mono-editorjs .image-tool {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#mono-editorjs .image-tool__image {
+  max-width: 100% !important;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: margin 0.15s ease !important;
+}
+
+/* Image Alignment Options */
+#mono-editorjs [data-img-align="left"] .image-tool {
+  display: flex !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+#mono-editorjs [data-img-align="left"] .image-tool__image {
+  margin-right: auto !important;
+  margin-left: 0 !important;
+}
+
+#mono-editorjs [data-img-align="center"] .image-tool {
+  display: flex !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+#mono-editorjs [data-img-align="center"] .image-tool__image {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+#mono-editorjs [data-img-align="right"] .image-tool {
+  display: flex !important;
+  justify-content: flex-end !important;
+  text-align: right !important;
+}
+
+#mono-editorjs [data-img-align="right"] .image-tool__image {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* Image Tool Stretched Modifier */
+#mono-editorjs .image-tool--stretched {
+  width: 100% !important;
+  max-width: 100% !important;
+  align-items: stretch !important;
+}
+
+#mono-editorjs .image-tool--stretched .image-tool__image {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: 0 !important;
+}
+
+#mono-editorjs .image-tool--stretched img,
+#mono-editorjs .image-tool--stretched .image-tool__image-picture {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#mono-editorjs .image-tool__image-picture,
+#mono-editorjs img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  border-radius: 8px;
+}
+
+/* Image Tool Tune Modifiers */
+#mono-editorjs .image-tool--withBorder .image-tool__image {
+  border: 1px solid var(--outline-variant) !important;
+  box-shadow: var(--shadow) !important;
+}
+
+#mono-editorjs .image-tool--withBackground {
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+#mono-editorjs .image-tool--withBackground .image-tool__image {
+  background-color: var(--surface-container-low) !important;
+  padding: 1.25rem !important;
+  border-radius: 0.75rem !important;
+  transition: background-color 0.2s ease !important;
+}
+
+/* Quotes & Callout Boxes */
+#mono-editorjs .cdx-quote--box {
+  background-color: var(--surface-container-low) !important;
+  color: var(--on-surface) !important;
+  border-left: 4px solid var(--primary) !important;
+  padding: 1rem !important;
+  border-radius: 0.5rem !important;
+}
+
+/* ==========================================
+   MOBILE RESPONSIVE TOOLBAR & LAYOUT OVERRIDES
+   ========================================== */
+@media (max-width: 640px) {
+  #mono-editorjs {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  .codex-editor__redactor {
+    padding-bottom: 6rem !important;
+  }
+
+  /* Industry Standard Fixed Above-Keyboard Accessory Toolbar (< 640px) */
+  #mono-editorjs .ce-toolbar {
+    position: fixed !important;
+    bottom: 0 !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    height: 48px !important;
+    background-color: var(--surface-container-high) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-top: 1px solid var(--outline-variant) !important;
+    padding: 0 1rem !important;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12) !important;
+    z-index: 100 !important;
+    transform: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+  }
+
+  #mono-editorjs .ce-toolbar__content {
+    max-width: 100% !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin: 0 !important;
+  }
+
+  #mono-editorjs .ce-toolbar__actions {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    margin: 0 !important;
+  }
+
+  #mono-editorjs .ce-toolbar__actions > button,
+  #mono-editorjs .ce-toolbar__plus,
+  #mono-editorjs .ce-toolbar__settings-btn,
+  #mono-editorjs .ce-settings-btn {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 6px !important;
+    background-color: var(--surface-container) !important;
+    border-radius: 0.5rem !important;
+    border: 1px solid var(--outline-variant) !important;
+  }
+
+  /* Transform Mobile Popover & Tune Menus into Bottom Sheet Drawers */
+  .ce-popover {
+    position: fixed !important;
+    bottom: 54px !important;
+    top: auto !important;
+    left: 4vw !important;
+    right: 4vw !important;
+    width: 92vw !important;
+    max-width: 92vw !important;
+    max-height: 52vh !important;
+    overflow-y: auto !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.25) !important;
+    z-index: 101 !important;
+  }
+
+  .ce-inline-toolbar {
+    position: fixed !important;
+    bottom: 54px !important;
+    top: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 101 !important;
+    border-radius: 0.75rem !important;
+  }
+}

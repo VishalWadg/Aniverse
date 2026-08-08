@@ -8,11 +8,11 @@ export function FeedbackModal() {
             <DialogTrigger asChild>
                 {/* Floating Action Button */}
                 <button
-                    className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl hover:scale-105 transition"
+                    className="fixed bottom-14 right-4 sm:bottom-6 sm:right-6 z-50 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-transparent border-none shadow-none text-primary hover:scale-110 transition-all"
                     aria-label="Report an Issue"
                     style={{ marginRight: "var(--removed-body-scroll-bar-size, 0px)" }}
                 >
-                    <MessageSquarePlus className="h-6 w-6" />
+                    <MessageSquarePlus className="h-6 w-6 sm:h-7 sm:w-7" />
                 </button>
             </DialogTrigger>
 

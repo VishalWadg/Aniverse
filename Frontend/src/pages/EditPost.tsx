@@ -65,8 +65,8 @@ function EditPost() {
 
     // --- 4. SUCCESSFUL RENDER ---
     return (
-        <div className='py-8'>
-            <Container>
+        <div className='min-h-screen w-full bg-[var(--editor-bg)] text-[var(--editor-text)] transition-colors duration-200 py-4'>
+            <Container className="w-full max-w-full px-2 sm:px-6">
                 <PostForm post={post} />
             </Container>
         </div>

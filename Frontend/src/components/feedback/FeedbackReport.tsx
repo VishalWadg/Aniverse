@@ -179,7 +179,12 @@ function FeedbackReport(): React.ReactNode {
                 </Button>
             </div>
             {/* 4. Submit Button */}
-            <Button type="submit" disabled={isSubmitting || isUploading} className="w-full">
+            <Button
+                type="submit"
+                disabled={isSubmitting || isUploading}
+                variant="outline"
+                className="w-full sm:bg-primary sm:text-primary-foreground sm:border-none border-primary/40 text-primary h-9 sm:h-10 text-xs sm:text-sm font-bold"
+            >
                 {isSubmitting ? "Submitting..." : "Submit Feedback"}
             </Button>
         </form>

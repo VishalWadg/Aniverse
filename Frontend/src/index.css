@@ -162,7 +162,7 @@
 }
 
 #mono-preview > * + * {
-  margin-top: 1.2rem;
+  margin-top: 0.4rem;
 }
 
 #mono-preview p,
@@ -283,7 +283,152 @@
 #mono-preview .monolith-image img {
   display: block;
   width: 100%;
-  border-radius: 18px;
+  border-radius: 12px;
+}
+
+#mono-preview .monolith-image--bordered img {
+  border: 1px solid var(--outline-variant);
+  box-shadow: var(--shadow);
+}
+
+#mono-preview .monolith-image--with-bg img {
+  background-color: var(--surface-container-low);
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+}
+
+/* Image Alignment Rules */
+#mono-preview .monolith-image--align-left {
+  text-align: left;
+}
+
+#mono-preview .monolith-image--align-left img {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+#mono-preview .monolith-image--align-center {
+  text-align: center;
+}
+
+#mono-preview .monolith-image--align-center img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#mono-preview .monolith-image--align-right {
+  text-align: right;
+}
+
+#mono-preview .monolith-image--align-right img {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+#mono-preview img[data-alignment="left"] {
+  display: block;
+  margin-right: auto !important;
+  margin-left: 0 !important;
+}
+
+#mono-preview img[data-alignment="center"] {
+  display: block;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+#mono-preview img[data-alignment="right"] {
+  display: block;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+#mono-preview .monolith-image--bg-surface img {
+  background-color: var(--surface-container-high);
+}
+
+#mono-preview .monolith-image--bg-dark img {
+  background-color: #18181b;
+}
+
+#mono-preview .monolith-image--bg-light img {
+  background-color: #ffffff;
+}
+
+#mono-preview .monolith-image--bg-primary img {
+  background-color: var(--primary-container);
+}
+
+#mono-preview .monolith-image--bg-accent img {
+  background-color: var(--tertiary-container);
+}
+
+/* Image Alignment Options */
+#mono-preview .monolith-image--align-left {
+  text-align: left;
+}
+
+#mono-preview .monolith-image--align-left img {
+  margin-right: auto;
+  margin-left: 0;
+}
+
+#mono-preview .monolith-image--align-center {
+  text-align: center;
+}
+
+#mono-preview .monolith-image--align-center img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#mono-preview .monolith-image--align-right {
+  text-align: right;
+}
+
+#mono-preview .monolith-image--align-right img {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* Image Size Presets */
+#mono-preview .monolith-image--size-small img {
+  width: 35%;
+}
+
+#mono-preview .monolith-image--size-medium img {
+  width: 65%;
+}
+
+#mono-preview .monolith-image--size-full img {
+  width: 100%;
+}
+
+/* Image Aspect Ratio / Crop Presets */
+#mono-preview .monolith-image--aspect-16-9 img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+#mono-preview .monolith-image--aspect-4-3 img {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+#mono-preview .monolith-image--aspect-1-1 img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+#mono-preview .monolith-image--stretched {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(-50vw + 50%);
+}
+
+#mono-preview .monolith-image--stretched img {
+  width: 100%;
+  border-radius: 0;
 }
 
 #mono-preview .monolith-image figcaption,
@@ -861,7 +1006,7 @@
   }
 
   #mono-preview > * + * {
-    margin-top: 1rem;
+    margin-top: 0.4rem;
   }
 
   #mono-editorjs .ce-block__content,
