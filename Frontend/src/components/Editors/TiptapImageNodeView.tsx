@@ -49,7 +49,11 @@ export function TiptapImageNodeView(props: NodeViewProps) {
         const uploadData = await uploadImageToCloudinary(file);
 
         if (uploadData?.secure_url) {
-          updateAttributes({ src: uploadData.secure_url });
+          updateAttributes({ 
+            src: uploadData.secure_url,
+            publicId: uploadData.public_id
+          });
+          
           setIsCropping(false);
         }
         setIsUploading(false);

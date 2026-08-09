@@ -20,6 +20,16 @@ export const CustomImage = Image.extend({
           style: `width: ${attributes.width};`,
         }),
       },
+      publicId: {
+        default: null,
+        parseHTML: (element) => element.getAttribute('data-public-id'),
+        renderHTML: (attributes) => {
+          if (!attributes.publicId) return {};
+          return {
+            'data-public-id': attributes.publicId,
+          };
+        },
+      },
     };
   },
 
@@ -27,3 +37,19 @@ export const CustomImage = Image.extend({
     return ReactNodeViewRenderer(TiptapImageNodeView);
   },
 });
+
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    customImage: {
+      setImage: (options: {
+        src: string;
+        alt?: string;
+        title?: string;
+        publicId?: string | null;
+        alignment?: string;
+        width?: string;
+      }) => ReturnType;
+    };
+  }
+}

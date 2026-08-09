@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button, RTE } from '../index'
 import useToasts from '../../hooks/useToasts'
 import { useCreatePostMutation, useUpdatePostMutation } from '@/api/postsApi'
+import { deleteImageFromCloudinary } from '@/api/uploadApi'
 
 type PostFormValues = {
     title: string;
@@ -29,6 +30,14 @@ function PostForm({ post }: PostFormProps) {
 
     const navigate = useNavigate()
 
+    function extractPublicIdsFromHtml(html: string): string[] {
+        if (!html) return [];
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        return Array.from(doc.querySelectorAll('img[data-public-id]'))
+            .map((img) => img.getAttribute('data-public-id'))
+            .filter(Boolean) as string[];
+    }
+
     const submit = async (data) => {
         try {
             if (post) {
@@ -47,6 +56,14 @@ function PostForm({ post }: PostFormProps) {
                         error: "Failed to Update Post"
                     }
                 );
+                const oldPublicIds = extractPublicIdsFromHtml(post.content);
+                const newPublicIds = new Set(extractPublicIdsFromHtml(data.content));
+                const removedPublicIds = oldPublicIds.filter((id) => !newPublicIds.has(id));
+
+                // Delete orphaned Cloudinary assets asynchronously
+                removedPublicIds.forEach((publicId) => {
+                    deleteImageFromCloudinary(publicId);
+                });
                 if (dbPost) navigate(`/post/${dbPost.id}`); // Navigate using ID
 
             } else {
@@ -73,12 +90,12 @@ function PostForm({ post }: PostFormProps) {
         <form onSubmit={handleSubmit(submit)} className="w-full max-w-full min-h-screen bg-[var(--editor-bg)] text-[var(--editor-text)] transition-colors duration-200">
             {/* Full Width Editor Container with Integrated Submit Toolbar */}
             <div className="w-full min-w-0 text-start">
-                <RTE 
+                <RTE
                     titleName="title"
-                    name="content" 
-                    control={control} 
+                    name="content"
+                    control={control}
                     titleDefaultValue={post?.title || ''}
-                    defaultValue={post?.content || ''} 
+                    defaultValue={post?.content || ''}
                     onSubmit={handleSubmit(submit)}
                     submitLabel={post ? "Update Post" : "Publish Post"}
                     isEditing={Boolean(post)}

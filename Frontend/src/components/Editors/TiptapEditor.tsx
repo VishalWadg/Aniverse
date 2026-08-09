@@ -134,7 +134,10 @@ export function TiptapEditor({
     try {
       const uploadData = await uploadImageToCloudinary(file);
       if (uploadData?.secure_url) {
-        editor.chain().focus().setImage({ src: uploadData.secure_url }).run();
+        editor.chain().focus().setImage({ 
+          src: uploadData.secure_url,
+          publicId: uploadData.public_id, 
+        }).run();
       }
     } catch (err) {
       console.error('Image upload failed:', err);

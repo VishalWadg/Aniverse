@@ -261,6 +261,11 @@ function sanitizeAttributes(source: Element, target: HTMLElement) {
       continue
     }
 
+    if ((tagName === 'img' || tagName === 'figure') && attributeName === 'data-public-id' && attributeValue) {
+      target.setAttribute('data-public-id', attributeValue)
+      continue
+    }
+
     if (tagName === 'img' && attributeName === 'alt') {
       target.setAttribute('alt', attributeValue)
       continue
