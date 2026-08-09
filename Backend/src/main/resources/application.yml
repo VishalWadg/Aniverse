@@ -45,7 +45,11 @@ application:
       days: ${POST_RETENTION_DAYS:30}
       purge-cron: ${POST_RETENTION_PURGE_CRON:0 0 3 * * *}
       purge-zone: ${POST_RETENTION_PURGE_ZONE:UTC}
-
+    image-cleanup:
+      cron: ${IMAGE_CLEANUP_CRON:0 0 4 * * SUN}
+      cron-zone: ${IMAGE_CLEANUP_CRON_ZONE:${application.posts.retention.purge-zone:UTC}}
+      grace-period-hours: ${IMAGE_CLEANUP_GRACE_HOURS:24}
+      dry-run: ${IMAGE_CLEANUP_DRY_RUN:true}
 # cloudinary
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}

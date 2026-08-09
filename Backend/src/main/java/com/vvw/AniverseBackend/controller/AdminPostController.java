@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.vvw.AniverseBackend.service.ImageCleanupService;
 
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import java.util.UUID;
 @RequestMapping("/admin/posts")
 public class AdminPostController {
     private final PostService postService;
+    private final ImageCleanupService imageCleanupService;
 
     @GetMapping("/deleted")
     public ResponseEntity<Page<PostResponseDto>> getDeletedPosts(
@@ -43,5 +46,10 @@ public class AdminPostController {
     public ResponseEntity<Void> deleteExpiredPost(@PathVariable UUID id) {
         postService.purgeDeletedPost(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/image-cleanup")
+    public ResponseEntity<Integer> cleanupOrphanedImages() {
+        return ResponseEntity.ok(imageCleanupService.cleanupOrphanedCloudinaryImages());
     }
 }
