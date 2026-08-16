@@ -19,6 +19,7 @@ import Home from './pages/Home'
 import Post from './pages/Post'
 import EditPost from './pages/EditPost' // You need to export this from EditPost.jsx
 import AdminDashboard from './pages/AdminDashboard'
+import AdminFeedbackTriage from './pages/AdminFeedbackTriage'
 
 // These don't have loaders, so standard import is fine
 import { Login, Signup, AddPost, Profile } from './pages'
@@ -133,6 +134,14 @@ export const router = createBrowserRouter(createRoutesFromElements(
       }
     />
 
+    <Route
+      path="/admin/feedback"
+      element={
+        <AdminLayout authentication={true}>
+          <AdminFeedbackTriage />
+        </AdminLayout>
+      }
+    />
   </Route>
 ),
 {

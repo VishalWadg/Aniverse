@@ -2,24 +2,23 @@
 # TEST CONFIGURATION (Used only during CI/CD and 'mvn test')
 # ===================================================================
 
-# 1. Use H2 In-Memory Database instead of MySQL
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driverClassName: org.h2.Driver
-    username: sa
-    password: 
-
-# 2. Tell Hibernate to use H2 SQL dialect
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
 
 # 3. Disable your data.sql file for tests (prevents MySQL syntax errors in H2)
   sql:
     init:
       mode: never
+
+  ai:
+    google:
+      genai:
+        api-key: ${GOOGLE_AI_API_KEY:dummy_key_for_testing_1234567890}
+        embedding:
+          api-key: ${GOOGLE_AI_API_KEY:dummy_key_for_testing_1234567890}
 
 # 4. Dummy JWT Secret just so the context loads without crashing
 jwt:
@@ -38,7 +37,24 @@ application:
       days: ${POST_RETENTION_DAYS:30}
       purge-cron: ${POST_RETENTION_PURGE_CRON:0 0 3 * * *}
       purge-zone: ${POST_RETENTION_PURGE_ZONE:UTC}
+    image-cleanup:
+      cron: ${IMAGE_CLEANUP_CRON:0 0 4 * * SUN}
+      cron-zone: ${IMAGE_CLEANUP_CRON_ZONE:${application.posts.retention.purge-zone:UTC}}
+      grace-period-hours: ${IMAGE_CLEANUP_GRACE_HOURS:24}
+      dry-run: ${IMAGE_CLEANUP_DRY_RUN:true}
 
 app:
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dummy_cloud}
+  api-key: ${CLOUDINARY_KEY:1234567890}
+  api-secret: ${CLOUDINARY_SECRET:dummy_secret}
+  folder-name: ${CLOUDINARY_FOLDER_NAME:aniverse_posts}
+
+github:
+  token: ${GITHUB_TOKEN:dummy_github_token}
+  repo: ${GITHUB_REPO:VishalWadg/Aniverse}
+  webhook-secret: ${GITHUB_WEBHOOK_SECRET:dummy_webhook_secret}
+

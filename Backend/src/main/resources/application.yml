@@ -9,6 +9,18 @@ spring:
     deserialization:
       fail-on-unknown-properties: true
 
+  ai:
+    google:
+      genai:
+        api-key: ${GOOGLE_AI_API_KEY} # Your Google AI Studio Key (AIzaSy...)
+        embedding:
+          api-key: ${GOOGLE_AI_API_KEY}
+          text:
+            enabled: true
+            options:
+              model: gemini-embedding-001
+              dimensions: 768
+
 # spring.sql.init.data-locations=classpath:data.sql
 server:
   servlet:
@@ -33,11 +45,21 @@ application:
       days: ${POST_RETENTION_DAYS:30}
       purge-cron: ${POST_RETENTION_PURGE_CRON:0 0 3 * * *}
       purge-zone: ${POST_RETENTION_PURGE_ZONE:UTC}
-
+    image-cleanup:
+      cron: ${IMAGE_CLEANUP_CRON:0 0 4 * * SUN}
+      cron-zone: ${IMAGE_CLEANUP_CRON_ZONE:${application.posts.retention.purge-zone:UTC}}
+      grace-period-hours: ${IMAGE_CLEANUP_GRACE_HOURS:24}
+      dry-run: ${IMAGE_CLEANUP_DRY_RUN:true}
 # cloudinary
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_KEY}
   api-secret: ${CLOUDINARY_SECRET}
   folder-name: ${CLOUDINARY_FOLDER_NAME:aniverse_posts}
+
+github:
+  token: ${GITHUB_TOKEN}
+  repo: ${GITHUB_REPO}
+  webhook-secret: ${GITHUB_WEBHOOK_SECRET}
+
 

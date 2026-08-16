@@ -9,6 +9,10 @@ permissions:
   contents: write
   packages: write
 
+concurrency:
+  group: production-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # -------------------------------------------------------------
   # JOB 1: Calculate Version, Build Artifacts, & Push to GHCR
@@ -32,13 +36,13 @@ jobs:
           echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
 
       # 2. Automatically Calculate & Create SemVer Tag using Conventional Commits
-      - name: Bump version and push tag
+      - name: Compute next version (no push yet)
         id: tagger
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: patch
-          create_annotated_tag: true
+          dry_run: true 
 
       # 3. Set up Java Environment
       - name: Set up JDK 21
@@ -90,6 +94,11 @@ jobs:
             --cache-to type=gha,mode=max \
             .
 
+      - name: Push the version tag now that images are published
+        run: |
+          git tag ${{ steps.tagger.outputs.new_tag }}
+          git push origin ${{ steps.tagger.outputs.new_tag }}
+
       # 8. Auto-create GitHub Release notes
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -136,6 +145,7 @@ jobs:
             DB_URL=${{ secrets.DB_URL }}
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            GOOGLE_AI_API_KEY=${{ secrets.GOOGLE_AI_API_KEY }}
             REDIS_HOST=redis
             REDIS_PORT=6379
             JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -156,7 +166,7 @@ jobs:
             } 
             EOF
 
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
             docker image prune -af
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans

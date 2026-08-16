@@ -4,6 +4,7 @@ import { Footer, Header, RouteToast } from './components';
 import { subscribeAuthFailure } from './lib/authSession';
 import { useAppDispatch } from './store/hooks';
 import { logout } from './store';
+import { FeedbackModal } from './components/feedback/FeedbackModal';
 import './index.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Outlet />
         </main>
         <Footer />
+         {!isAuthRoute && <FeedbackModal />}
       </div>
     </div>
   );

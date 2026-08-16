@@ -1,43 +1,29 @@
 package com.vvw.AniverseBackend.controller;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.cloudinary.Cloudinary;
-import com.vvw.AniverseBackend.config.properties.CloudinaryProperties;
-
+import com.vvw.AniverseBackend.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import com.vvw.AniverseBackend.dto.CloudinarySignatureResponse;
 
 @RestController
 @RequestMapping("/uploads")
 @RequiredArgsConstructor
 public class UploadController {
-    private final Cloudinary cloudinary;
-    private final CloudinaryProperties cloudinaryProperties;
+
+    private final CloudinaryService cloudinaryService;
 
     @GetMapping("/signature")
-    public ResponseEntity<Map<String, Object>> getUploadSignature() {
-        long timestamp = Instant.now().getEpochSecond();
+    @PreAuthorize("isAuthenticated()") 
+    public ResponseEntity<CloudinarySignatureResponse> getUploadSignature() {
+        return ResponseEntity.ok(cloudinaryService.generateUploadSignature());
+    }
 
-        Map<String, Object> paramsToSign = new HashMap<>();
-        paramsToSign.put("timestamp", timestamp);
-        paramsToSign.put("folder", cloudinaryProperties.folderName());
-
-        String signature = cloudinary.apiSignRequest(paramsToSign, cloudinary.config.apiSecret);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", timestamp);
-        response.put("signature", signature);
-        response.put("folder", cloudinaryProperties.folderName());
-        response.put("apiKey", cloudinaryProperties.apiKey());
-        response.put("cloudName", cloudinaryProperties.cloudName());
-
-        return ResponseEntity.ok(response);
+    @DeleteMapping
+    @PreAuthorize("isAuthenticated()") 
+    public ResponseEntity<Void> deleteUpload(@RequestParam("publicId") String publicId) {
+        cloudinaryService.deleteFile(publicId);
+        return ResponseEntity.noContent().build();
     }
 }

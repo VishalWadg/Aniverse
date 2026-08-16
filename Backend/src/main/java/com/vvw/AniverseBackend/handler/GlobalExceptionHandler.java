@@ -19,6 +19,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestCookieException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -210,6 +211,18 @@ public class GlobalExceptionHandler {
                 return new ResponseEntity<>(apiErrorDto, HttpStatus.UNAUTHORIZED);
         }
 
+        @ExceptionHandler(ResponseStatusException.class)
+        public ResponseEntity<ApiErrorDto> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request){
+                log.warn("Response status exception: {} | URL: {}", ex.getReason(), request.getRequestURI());
+                HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+                ApiErrorDto apiErrorDto = new ApiErrorDto(
+                                ex.getStatusCode().value(), // 401
+                                status != null ? status.getReasonPhrase() : "Error",
+                                ex.getReason() != null ? ex.getReason() : "No additional details provided",
+                                request.getRequestURI());
+                return new ResponseEntity<>(apiErrorDto, ex.getStatusCode());
+        }
+
         // ---- Validation Errors ----
 
         @ExceptionHandler(BadCredentialsException.class)
@@ -271,7 +284,7 @@ public class GlobalExceptionHandler {
                 ApiErrorDto apiErrorDto = new ApiErrorDto(
                                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                 "Internal Server Error",
-                                ex.getMessage(),
+                                "An unexpected server error occurred. Please try again later.",
                                 request.getRequestURI());
 
                 return new ResponseEntity<>(apiErrorDto, HttpStatus.INTERNAL_SERVER_ERROR);

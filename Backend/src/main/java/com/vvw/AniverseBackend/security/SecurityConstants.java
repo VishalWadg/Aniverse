@@ -5,5 +5,6 @@ public class SecurityConstants {
             "/auth/**",
             "/public/**",
             "/actuator/health",
+            "/webhooks/**",
     };
 }

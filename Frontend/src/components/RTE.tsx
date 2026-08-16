@@ -1,6 +1,6 @@
 import React from "react";
 import { Controller, type Control } from "react-hook-form";
-import MonolithEditor from "./Editors/MonolithEditor";
+import TiptapEditor from "./Editors/TiptapEditor";
 
 type RTEProps = {
   name: string;
@@ -9,6 +9,10 @@ type RTEProps = {
   defaultValue?: string;
   titleDefaultValue?: string;
   placeholder?: string;
+  onSubmit?: () => void;
+  submitLabel?: string;
+  isSubmitting?: boolean;
+  isEditing?: boolean;
 };
 
 export default function RTE({
@@ -18,6 +22,10 @@ export default function RTE({
   defaultValue = "",
   titleDefaultValue = "",
   placeholder,
+  onSubmit,
+  submitLabel,
+  isSubmitting,
+  isEditing,
 }: RTEProps) {
   return (
     <Controller
@@ -32,12 +40,16 @@ export default function RTE({
           defaultValue={defaultValue}
           render={({ field: contentField }) => (
             <div className="w-full text-start">
-              <MonolithEditor
+              <TiptapEditor
                 title={(titleField.value as string) ?? ""}
                 onTitleChange={titleField.onChange}
                 value={(contentField.value as string) ?? ""}
                 onChange={contentField.onChange}
                 placeholder={placeholder}
+                onSubmit={onSubmit}
+                submitLabel={submitLabel}
+                isSubmitting={isSubmitting}
+                isEditing={isEditing}
               />
             </div>
           )}

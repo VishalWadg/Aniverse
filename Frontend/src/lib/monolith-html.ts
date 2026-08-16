@@ -56,6 +56,18 @@ const ALLOWED_CLASSES = new Set([
   'monolith-embed',
   'monolith-embed__frame',
   'monolith-image',
+  'monolith-image--bordered',
+  'monolith-image--with-bg',
+  'monolith-image--stretched',
+  'monolith-image--align-left',
+  'monolith-image--align-center',
+  'monolith-image--align-right',
+  'monolith-image--bg-default',
+  'monolith-image--bg-surface',
+  'monolith-image--bg-dark',
+  'monolith-image--bg-light',
+  'monolith-image--bg-primary',
+  'monolith-image--bg-accent',
 ])
 const ALLOWED_TEXT_ALIGN_VALUES = new Set(['left', 'center', 'right', 'justify'])
 const ALLOWED_LIST_STYLE_VALUES = new Set([
@@ -147,8 +159,13 @@ function sanitizeStyle(tagName: string, classList: DOMTokenList, styleValue = ''
       continue
     }
 
-    if (tagName === 'span' && property === 'background-color' && SAFE_COLOR_PATTERN.test(value)) {
+    if ((tagName === 'span' || tagName === 'figure' || tagName === 'img') && property === 'background-color' && SAFE_COLOR_PATTERN.test(value)) {
       sanitizedDeclarations.push(`background-color:${value}`)
+      continue
+    }
+
+    if ((tagName === 'img' || tagName === 'figure') && (property === 'width' || property === 'max-width' || property === 'height') && SAFE_FONT_SIZE_PATTERN.test(value)) {
+      sanitizedDeclarations.push(`${property}:${value}`)
       continue
     }
 
@@ -236,6 +253,16 @@ function sanitizeAttributes(source: Element, target: HTMLElement) {
         target.setAttribute('src', safeSrc)
       }
 
+      continue
+    }
+
+    if ((tagName === 'img' || tagName === 'figure') && attributeName === 'data-alignment' && (attributeValue === 'left' || attributeValue === 'center' || attributeValue === 'right')) {
+      target.setAttribute('data-alignment', attributeValue)
+      continue
+    }
+
+    if ((tagName === 'img' || tagName === 'figure') && attributeName === 'data-public-id' && attributeValue) {
+      target.setAttribute('data-public-id', attributeValue)
       continue
     }
 

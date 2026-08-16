@@ -2,7 +2,6 @@ package com.vvw.AniverseBackend;
 
 import com.vvw.AniverseBackend.dto.PostResponseDto;
 import com.vvw.AniverseBackend.entity.User;
-import com.vvw.AniverseBackend.repository.CommentRepository;
 import com.vvw.AniverseBackend.service.PostService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -12,18 +11,10 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import com.vvw.AniverseBackend.repository.PostRepository;
 import com.vvw.AniverseBackend.repository.UserRepository;
 
-@SpringBootTest
-public class DataTest {
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private CommentRepository commentRepository;
+public class DataTest extends AbstractIntegrationTest {
 
     @Autowired
     private PostService postService;
