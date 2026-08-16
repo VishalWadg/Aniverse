@@ -1,8 +1,15 @@
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogClose } from "../ui/dialog";
 import { MessageSquarePlus, X } from "lucide-react";
 import FeedbackReport from "./FeedbackReport";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export function FeedbackModal() {
+    const { canSubmitFeedback } = usePermissions();
+
+    if (!canSubmitFeedback) {
+        return null;
+    }
+
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -28,4 +35,4 @@ export function FeedbackModal() {
             </DialogContent>
         </Dialog>
     );
-}
+}

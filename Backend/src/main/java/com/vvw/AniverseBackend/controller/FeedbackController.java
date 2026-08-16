@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +20,7 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     @PostMapping
+    @PreAuthorize("isAuthenticated() and !hasRole('ADMIN')")
     public ResponseEntity<FeedbackResponseDto> submitFeedback(@Valid @RequestBody FeedbackRequestDto requestDto) {
         FeedbackResponseDto response = feedbackService.createFeedback(requestDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
