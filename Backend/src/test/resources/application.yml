@@ -13,6 +13,13 @@ spring:
     init:
       mode: never
 
+  ai:
+    google:
+      genai:
+        api-key: ${GOOGLE_AI_API_KEY:dummy_key_for_testing_1234567890}
+        embedding:
+          api-key: ${GOOGLE_AI_API_KEY:dummy_key_for_testing_1234567890}
+
 # 4. Dummy JWT Secret just so the context loads without crashing
 jwt:
   secretKey: ${JWT_SECRET:adasfasd3424@#$@#wruwJj3@#djfsk#ioriw,.vxv2343#$@dfdljk#}
@@ -39,3 +46,15 @@ application:
 app:
   cors:
     allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:dummy_cloud}
+  api-key: ${CLOUDINARY_KEY:1234567890}
+  api-secret: ${CLOUDINARY_SECRET:dummy_secret}
+  folder-name: ${CLOUDINARY_FOLDER_NAME:aniverse_posts}
+
+github:
+  token: ${GITHUB_TOKEN:dummy_github_token}
+  repo: ${GITHUB_REPO:VishalWadg/Aniverse}
+  webhook-secret: ${GITHUB_WEBHOOK_SECRET:dummy_webhook_secret}
+
