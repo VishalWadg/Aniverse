@@ -11,7 +11,7 @@ public class GithubClientConfig {
     public RestClient restClient(GithubProperties githubProperties){
         return RestClient.builder()
                 .baseUrl("https://api.github.com")
-                .defaultHeader("Authorization", "Bearer" + githubProperties.token())
+                .defaultHeader("Authorization", "Bearer " + githubProperties.token())
                 .defaultHeader("Accept", "application/vnd.github+json")
                 .defaultHeader("X-GitHub-Api-Version", "2022-11-28")
                 .build();

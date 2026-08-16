@@ -32,7 +32,6 @@ public class Tag {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(columnDefinition = "vector(768)")
     @JdbcTypeCode(SqlTypes.VECTOR)
     private float[] embedding;
 

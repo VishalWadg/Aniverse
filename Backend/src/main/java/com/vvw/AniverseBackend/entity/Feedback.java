@@ -1,6 +1,5 @@
 package com.vvw.AniverseBackend.entity;
 
-import com.vvw.AniverseBackend.entity.type.FeedbackStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,24 +31,16 @@ public class Feedback {
     @Column(name = "attachments", columnDefinition = "text[]")
     private List<String> attachments;
 
-    @Column(name = "impact_count", nullable = false)
-    @Builder.Default
-    private int impactCount = 1;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private FeedbackGroup group;
 
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(nullable = false)
-    @Builder.Default
-    private FeedbackStatus status = FeedbackStatus.NEW;
-
-    @Column(name = "github_issue_id")
-    private Integer githubIssueId;
+    @JdbcTypeCode(SqlTypes.VECTOR)
+    @Column(name = "embedding")
+    private float[] embedding;
 
     @ManyToMany
-    @JoinTable(
-            name = "feedback_tags",
-            joinColumns = @JoinColumn(name = "feedback_id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
+    @JoinTable(name = "feedback_tags", joinColumns = @JoinColumn(name = "feedback_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
     private Set<Tag> tags;
 
     @CreationTimestamp

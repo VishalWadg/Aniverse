@@ -40,6 +40,6 @@ const axiosBaseQuery = (): BaseQueryFn<
 export const baseApi = createApi({
     reducerPath: 'api',
     baseQuery: axiosBaseQuery(),
-    tagTypes: ['Post', 'User', 'Comment', 'Feedback', 'Tag'],
+    tagTypes: ['Post', 'User', 'Comment', 'Feedback', 'Tag', 'FeedbackGroup'],
     endpoints: () => ({}),
 })

@@ -95,18 +95,34 @@ export default function SettingsDrawer({
               </Link>
             )}
 
-            {/* Admin Trash Bin Link (Visible to Admin on All Viewports) */}
+            {/* Admin Links (Visible to Admin on All Viewports) */}
             {userRole === 'ADMIN' && (
-              <Link
-                to="/admin"
-                onClick={() => onOpenChange(false)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-xs font-semibold text-error hover:bg-error/10",
-                  location.pathname === '/admin' ? "bg-error/15 text-error" : ""
-                )}
-              >
-                <TrashIcon className="size-4" /> Trash Bin (Admin)
-              </Link>
+              <>
+                <Link
+                  to="/admin"
+                  onClick={() => onOpenChange(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-xs font-semibold text-error hover:bg-error/10",
+                    location.pathname === '/admin' ? "bg-error/15 text-error" : ""
+                  )}
+                >
+                  <TrashIcon className="size-4" /> Trash Bin (Admin)
+                </Link>
+
+                <Link
+                  to="/admin/feedback"
+                  onClick={() => onOpenChange(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-xs font-semibold text-primary hover:bg-primary/10",
+                    location.pathname === '/admin/feedback' ? "bg-primary/15 text-primary" : ""
+                  )}
+                >
+                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  Feedback Triage (Admin)
+                </Link>
+              </>
             )}
           </div>
 
