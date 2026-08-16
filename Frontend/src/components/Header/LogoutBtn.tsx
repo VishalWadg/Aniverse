@@ -49,10 +49,10 @@ function LogoutBtn() {
     <Button
       type="button"
       variant="ghost"
-      className="flex items-center gap-2 w-full justify-start rounded-control bg-transparent px-3 py-2 text-sm font-semibold text-error hover:bg-error/10 transition-colors"
+      className="flex items-center gap-3 w-full justify-start rounded-control bg-transparent px-3 py-2.5 text-sm font-semibold text-error hover:bg-error/10 transition-colors"
       onClick={logoutHandler}
     >
-      <LogOutIcon className="size-4" />
+      <LogOutIcon className="size-5" />
       Log Out
     </Button>
   )
