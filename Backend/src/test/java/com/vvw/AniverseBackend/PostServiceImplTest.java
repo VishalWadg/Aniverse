@@ -14,7 +14,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.data.domain.PageRequest;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,8 +26,13 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Testcontainers
 @Transactional
 public class PostServiceImplTest {
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("pgvector/pgvector:pg16");
 
     @Autowired
     private PostService postService;
@@ -145,7 +154,7 @@ public class PostServiceImplTest {
         assertThat(postRepository.findActiveByIdWithAuthor(activePostId)).isPresent();
     }
 
-        @Test
+    @Test
     void whenSearchPosts_ByTitle_ThenReturnsMatchingActivePosts() {
         // "Active Theory" matches "theory" case-insensitively
         var results = postService.searchPosts("theory", PageRequest.of(0, 10));
@@ -173,7 +182,8 @@ public class PostServiceImplTest {
 
     @Test
     void whenSearchPosts_MatchingSoftDeleted_ThenExcludesThem() {
-        // "Expired Deleted Theory" matches "Expired" but is soft-deleted (isDeleted = true)
+        // "Expired Deleted Theory" matches "Expired" but is soft-deleted (isDeleted =
+        // true)
         var results = postService.searchPosts("Expired", PageRequest.of(0, 10));
 
         assertThat(results.getContent()).isEmpty();
@@ -181,7 +191,8 @@ public class PostServiceImplTest {
 
     @Test
     void whenSearchPosts_Pagination_ThenReturnsCorrectPageAndSize() {
-        // We already have "Active Theory" from setUp. Let's create two more matching posts:
+        // We already have "Active Theory" from setUp. Let's create two more matching
+        // posts:
         Post post2 = new Post();
         post2.setTitle("Second Theory");
         post2.setContent("More research content.");
@@ -193,7 +204,8 @@ public class PostServiceImplTest {
         post3.setAuthor(author);
         postRepository.save(post3);
         postRepository.flush();
-        // 1. Query page 0 with size 2 (Expects 2 posts back, with a next page available)
+        // 1. Query page 0 with size 2 (Expects 2 posts back, with a next page
+        // available)
         var page0 = postService.searchPosts("Theory", PageRequest.of(0, 2));
         assertThat(page0.getContent()).hasSize(2);
         assertThat(page0.hasNext()).isTrue();

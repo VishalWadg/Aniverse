@@ -2,19 +2,11 @@
 # TEST CONFIGURATION (Used only during CI/CD and 'mvn test')
 # ===================================================================
 
-# 1. Use H2 In-Memory Database instead of MySQL
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driverClassName: org.h2.Driver
-    username: sa
-    password: 
-
-# 2. Tell Hibernate to use H2 SQL dialect
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
 
 # 3. Disable your data.sql file for tests (prevents MySQL syntax errors in H2)
   sql:
