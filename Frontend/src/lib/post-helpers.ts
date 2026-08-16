@@ -9,12 +9,19 @@ const CATEGORY_RULES = [
 ]
 
 export function stripHtml(value = '') {
+  if (!value) return ''
   return value
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ')
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<\/(p|div|h[1-6]|li|td|blockquote|tr|section|article)>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&(?:#39|#x27|apos);/gi, "'")
     .replace(/\s+/g, ' ')
     .trim()
 }

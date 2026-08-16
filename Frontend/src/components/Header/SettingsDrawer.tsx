@@ -3,8 +3,6 @@ import { Link, useLocation } from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import SettingsPanelContent from '@/components/Theme/SettingsPanelContent'
@@ -41,101 +39,76 @@ export default function SettingsDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="fixed inset-y-0 left-0 right-auto top-0 z-50 h-full w-[85vw] max-w-xs sm:max-w-sm translate-x-0 translate-y-0 rounded-none border-r border-outline-variant bg-surface-container p-5 shadow-elevation-2 flex flex-col justify-between overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left duration-300 will-change-transform">
+      <DialogContent className="fixed inset-y-0 left-0 right-auto top-0 z-50 h-full w-[72vw] max-w-[260px] sm:max-w-[280px] translate-x-0 translate-y-0 rounded-none border-r border-outline-variant bg-surface-container px-5 py-5 shadow-elevation-2 flex flex-col justify-between overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left duration-300 will-change-transform">
         
-        {/* Drawer Top Header */}
+        {/* Drawer Top Header & Navigation */}
         <div>
-          <div className="flex items-center justify-between border-b border-outline-variant/60 pb-4 mb-4">
-            <DialogHeader>
-              <DialogTitle className="text-base font-black uppercase tracking-wider text-on-surface">
-                Menu & Settings
-              </DialogTitle>
-            </DialogHeader>
-            <button
-              type="button"
-              onClick={() => onOpenChange(false)}
-              className="inline-flex size-8 items-center justify-center rounded-control text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors cursor-pointer"
-              aria-label="Close menu"
-            >
-              <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
           {/* Navigation Links Section */}
-          <div className="space-y-1">
-            <div className="px-2 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-on-surface-variant/60">
-              Navigation
-            </div>
-            
+          <div className="pt-4 space-y-2.5">
             {/* Home Link */}
             <Link
               to="/"
               onClick={() => onOpenChange(false)}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-xs font-semibold",
+                "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-sm font-semibold",
                 location.pathname === '/' ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
               )}
             >
-              <HomeIcon className="size-4" /> Home
+              <HomeIcon className="size-5" /> Home
             </Link>
 
-            {/* Profile Link (When Logged In) */}
+            {/* Profile Link */}
             {authStatus && currentUser && (
               <Link
                 to={`/users/${currentUser.username}`}
                 onClick={() => onOpenChange(false)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-xs font-semibold",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-sm font-semibold",
                   location.pathname === `/users/${currentUser.username}` ? "bg-primary/10 text-primary" : "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
                 )}
               >
-                <UserIcon className="size-4" /> My Profile
+                <UserIcon className="size-5" /> Profile
               </Link>
             )}
 
-            {/* Admin Links (Visible to Admin on All Viewports) */}
+            {/* Admin Links */}
             {userRole === 'ADMIN' && (
               <>
                 <Link
                   to="/admin"
                   onClick={() => onOpenChange(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-xs font-semibold text-error hover:bg-error/10",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-sm font-semibold text-error hover:bg-error/10",
                     location.pathname === '/admin' ? "bg-error/15 text-error" : ""
                   )}
                 >
-                  <TrashIcon className="size-4" /> Trash Bin (Admin)
+                  <TrashIcon className="size-5" /> Trash
                 </Link>
 
                 <Link
                   to="/admin/feedback"
                   onClick={() => onOpenChange(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-xs font-semibold text-primary hover:bg-primary/10",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-control transition-colors text-sm font-semibold text-primary hover:bg-primary/10",
                     location.pathname === '/admin/feedback' ? "bg-primary/15 text-primary" : ""
                   )}
                 >
-                  <svg className="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
-                  Feedback Triage (Admin)
+                  Feedback
                 </Link>
               </>
             )}
           </div>
 
-          {/* Appearance Section */}
-          <div className="mt-6 border-t border-outline-variant/60 pt-4">
-            <div className="px-2 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-on-surface-variant/60 mb-1">
-              Preferences
-            </div>
+          {/* Themes Accordion */}
+          <div className="mt-1">
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="theme" className="border-none">
-                <AccordionTrigger className="flex w-full items-center justify-between gap-3 px-3 py-2.5 rounded-control transition-colors text-xs font-semibold text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface hover:no-underline">
+                <AccordionTrigger className="flex w-full items-center justify-between gap-3 px-3 py-2.5 rounded-control transition-colors text-sm font-semibold text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface hover:no-underline">
                   <div className="flex items-center gap-3">
-                    <PaletteIcon className="size-4" /> Theme Customizer
+                    <PaletteIcon className="size-5" /> Themes
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-2 pb-3 pt-2">
@@ -150,14 +123,14 @@ export default function SettingsDrawer({
         <div className="border-t border-outline-variant/60 pt-4 mt-6">
           {!authStatus ? (
             <div className="flex flex-col gap-2">
-              <Button asChild variant="ghost" className="w-full justify-start gap-3 rounded-control text-xs font-semibold">
+              <Button asChild variant="ghost" className="w-full justify-start gap-3 rounded-control text-sm font-semibold">
                 <Link to="/login" onClick={() => onOpenChange(false)}>
-                  <LogInIcon className="size-4" /> Log In
+                  <LogInIcon className="size-5" /> Log In
                 </Link>
               </Button>
-              <Button asChild className="w-full justify-start gap-3 rounded-control text-xs font-semibold">
+              <Button asChild className="w-full justify-start gap-3 rounded-control text-sm font-semibold">
                 <Link to="/signup" onClick={() => onOpenChange(false)}>
-                  <UserPlusIcon className="size-4" /> Sign Up
+                  <UserPlusIcon className="size-5" /> Sign Up
                 </Link>
               </Button>
             </div>
