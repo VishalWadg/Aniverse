@@ -153,6 +153,9 @@ jobs:
             CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }}
             CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }}
             VITE_API_BASE_URL=https://${{ secrets.VPS_PUBLIC_DOMAIN }}/api/v1
+            GITHUB_REPO=VishalWadg/Aniverse
+            GITHUB_TOKEN=${{ secrets.GHCR_PAT }} 
+            GITHUB_WEBHOOK_SECRET=${{ secrets.GH_WEBHOOK_SECRET }}
             EOF
 
             cat <<'EOF' | sed 's/^[ \t]*//' > Caddyfile
