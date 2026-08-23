@@ -19,6 +19,7 @@ import com.vvw.AniverseBackend.dto.FeedbackGroupResponseDto;
 import com.vvw.AniverseBackend.dto.MoveFeedbackRequestDto;
 import com.vvw.AniverseBackend.entity.type.FeedbackGroupStatus;
 import com.vvw.AniverseBackend.service.AdminFeedbackService;
+import com.vvw.AniverseBackend.service.JobWorkerService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminFeedbackController {
     private final AdminFeedbackService adminFeedbackService;
-
+    private final JobWorkerService jobWorkerService;
     @GetMapping
     public ResponseEntity<Page<FeedbackGroupResponseDto>> getGroups(
             @RequestParam(defaultValue = "PENDING") FeedbackGroupStatus status,
@@ -64,5 +65,11 @@ public class AdminFeedbackController {
         adminFeedbackService.moveFeedback(feedbackId, dto);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/pending-jobs/process")
+public ResponseEntity<Void> triggerJobProcessing() {
+    jobWorkerService.pollAndProcess();
+    return ResponseEntity.ok().build();
+}
 
 }

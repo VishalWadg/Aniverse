@@ -31,6 +31,7 @@
 		<mapstruct.version>1.6.3</mapstruct.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+		<testcontainers.version>1.21.4</testcontainers.version>
   		<sonar.organization>vishalwadg</sonar.organization>
     </properties>
 	<repositories>
@@ -210,6 +211,8 @@
 						</path>
 
 					</annotationProcessorPaths>
+					<source>14</source>
+					<target>14</target>
 				</configuration>
 			</plugin>
 			<plugin>
