@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate # Crucial safety gate in production
+    show-sql: false
+  flyway:
+    enabled: true
+    clean-disabled: true # Never allow Flyway to drop the database in production
+  sql:
+    init:
+      mode: never # Never seed production with dev/test data
+
+app:
+  cookie:
+    secure: true
+    same-site: "None"
+  cors:
+    allowed-origins: ${ALLOWED_ORIGINS:https://aniverse.com}
