@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import SettingsPanelContent from '@/components/Theme/SettingsPanelContent'
@@ -40,7 +41,7 @@ export default function SettingsDrawer({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="fixed inset-y-0 left-0 right-auto top-0 z-50 h-full w-[72vw] max-w-[260px] sm:max-w-[280px] translate-x-0 translate-y-0 rounded-none border-r border-outline-variant bg-surface-container px-5 py-5 shadow-elevation-2 flex flex-col justify-between overflow-y-auto data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left duration-300 will-change-transform">
-        
+        <DialogTitle className="sr-only">Settings and Navigation</DialogTitle>
         {/* Drawer Top Header & Navigation */}
         <div>
           {/* Navigation Links Section */}
