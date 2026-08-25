@@ -18,7 +18,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <Provider store={store}>
       <ThemeProvider>
         <ThemeToaster />
-        <RouterProvider router={router} />
+        <RouterProvider 
+          router={router} 
+          fallbackElement={
+            <div className="flex h-screen w-full items-center justify-center bg-surface-container">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+          } 
+        />
       </ThemeProvider>
     </Provider>
   // </React.StrictMode>,

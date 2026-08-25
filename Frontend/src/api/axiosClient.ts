@@ -15,7 +15,7 @@ let isAuthInitialized = false;
 
 const axiosClient = axios.create({
     baseURL,
-    timeout: 2000, // 2 seconds timeout to prevent hanging
+    timeout: 10000, // 10 seconds timeout to prevent hanging
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',

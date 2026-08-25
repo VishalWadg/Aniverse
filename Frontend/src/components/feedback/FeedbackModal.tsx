@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogClose } from "../ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription, DialogHeader, DialogClose } from "../ui/dialog";
 import { MessageSquarePlus, X } from "lucide-react";
 import FeedbackReport from "./FeedbackReport";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -26,6 +26,7 @@ export function FeedbackModal() {
             <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
                     <DialogTitle className="sr-only">Feedback Report</DialogTitle>
+                    <DialogDescription className="sr-only">Submit bug reports, feature requests, or general feedback</DialogDescription>
                 </DialogHeader>
                 <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:pointer-events-none">
                     <X className="h-4 w-4" />

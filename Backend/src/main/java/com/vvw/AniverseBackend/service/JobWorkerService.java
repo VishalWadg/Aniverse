@@ -3,6 +3,7 @@ package com.vvw.AniverseBackend.service;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Async
 public class JobWorkerService {
     private final PendingJobRepository pendingJobRepository;
     private final FeedbackService feedbackService;
