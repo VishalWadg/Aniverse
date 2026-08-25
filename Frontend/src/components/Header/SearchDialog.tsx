@@ -5,6 +5,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { SearchIcon, QuillIcon } from '@/components/ui/Icons'
@@ -78,6 +79,7 @@ export default function SearchDialog({
                 {/* Accessible Dialog Title */}
                 <DialogHeader className="sr-only">
                     <DialogTitle>Search Manuscripts & Theories</DialogTitle>
+                    <DialogDescription>Search manuscripts, theories, and authors across Aniverse</DialogDescription>
                 </DialogHeader>
 
                 {/* Search Input Bar inside Modal (Fixed Top Header) */}
