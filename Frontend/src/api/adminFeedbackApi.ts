@@ -54,13 +54,17 @@ export const adminFeedbackApi = baseApi.injectEndpoints({
         url: `/admin/feedback-groups?status=${status}&page=${page}&size=10`,
         method: 'GET',
       }),
-      providesTags: (result) =>
+      providesTags: (result, error, { status }) =>
         result
           ? [
               ...result.content.map((group) => ({ type: 'FeedbackGroup' as const, id: group.id })),
+              { type: 'FeedbackGroup' as const, id: status },
               { type: 'FeedbackGroup' as const, id: 'LIST' },
             ]
-          : [{ type: 'FeedbackGroup' as const, id: 'LIST' }],
+          : [
+              { type: 'FeedbackGroup' as const, id: status },
+              { type: 'FeedbackGroup' as const, id: 'LIST' },
+            ],
     }),
 
     approveFeedbackGroup: build.mutation<FeedbackGroup, ApproveGroupPayload>({
@@ -69,7 +73,25 @@ export const adminFeedbackApi = baseApi.injectEndpoints({
         method: 'POST',
         data: body,
       }),
-      invalidatesTags: [{ type: 'FeedbackGroup' as const, id: 'LIST' }],
+      async onQueryStarted({ groupId }, { dispatch, queryFulfilled }) {
+        const patchPending = dispatch(
+          adminFeedbackApi.util.updateQueryData('getFeedbackGroups', { status: 'PENDING', page: 0 }, (draft) => {
+            if (draft?.content) {
+              draft.content = draft.content.filter((g) => g.id !== groupId);
+              draft.totalElements = Math.max(0, draft.totalElements - 1);
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchPending.undo();
+        }
+      },
+      invalidatesTags: [
+        { type: 'FeedbackGroup' as const, id: 'PENDING' },
+        { type: 'FeedbackGroup' as const, id: 'APPROVED' },
+      ],
     }),
 
     discardFeedbackGroup: build.mutation<FeedbackGroup, string>({
@@ -77,7 +99,25 @@ export const adminFeedbackApi = baseApi.injectEndpoints({
         url: `/admin/feedback-groups/${groupId}/discard`,
         method: 'POST',
       }),
-      invalidatesTags: [{ type: 'FeedbackGroup' as const, id: 'LIST' }],
+      async onQueryStarted(groupId, { dispatch, queryFulfilled }) {
+        const patchPending = dispatch(
+          adminFeedbackApi.util.updateQueryData('getFeedbackGroups', { status: 'PENDING', page: 0 }, (draft) => {
+            if (draft?.content) {
+              draft.content = draft.content.filter((g) => g.id !== groupId);
+              draft.totalElements = Math.max(0, draft.totalElements - 1);
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchPending.undo();
+        }
+      },
+      invalidatesTags: [
+        { type: 'FeedbackGroup' as const, id: 'PENDING' },
+        { type: 'FeedbackGroup' as const, id: 'DISCARDED' },
+      ],
     }),
 
     restoreFeedbackGroup: build.mutation<FeedbackGroup, string>({
@@ -85,7 +125,25 @@ export const adminFeedbackApi = baseApi.injectEndpoints({
         url: `/admin/feedback-groups/${groupId}/restore`,
         method: 'POST',
       }),
-      invalidatesTags: [{ type: 'FeedbackGroup' as const, id: 'LIST' }],
+      async onQueryStarted(groupId, { dispatch, queryFulfilled }) {
+        const patchDiscarded = dispatch(
+          adminFeedbackApi.util.updateQueryData('getFeedbackGroups', { status: 'DISCARDED', page: 0 }, (draft) => {
+            if (draft?.content) {
+              draft.content = draft.content.filter((g) => g.id !== groupId);
+              draft.totalElements = Math.max(0, draft.totalElements - 1);
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchDiscarded.undo();
+        }
+      },
+      invalidatesTags: [
+        { type: 'FeedbackGroup' as const, id: 'PENDING' },
+        { type: 'FeedbackGroup' as const, id: 'DISCARDED' },
+      ],
     }),
 
     moveFeedbackItem: build.mutation<void, MoveFeedbackPayload>({
@@ -94,7 +152,28 @@ export const adminFeedbackApi = baseApi.injectEndpoints({
         method: 'POST',
         data: body,
       }),
-      invalidatesTags: [{ type: 'FeedbackGroup' as const, id: 'LIST' }],
+      async onQueryStarted({ feedbackId }, { dispatch, queryFulfilled }) {
+        const patchPending = dispatch(
+          adminFeedbackApi.util.updateQueryData('getFeedbackGroups', { status: 'PENDING', page: 0 }, (draft) => {
+            if (draft?.content) {
+              draft.content.forEach((group) => {
+                const initialCount = group.feedbacks.length;
+                group.feedbacks = group.feedbacks.filter((item) => item.id !== feedbackId);
+                if (group.feedbacks.length < initialCount) {
+                  group.impactCount = Math.max(0, group.impactCount - 1);
+                }
+              });
+              draft.content = draft.content.filter((group) => group.feedbacks.length > 0);
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchPending.undo();
+        }
+      },
+      invalidatesTags: [{ type: 'FeedbackGroup' as const, id: 'PENDING' }],
     }),
   }),
   overrideExisting: false,

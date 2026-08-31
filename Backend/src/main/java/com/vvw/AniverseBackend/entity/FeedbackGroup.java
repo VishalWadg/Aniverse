@@ -57,6 +57,7 @@ public class FeedbackGroup {
     private String githubIssueUrl;
 
     @OneToMany(mappedBy = "group", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @org.hibernate.annotations.BatchSize(size = 25)
     @Builder.Default
     private List<Feedback> feedbacks = new ArrayList<>();
 
