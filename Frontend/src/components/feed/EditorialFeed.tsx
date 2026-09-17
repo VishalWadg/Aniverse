@@ -17,6 +17,7 @@ import PostCard from '../PostCard'
 import { cn } from '@/lib/utils'
 import { useGetPostsQuery, useSearchPostsQuery } from '@/api/postsApi'
 import { Virtuoso } from "react-virtuoso"
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel'
 
 const feedTabs = {
   home: [
@@ -96,13 +97,12 @@ function TrendingManuscripts({ trendingPosts, canInteract }) {
   )
 }
 
-// NOTE: swap `any[]` for your real Post type when you wire this back in —
-// left loose here since I don't have that type's shape.
 function HeroCarousel({ posts }: { posts: any[] }) {
   const featuredPosts = useMemo(() => posts.filter(Boolean).slice(0, 5), [posts])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const [api, setApi] = useState<CarouselApi>()
 
   // Respect the OS-level reduced-motion setting: no forced auto-advance for
   // people who've asked their system to cut motion.
@@ -114,27 +114,38 @@ function HeroCarousel({ posts }: { posts: any[] }) {
     return () => query.removeEventListener('change', handler)
   }, [])
 
-  // Guard against a stale index if the post list shrinks under us (e.g. a
-  // background refetch returns fewer than 5 posts while a later slide was active).
+  // Sync CarouselApi selection state with currentIndex
+  useEffect(() => {
+    if (!api) return
+
+    const onSelect = () => {
+      setCurrentIndex(api.selectedScrollSnap())
+    }
+
+    onSelect()
+    api.on('select', onSelect)
+    api.on('reInit', onSelect)
+    return () => {
+      api.off('select', onSelect)
+    }
+  }, [api])
+
+  // Guard against a stale index if the post list shrinks under us
   useEffect(() => {
     if (currentIndex >= featuredPosts.length && featuredPosts.length > 0) {
       setCurrentIndex(0)
+      api?.scrollTo(0)
     }
-  }, [featuredPosts.length, currentIndex])
+  }, [featuredPosts.length, currentIndex, api])
 
+  // Auto-advance slideshow using Carousel API
   useEffect(() => {
-    if (featuredPosts.length <= 1 || isPaused || prefersReducedMotion) return
+    if (featuredPosts.length <= 1 || isPaused || prefersReducedMotion || !api) return
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % featuredPosts.length)
+      api.scrollNext()
     }, AUTO_ADVANCE_MS)
     return () => clearInterval(interval)
-  }, [featuredPosts.length, isPaused, prefersReducedMotion])
-
-  const currentPost = featuredPosts[currentIndex]
-  const imageUrl = useMemo(
-    () => currentPost?.coverImage || extractImageSource(currentPost?.content || ''),
-    [currentPost]
-  )
+  }, [featuredPosts.length, isPaused, prefersReducedMotion, api])
 
   if (featuredPosts.length === 0) {
     return (
@@ -152,13 +163,16 @@ function HeroCarousel({ posts }: { posts: any[] }) {
     )
   }
 
-  const goTo = (index: number) => setCurrentIndex(index)
-  const goPrev = () =>
-    setCurrentIndex((prev) => (prev === 0 ? featuredPosts.length - 1 : prev - 1))
-  const goNext = () => setCurrentIndex((prev) => (prev + 1) % featuredPosts.length)
+  const goTo = (index: number) => api?.scrollTo(index)
+  const goPrev = () => api?.scrollPrev()
+  const goNext = () => api?.scrollNext()
+
+  const currentPost = featuredPosts[currentIndex] || featuredPosts[0]
 
   return (
-    <div
+    <Carousel
+      setApi={setApi}
+      opts={{ loop: true }}
       className="relative overflow-hidden rounded-card border border-outline-variant/40 shadow-elevation-2 min-h-[420px] sm:min-h-[460px] md:min-h-[480px]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
@@ -168,80 +182,93 @@ function HeroCarousel({ posts }: { posts: any[] }) {
       aria-roledescription="carousel"
       aria-label="Featured posts"
     >
-      {/* Background layer — full-bleed image when one exists, a branded
-          gradient when it doesn't, so the layout height never jumps. */}
-      <div className="absolute inset-0">
-        {imageUrl ? (
-          <img
-            key={currentPost.id}
-            src={imageUrl}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="relative h-full w-full bg-gradient-to-br from-surface-container-high via-surface-container to-primary/20">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(var(--primary-rgb),0.25),transparent_60%)]" />
-            <div className="absolute inset-0 flex items-center justify-center opacity-30">
-              <Logo showText={false} iconClassName="h-24 w-24" />
-            </div>
-          </div>
-        )}
-        {/* Scrim: guarantees the title/excerpt stay readable over any photo */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
-      </div>
+      {/* 1. Swipable track containing only cover background, title, and excerpt */}
+      <CarouselContent className="-ml-0 min-h-[420px] sm:min-h-[460px] md:min-h-[480px]">
+        {featuredPosts.map((post) => {
+          const imageUrl = post?.coverImage || extractImageSource(post?.content || '')
+          return (
+            <CarouselItem key={post.id} className="pl-0 min-w-0 shrink-0 basis-full relative min-h-[420px] sm:min-h-[460px] md:min-h-[480px]">
+              {/* Background layer */}
+              <div className="absolute inset-0">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="relative h-full w-full bg-gradient-to-br from-surface-container-high via-surface-container to-primary/20">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(var(--primary-rgb),0.25),transparent_60%)]" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                      <Logo showText={false} iconClassName="h-24 w-24" />
+                    </div>
+                  </div>
+                )}
+                {/* Scrim overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+              </div>
 
-      {/* Top row: category + live indicator (left), slide count (right) */}
-      <div className="relative z-10 flex items-start justify-between gap-4 p-5 sm:p-7">
-        <div className="flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-sm">
+              {/* Swiped Title & Excerpt Content */}
+              <div className="absolute inset-x-0 bottom-16 sm:bottom-20 z-10 p-5 sm:p-7 md:p-9">
+                <Link to={`/post/${post.id}`} className="group block max-w-3xl">
+                  <h2 className="text-2xl font-black leading-[1.1] tracking-tight text-white transition-colors sm:text-3xl md:text-4xl line-clamp-2 group-hover:text-primary">
+                    {post.title}
+                  </h2>
+                  {post.content && (
+                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75 line-clamp-2 sm:text-base">
+                      {getExcerpt(post.content, 220)}
+                    </p>
+                  )}
+                </Link>
+              </div>
+            </CarouselItem>
+          )
+        })}
+      </CarouselContent>
+
+      {/* 2. Fixed Top Overlay: Category badge & slide counter (stationary during swipe) */}
+      <div className="absolute top-0 inset-x-0 z-20 flex items-start justify-between gap-4 p-5 sm:p-7 pointer-events-none">
+        <div className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-sm pointer-events-auto">
           <span className="size-1.5 rounded-full bg-primary animate-pulse" />
           <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white">
             Featured // {inferCategory(currentPost)}
           </p>
         </div>
-        <div className="rounded-full bg-black/30 px-3 py-1.5 backdrop-blur-sm">
+        <div className="rounded-full bg-black/40 px-3 py-1.5 backdrop-blur-sm pointer-events-auto">
           <span className="text-xs font-bold tracking-wider text-white/90">
             {String(currentIndex + 1).padStart(2, '0')} / {String(featuredPosts.length).padStart(2, '0')}
           </span>
         </div>
       </div>
 
-      {/* Bottom content: title, excerpt, byline, controls */}
-      <div className="absolute inset-x-0 bottom-0 z-10 p-5 sm:p-7 md:p-9">
-        <Link to={`/post/${currentPost.id}`} className="group block max-w-3xl">
-          <h2 className="text-2xl font-black leading-[1.1] tracking-tight text-white transition-colors sm:text-3xl md:text-4xl line-clamp-2 group-hover:text-primary">
-            {currentPost.title}
-          </h2>
-          {currentPost.content && (
-            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/75 line-clamp-2 sm:text-base">
-              {getExcerpt(currentPost.content, 220)}
-            </p>
-          )}
-        </Link>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs font-semibold text-white/70">
+      {/* 3. Fixed Bottom Bar Overlay: Byline, Dots & Prev/Next buttons (stationary during swipe) */}
+      <div className="absolute inset-x-0 bottom-0 z-20 p-5 sm:p-7 md:p-9 pt-0 pointer-events-none">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-xs font-semibold text-white/70 pointer-events-auto">
             <span>By {getDisplayName(currentPost.author)}</span>
             <span aria-hidden="true">•</span>
             <span>{formatRelativeTime(currentPost.createdAt)}</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pointer-events-auto">
             <div className="flex items-center gap-1.5">
-              {featuredPosts.map((post, index) => (
+              {featuredPosts.map((item, dotIndex) => (
                 <button
-                  key={post.id}
+                  key={item.id}
                   type="button"
-                  onClick={() => goTo(index)}
-                  aria-label={`Go to slide ${index + 1}`}
-                  aria-current={currentIndex === index}
+                  onClick={() => goTo(dotIndex)}
+                  aria-label={`Go to slide ${dotIndex + 1}`}
+                  aria-current={currentIndex === dotIndex}
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-300 cursor-pointer',
-                    currentIndex === index ? 'w-6 bg-primary' : 'w-1.5 bg-white/40 hover:bg-white/70'
+                    currentIndex === dotIndex ? 'w-6 bg-primary' : 'w-1.5 bg-white/40 hover:bg-white/70'
                   )}
                 />
               ))}
             </div>
-            <div className="flex items-center gap-1.5">
+
+            {/* Prev/Next buttons hidden on small screens (< sm), visible on desktop (sm:flex) */}
+            <div className="hidden sm:flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={goPrev}
@@ -262,12 +289,7 @@ function HeroCarousel({ posts }: { posts: any[] }) {
           </div>
         </div>
       </div>
-
-      {/* Visually hidden — announces slide changes to screen reader users */}
-      <span className="sr-only" aria-live="polite">
-        {`Slide ${currentIndex + 1} of ${featuredPosts.length}: ${currentPost.title}`}
-      </span>
-    </div>
+    </Carousel>
   )
 }
 
