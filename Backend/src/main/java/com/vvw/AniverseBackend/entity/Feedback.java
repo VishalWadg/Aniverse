@@ -41,6 +41,7 @@ public class Feedback {
 
     @ManyToMany
     @JoinTable(name = "feedback_tags", joinColumns = @JoinColumn(name = "feedback_id"), inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    @org.hibernate.annotations.BatchSize(size = 25)
     private Set<Tag> tags;
 
     @CreationTimestamp
